@@ -35,22 +35,6 @@ class Net {
     ustd::map<String, String> netServices; // XXX: ustdification
     String macAddress;
 
-    void subsNetGet(String topic, String msg) { publishNetwork(); }
-    void subsNetsGet(String topic, String msg) { publishNetworks(); }
-    void subsNetSet(String topic, String msg) {
-        // XXX: not yet implemented.
-    }
-
-    void subsNetServicesGet(String topic, String msg) {
-        for (int i = 0; i < netServices.length(); i++) {
-            if (topic == "net/services/" + netServices.keys[i] + "/get") {
-                pSched->publish("net/services/" + netServices.keys[i],
-                                "{\"server\":\"" + netServices.values[i] +
-                                    "\"}");
-            }
-        }
-    }
-
     Net(Scheduler *pSched, String ssid = "", String password = "",
         Netmode mode = AP)
         : pSched(pSched), state(state), SSID(ssid), password(password) {
@@ -207,6 +191,22 @@ class Net {
         for (int i = 0; i < netServices.length(); i++) {
             pSched->publish("net/services/" + netServices.keys[i],
                             "{\"server\":\"" + netServices.values[i] + "\"}");
+        }
+    }
+
+    void subsNetGet(String topic, String msg) { publishNetwork(); }
+    void subsNetsGet(String topic, String msg) { publishNetworks(); }
+    void subsNetSet(String topic, String msg) {
+        // XXX: not yet implemented.
+    }
+
+    void subsNetServicesGet(String topic, String msg) {
+        for (int i = 0; i < netServices.length(); i++) {
+            if (topic == "net/services/" + netServices.keys[i] + "/get") {
+                pSched->publish("net/services/" + netServices.keys[i],
+                                "{\"server\":\"" + netServices.values[i] +
+                                    "\"}");
+            }
         }
     }
 
