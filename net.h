@@ -51,13 +51,19 @@ class Net {
         }
     }
 
-    Net(Scheduler *pSched) : pSched(pSched) {
+    Net(Scheduler *pSched, String ssid = "", String password = "",
+        Netmode mode = AP)
+        : pSched(pSched), state(state), SSID(ssid), password(password) {
         oldState = NOTDEFINED;
         state = NOTCONFIGURED;
-        mode = AP;
         tick1sec = millis();
         tick10sec = millis();
-        if (readNetConfig()) {
+        if (SSID == "") {
+            if (readNetConfig()) {
+                connectAP();
+            }
+        } else {
+            localHostname = "";
             connectAP();
         }
 
