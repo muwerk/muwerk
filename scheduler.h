@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../ustd/platform.h"
 #include "../ustd/array.h"
+#include "../ustd/platform.h"
 #include "../ustd/queue.h"
 
 #include <stdio.h>
@@ -32,10 +32,14 @@ enum T_MSGTYPE {
     MSG_PUBLISHRAW = 5
 };
 
+#if defined(__ESP__) || defined(__UNIXOID__)
+typedef std::function<void()> T_TASK;
+#else
 typedef void (*T_TASK)();
+#endif
 
 typedef struct {
-    char *topic;  // topic string
+    char *topic; // topic string
     char *msg;
 } T_MSG;
 
@@ -52,6 +56,7 @@ typedef struct {
 } T_SUBSCRIPTION;
 
 typedef struct {
+    int taskID;
     T_TASK task;
     T_PRIO prio;
     unsigned long minMicros;
@@ -63,7 +68,8 @@ class Scheduler {
   private:
     ustd::array<T_TASKENTRY> taskList;
     ustd::array<T_SUBSCRIPTION> subscriptionList;
-    unsigned int subscriptionHandle;
+    int subscriptionHandle;
+    int taskID;
     ustd::queue<T_MSG> msgqueue;
 
   public:
@@ -72,6 +78,7 @@ class Scheduler {
         : taskList(nTaskListSize), msgqueue(queueSize),
           subscriptionList(nSubscriptionListSize) {
         subscriptionHandle = 0;
+        taskID = 0;
 #ifdef __ESP__
         ESP.wdtDisable();
         ESP.wdtEnable(WDTO_8S);
@@ -100,7 +107,7 @@ class Scheduler {
         int lp = strlen(pub);
         int ls = strlen(sub);
 
-        bool wPos = true;  // sub wildcard is legal now
+        bool wPos = true; // sub wildcard is legal now
         int ps = 0;
         for (int pp = 0; pp < lp; pp++) {
             // if ( pp >= ls || ps > ls ) {
@@ -109,7 +116,7 @@ class Scheduler {
             //    sub
             // }
             if (pub[pp] == '+' || pub[pp] == '#') {
-                return false;  // Illegal wildcards in pub
+                return false; // Illegal wildcards in pub
             }
             if (wPos) {
                 wPos = false;
@@ -117,8 +124,8 @@ class Scheduler {
                     if (ps == ls - 1) {
                         return true;
                     } else {
-                        return false;  // In sub, # must not be followed by
-                                       // anything else
+                        return false; // In sub, # must not be followed by
+                                      // anything else
                     }
                 }
                 if (sub[ps] == '+') {
@@ -135,7 +142,7 @@ class Scheduler {
                 }
             } else {
                 if (sub[ps] == '+' || sub[ps] == '#') {
-                    return false;  // Illegal wildcard-position
+                    return false; // Illegal wildcard-position
                 }
             }
             if (pub[pp] != sub[ps] && strcmp(&sub[ps], "/#")) {
@@ -242,24 +249,26 @@ class Scheduler {
 #endif
     }
 
-    bool add(T_TASK task, unsigned long minMicroSecs = 100000L,
-             T_PRIO prio = PRIO_NORMAL) {
+    int add(T_TASK task, unsigned long minMicroSecs = 100000L,
+            T_PRIO prio = PRIO_NORMAL) {
 
         T_TASKENTRY taskEnt;
         memset(&taskEnt, 0, sizeof(taskEnt));
+        ++taskID;
+        taskEnt.taskID = taskID;
         taskEnt.task = task;
         taskEnt.minMicros = minMicroSecs;
         taskEnt.prio = prio;
 
         if (taskList.add(taskEnt) >= 0)
-            return true;
+            return taskID;
         else
-            return false;
+            return -1;
     }
 
-    bool remove(T_TASK task) {
+    bool remove(int taskID) {
         for (unsigned int i = 0; i < taskList.length(); i++) {
-            if (taskList[i].task == task) {
+            if (taskList[i].taskID == taskID) {
                 taskList.erase(i);
                 return true;
             }
@@ -267,4 +276,4 @@ class Scheduler {
         return false;
     }
 };
-}  // namespace ustd
+} // namespace ustd
