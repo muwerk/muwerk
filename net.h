@@ -63,17 +63,25 @@ class Net {
         pSched->add(ft);
 
         // give a c++11 lambda as callback for incoming mqttmessages:
-        std::function<void(String, String)> fng =
-            [=](String topic, String msg) { this->subsNetGet(topic, msg); };
+        std::function<void(String, String, String)> fng =
+            [=](String topic, String msg, String originator) {
+                this->subsNetGet(topic, msg, originator);
+            };
         pSched->subscribe("net/network/get", fng);
-        std::function<void(String, String)> fns =
-            [=](String topic, String msg) { this->subsNetSet(topic, msg); };
+        std::function<void(String, String, String)> fns =
+            [=](String topic, String msg, String originator) {
+                this->subsNetSet(topic, msg, originator);
+            };
         pSched->subscribe("net/network/set", fns);
-        std::function<void(String, String)> fnsg =
-            [=](String topic, String msg) { this->subsNetsGet(topic, msg); };
+        std::function<void(String, String, String)> fnsg =
+            [=](String topic, String msg, String originator) {
+                this->subsNetsGet(topic, msg, originator);
+            };
         pSched->subscribe("net/networks/get", fnsg);
-        std::function<void(String, String)> fsg = [=](
-            String topic, String msg) { this->subsNetServicesGet(topic, msg); };
+        std::function<void(String, String, String)> fsg =
+            [=](String topic, String msg, String originator) {
+                this->subsNetServicesGet(topic, msg, originator);
+            };
         pSched->subscribe("net/services/+/get", fsg);
     }
 
@@ -200,13 +208,17 @@ class Net {
         }
     }
 
-    void subsNetGet(String topic, String msg) { publishNetwork(); }
-    void subsNetsGet(String topic, String msg) { publishNetworks(); }
-    void subsNetSet(String topic, String msg) {
+    void subsNetGet(String topic, String msg, String originator) {
+        publishNetwork();
+    }
+    void subsNetsGet(String topic, String msg, String originator) {
+        publishNetworks();
+    }
+    void subsNetSet(String topic, String msg, String originator) {
         // XXX: not yet implemented.
     }
 
-    void subsNetServicesGet(String topic, String msg) {
+    void subsNetServicesGet(String topic, String msg, String originator) {
         for (int i = 0; i < netServices.length(); i++) {
             if (topic == "net/services/" + netServices.keys[i] + "/get") {
                 pSched->publish("net/services/" + netServices.keys[i],

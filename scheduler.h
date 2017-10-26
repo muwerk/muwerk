@@ -39,18 +39,20 @@ typedef void (*T_TASK)();
 #endif
 
 typedef struct {
-    char *topic; // topic string
+    char *originator;
+    char *topic;
     char *msg;
 } T_MSG;
 
 #if defined(__ESP__) || defined(__UNIXOID__)
-typedef std::function<void(String topic, String msg)> T_SUBS;
+typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
 #else
-typedef void (*T_SUBS)(String topic, String msg);
+typedef void (*T_SUBS)(String topic, String msg, String originator);
 #endif
 
 typedef struct {
     int subscriptionHandle;
+    char *originator;
     char *topic;
     T_SUBS subs;
 } T_SUBSCRIPTION;
@@ -169,21 +171,25 @@ class Scheduler {
         }
     }
 
-    bool publish(String topic, String msg) {
+    bool publish(String topic, String msg = "", String originator = "") {
         T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
         memset(pMsg, 0, sizeof(T_MSG));
+        pMsg->originator = (char *)malloc(originator.length() + 1);
         pMsg->msg = (char *)malloc(msg.length() + 1);
         pMsg->topic = (char *)malloc(topic.length() + 1);
+        strcpy(pMsg->originator, originator.c_str());
         strcpy(pMsg->topic, topic.c_str());
         strcpy(pMsg->msg, msg.c_str());
         return msgqueue.push(pMsg);
     }
 
-    int subscribe(String topic, T_SUBS subs) {
+    int subscribe(String topic, T_SUBS subs, String originator = "") {
         T_SUBSCRIPTION sub;
         memset(&sub, 0, sizeof(sub));
         sub.topic = (char *)malloc(topic.length() + 1);
         strcpy(sub.topic, topic.c_str());
+        sub.originator = (char *)malloc(originator.length() + 1);
+        strcpy(sub.originator, originator.c_str());
         sub.subs = subs;
         ++subscriptionHandle;
         sub.subscriptionHandle = subscriptionHandle;
@@ -197,6 +203,7 @@ class Scheduler {
         for (unsigned int i = 0; i < subscriptionList.length(); i++) {
             if (subscriptionList[i].subscriptionHandle == subscriptionHandle) {
                 free(subscriptionList[i].topic);
+                free(subscriptionList[i].originator);
                 subscriptionList.erase(i);
                 return true;
             }
@@ -209,9 +216,15 @@ class Scheduler {
         while ((pMsg = msgqueue.pop()) != nullptr) {
             for (unsigned int i = 0; i < subscriptionList.length(); i++) {
                 if (mqttmatch(pMsg->topic, subscriptionList[i].topic)) {
-                    subscriptionList[i].subs(pMsg->topic, pMsg->msg);
+                    if (*(pMsg->originator) != 0)
+                        if (String(pMsg->originator) ==
+                            String(subscriptionList[i].originator))
+                            continue;
+                    subscriptionList[i].subs(pMsg->topic, pMsg->msg,
+                                             pMsg->originator);
                 }
             }
+            free(pMsg->originator);
             free(pMsg->topic);
             free(pMsg->msg);
             free(pMsg);
