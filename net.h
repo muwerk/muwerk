@@ -35,7 +35,7 @@ class Net {
     Net() {
         oldState = NOTDEFINED;
         state = NOTCONFIGURED;
-        mode = Netmode::AP;
+        mode = AP;
         tick1sec = millis();
         tick10sec = millis();
         if (readNetConfig()) {
@@ -49,9 +49,9 @@ class Net {
 
     void publishNetwork() {
         String json;
-        if (mode == Netmode::AP) {
+        if (mode == AP) {
             json = "{\"mode\":\"ap\",";
-        } else if (mode == Netmode::STATION) {
+        } else if (mode == STATION) {
             json = "{\"mode\":\"station\",";
         } else {
             json = "{\"mode\":\"undefined\",";
