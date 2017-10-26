@@ -5,11 +5,10 @@
 #include "../ustd/platform.h"
 #include "../ustd/array.h"
 #include "../ustd/queue.h"
-#include "../ustd/map.h"
 
 #include <stdio.h>
 
-#ifdef __ESP__
+#if defined(__ESP__) || defined(__UNIXOID__)
 #include <functional>
 #endif
 
@@ -40,9 +39,7 @@ typedef struct {
     char *msg;
 } T_MSG;
 
-#ifdef __ESP__
-//#define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned
-// int)> callback
+#if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void(String topic, String msg)> T_SUBS;
 #else
 typedef void (*T_SUBS)(String topic, String msg);
@@ -62,26 +59,27 @@ typedef struct {
     unsigned long lateTime;
 } T_TASKENTRY;
 
-class scheduler {
+class Scheduler {
   private:
     ustd::array<T_TASKENTRY> taskList;
     ustd::array<T_SUBSCRIPTION> subscriptionList;
-    unsigned int subscriptionHandle = 0;
+    unsigned int subscriptionHandle;
     ustd::queue<T_MSG> msgqueue;
 
   public:
-    scheduler(int nTaskListSize = 2, int queueSize = 2,
+    Scheduler(int nTaskListSize = 2, int queueSize = 2,
               int nSubscriptionListSize = 2)
         : taskList(nTaskListSize), msgqueue(queueSize),
           subscriptionList(nSubscriptionListSize) {
-#ifdef ESP8266
-// ESP.wdtDisable();
-// ESP.wdtEnable(WDTO_8S);
+        subscriptionHandle = 0;
+#ifdef __ESP__
+        ESP.wdtDisable();
+        ESP.wdtEnable(WDTO_8S);
 #endif
     }
 
 #ifndef __ATTINY__
-    virtual ~scheduler() {
+    virtual ~Scheduler() {
         int l = msgqueue.length();
         for (int i = 0; i < l; i++) {
             msgqueue.pop();
@@ -188,19 +186,12 @@ class scheduler {
             return subscriptionHandle;
     }
 
-    /*
     // give a c++11 lambda as callback for incoming mqttmessages:
-
-    std::function<void( char *, unsigned char *, unsigned int )> f =
-                                [=]( char *t, unsigned char *m, unsigned int l )
-    { this->onMqttReceive( t, m, l ); }; mqttClient.setCallback(f);
-
-    #ifdef ESP8266
-    #include <functional>
-    #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned
-    int)> callback #else #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*,
-    uint8_t*, unsigned int) #endif
-    */
+    // std::function<void(char *, unsigned char *, unsigned int)> f =
+    //    [=](char *t, unsigned char *m, unsigned int l) {
+    //        this->onMqttReceive(t, m, l);
+    //    };
+    // mqttClient.setCallback(f);
 
     bool unsubscribe(int subscriptionHandle) {
         for (unsigned int i = 0; i < subscriptionList.length(); i++) {
@@ -229,7 +220,7 @@ class scheduler {
 
     void runTask(T_TASKENTRY *pTaskEnt) {
         unsigned long ticker = micros();
-        unsigned long tDelta = timeDiffMicros(pTaskEnt->lastCall, ticker);
+        unsigned long tDelta = timeDiff(pTaskEnt->lastCall, ticker);
         if (tDelta >= pTaskEnt->minMicros) {
             pTaskEnt->task();
             pTaskEnt->lastCall = micros();
@@ -242,11 +233,11 @@ class scheduler {
         for (unsigned int i = 0; i < taskList.length(); i++) {
             checkMsgQueue();
             runTask(&taskList[i]);
-#ifdef ESP8266
+#ifdef __ESP__
             yield();
 #endif
         }
-#ifdef ESP8266
+#ifdef __ESP__
         ESP.wdtFeed();
 #endif
     }
