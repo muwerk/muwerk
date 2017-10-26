@@ -35,11 +35,17 @@ class Net {
     ustd::map<String, String> netServices; // XXX: ustdification
     String macAddress;
 
-    Net(Scheduler *pSched, String ssid = "", String password = "",
-        Netmode mode = AP)
-        : pSched(pSched), state(state), SSID(ssid), password(password) {
+    Net() {
         oldState = NOTDEFINED;
         state = NOTCONFIGURED;
+    }
+
+    void begin(Scheduler *_pSched, String _ssid = "", String _password = "",
+               Netmode _mode = AP) {
+        pSched = _pSched;
+        SSID = _ssid;
+        password = _password;
+        mode = _mode;
         tick1sec = millis();
         tick10sec = millis();
         if (SSID == "") {
