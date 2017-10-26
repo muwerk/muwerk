@@ -32,11 +32,15 @@ class Net {
     unsigned long tick1sec;
     unsigned long tick10sec;
     ustd::sensorprocessor rssival;
-    ustd::map<String, String> netServices; // XXX: ustdification
+    ustd::map<String, String> netServices;  // XXX: ustdification
     String macAddress;
 
-    void subsNetGet(String topic, String msg) { publishNetwork(); }
-    void subsNetsGet(String topic, String msg) { publishNetworks(); }
+    void subsNetGet(String topic, String msg) {
+        publishNetwork();
+    }
+    void subsNetsGet(String topic, String msg) {
+        publishNetworks();
+    }
     void subsNetSet(String topic, String msg) {
         // XXX: not yet implemented.
     }
@@ -51,11 +55,17 @@ class Net {
         }
     }
 
-    Net(Scheduler *pSched, String ssid = "", String password = "",
-        Netmode mode = AP)
-        : pSched(pSched), state(state), SSID(ssid), password(password) {
+    Net() {
         oldState = NOTDEFINED;
         state = NOTCONFIGURED;
+    }
+
+    void begin(Scheduler *_pSched, String _ssid = "", String _password = "",
+               Netmode _mode = AP) {
+        pSched = _pSched;
+        SSID = _ssid;
+        password = _password;
+        mode = _mode;
         tick1sec = millis();
         tick10sec = millis();
         if (SSID == "") {
@@ -82,8 +92,10 @@ class Net {
         std::function<void(String, String)> fnsg =
             [=](String topic, String msg) { this->subsNetsGet(topic, msg); };
         pSched->subscribe("net/networks/get", fnsg);
-        std::function<void(String, String)> fsg = [=](
-            String topic, String msg) { this->subsNetServicesGet(topic, msg); };
+        std::function<void(String, String)> fsg = [=](String topic,
+                                                      String msg) {
+            this->subsNetServicesGet(topic, msg);
+        };
         pSched->subscribe("net/services/+/get", fsg);
     }
 
@@ -187,7 +199,7 @@ class Net {
     void publishNetworks() {
         int numSsid = WiFi.scanNetworks();
         if (numSsid == -1) {
-            pSched->publish("net/networks", "{}"); // "{\"state\":\"error\"}");
+            pSched->publish("net/networks", "{}");  // "{\"state\":\"error\"}");
             return;
         }
         String netlist = "{";
@@ -252,6 +264,6 @@ class Net {
         }
     }
 };
-} // namespace ustd
+}  // namespace ustd
 
-#endif // defined(__ESP__)
+#endif  // defined(__ESP__)
