@@ -193,13 +193,6 @@ class Scheduler {
             return subscriptionHandle;
     }
 
-    // give a c++11 lambda as callback for incoming mqttmessages:
-    // std::function<void(char *, unsigned char *, unsigned int)> f =
-    //    [=](char *t, unsigned char *m, unsigned int l) {
-    //        this->onMqttReceive(t, m, l);
-    //    };
-    // mqttClient.setCallback(f);
-
     bool unsubscribe(int subscriptionHandle) {
         for (unsigned int i = 0; i < subscriptionList.length(); i++) {
             if (subscriptionList[i].subscriptionHandle == subscriptionHandle) {

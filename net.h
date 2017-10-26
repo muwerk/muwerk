@@ -3,13 +3,15 @@
 #pragma once
 
 #if defined(__ESP__)
-#include "../ustd/platform.h"
 #include "../ustd/array.h"
 #include "../ustd/map.h"
+#include "../ustd/platform.h"
 
+#include "../muwerk/scheduler.h"
+
+#include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <FS.h>
-#include <ArduinoJson.h>
 
 namespace ustd {
 class Net {
@@ -26,13 +28,30 @@ class Net {
     String password;
     String localHostname;
     String ipAddress;
+    Scheduler *pSched;
     unsigned long tick1sec;
     unsigned long tick10sec;
     ustd::sensorprocessor rssival;
-    ustd::map<String, String> netServices;  // XXX: ustdification
+    ustd::map<String, String> netServices; // XXX: ustdification
     String macAddress;
 
-    Net() {
+    void subsNetGet(String topic, String msg) { publishNetwork(); }
+    void subsNetsGet(String topic, String msg) { publishNetworks(); }
+    void subsNetSet(String topic, String msg) {
+        // XXX: not yet implemented.
+    }
+
+    void subsNetServicesGet(String topic, String msg) {
+        for (int i = 0; i < netServices.length(); i++) {
+            if (topic == "net/services/" + netServices.keys[i] + "/get") {
+                pSched->publish("net/services/" + netServices.keys[i],
+                                "{\"server\":\"" + netServices.values[i] +
+                                    "\"}");
+            }
+        }
+    }
+
+    Net(Scheduler *pSched) : pSched(pSched) {
         oldState = NOTDEFINED;
         state = NOTCONFIGURED;
         mode = AP;
@@ -41,10 +60,25 @@ class Net {
         if (readNetConfig()) {
             connectAP();
         }
-        subscribe("net/network/get", subNetGet);
-        subscribe("net/network/set", subNetSet);
-        subscribe("net/networks/get", subNetsGet);
-        subscribe("net/servicees/+/get", subNetServicesGet);
+
+        // give a c++11 lambda as callback scheduler task registration of
+        // this.loop():
+        std::function<void()> ft = [=]() { this->loop(); };
+        pSched->add(ft);
+
+        // give a c++11 lambda as callback for incoming mqttmessages:
+        std::function<void(String, String)> fng =
+            [=](String topic, String msg) { this->subsNetGet(topic, msg); };
+        pSched->subscribe("net/network/get", fng);
+        std::function<void(String, String)> fns =
+            [=](String topic, String msg) { this->subsNetSet(topic, msg); };
+        pSched->subscribe("net/network/set", fns);
+        std::function<void(String, String)> fnsg =
+            [=](String topic, String msg) { this->subsNetsGet(topic, msg); };
+        pSched->subscribe("net/networks/get", fnsg);
+        std::function<void(String, String)> fsg = [=](
+            String topic, String msg) { this->subsNetServicesGet(topic, msg); };
+        pSched->subscribe("net/services/+/get", fsg);
     }
 
     void publishNetwork() {
@@ -73,8 +107,7 @@ class Net {
             json += "\"state\":\"undefined\"}";
             break;
         }
-        publish("net/network", json);
-        log(T_LOGLEVEL::INFO, json);
+        pSched->publish("net/network", json);
         if (state == CONNECTED)
             publishServices();
     }
@@ -83,7 +116,6 @@ class Net {
         SPIFFS.begin();
         File f = SPIFFS.open("/net.json", "r");
         if (!f) {
-            DBG("SPIFFS needs to contain a net.json file!");
             return false;
         } else {
             String jsonstr = "";
@@ -95,7 +127,6 @@ class Net {
             DynamicJsonBuffer jsonBuffer(200);
             JsonObject &root = jsonBuffer.parseObject(jsonstr);
             if (!root.success()) {
-                DBG("Invalid JSON received, check SPIFFS file net.json!");
                 return false;
             } else {
                 SSID = root["SSID"].as<char *>();
@@ -109,16 +140,11 @@ class Net {
                     }
                 }
             }
-
-            // for ( auto s : netServices ) {
-            //    DBG( "***" + s.first + "->" + s.second );
-            //}
             return true;
         }
     }
 
     void connectAP() {
-        DBG("Connecting to: " + SSID);
         WiFi.mode(WIFI_STA);
         WiFi.begin(SSID.c_str(), password.c_str());
         macAddress = WiFi.macAddress();
@@ -155,7 +181,7 @@ class Net {
     void publishNetworks() {
         int numSsid = WiFi.scanNetworks();
         if (numSsid == -1) {
-            publish("net/networks", "{}");  // "{\"state\":\"error\"}");
+            pSched->publish("net/networks", "{}"); // "{\"state\":\"error\"}");
             return;
         }
         String netlist = "{";
@@ -168,16 +194,17 @@ class Net {
                        strEncryptionType(WiFi.encryptionType(thisNet)) + "\"}";
         }
         netlist += "}";
-        publish("net/networks", netlist);
+        pSched->publish("net/networks", netlist);
     }
 
     void publishServices() {
-        for (for int i=0; i<netServices.length(); i++) {
-            publish("net/services/" + netServices.keys[i],
-                    "{\"server\":\"" + netServices.values[i] + "\"}");
+        for (int i = 0; i < netServices.length(); i++) {
+            pSched->publish("net/services/" + netServices.keys[i],
+                            "{\"server\":\"" + netServices.values[i] + "\"}");
         }
     }
-    virtual void loop() override {
+
+    void loop() {
         switch (state) {
         case NOTCONFIGURED:
             if (timeDiff(tick10sec, millis()) > 10000) {
@@ -192,8 +219,7 @@ class Net {
                 ipAddress = String(ip[0]) + '.' + String(ip[1]) + '.' +
                             String(ip[2]) + '.' + String(ip[3]);
             }
-            if (util::timebudget::delta(conTime, millis()) > conTimeout) {
-                DBG("Timeout connecting to: " + SSID);
+            if (ustd::timeDiff(conTime, millis()) > conTimeout) {
                 state = NOTCONFIGURED;
             }
             break;
@@ -203,7 +229,8 @@ class Net {
                 if (WiFi.status() == WL_CONNECTED) {
                     long rssi = WiFi.RSSI();
                     if (rssival.filter(&rssi)) {
-                        publish("net/rssi", "{\"rssi\":" + String(rssi) + "}");
+                        pSched->publish("net/rssi",
+                                        "{\"rssi\":" + String(rssi) + "}");
                     }
                 } else {
                     state = NOTCONFIGURED;
@@ -218,25 +245,7 @@ class Net {
             publishNetwork();
         }
     }
-
-    void subsNetGet(String topic, String msg) {
-        publishNetwork();
-    }
-    void subNetsGet(String topic, String msg) {
-        publishNetworks();
-    }
-    void subNetSet(String topic, String msg) {
-        // XXX: not yet implemented.
-    }
-    void subNetServicesGet(String topic, String msg) {
-        for (for int i=0; i<netServices.length(); i++) {
-            if (topic == "net/services/" + netServices.keys[i] + "/get") {
-                publish("net/services/" + netServices.keys[i],
-                        "{\"server\":\"" + netServices.values[i] + "\"}");
-            }
-        }
-    }
 };
-}  // namespace ustd
+} // namespace ustd
 
-#endif  // defined(__ESP__)
+#endif // defined(__ESP__)
