@@ -9,6 +9,10 @@
 
 #include <stdio.h>
 
+#ifdef __ESP__
+#include <functional>
+#endif
+
 namespace ustd {
 
 enum T_PRIO {
@@ -36,9 +40,16 @@ typedef struct {
     char *msg;
 } T_MSG;
 
+#ifdef __ESP__
+//#define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned
+// int)> callback
+typedef std::function<void(String topic, String msg)> T_SUBS;
+#else
 typedef void (*T_SUBS)(String topic, String msg);
+#endif
 
 typedef struct {
+    int subscriptionHandle;
     char *topic;
     T_SUBS subs;
 } T_SUBSCRIPTION;
@@ -55,6 +66,7 @@ class scheduler {
   private:
     ustd::array<T_TASKENTRY> taskList;
     ustd::array<T_SUBSCRIPTION> subscriptionList;
+    unsigned int subscriptionHandle = 0;
     ustd::queue<T_MSG> msgqueue;
 
   public:
@@ -155,33 +167,44 @@ class scheduler {
     bool publish(String topic, String msg) {
         T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
         memset(pMsg, 0, sizeof(T_MSG));
-        pMsg->msg = (char *)malloc(topic.length() + 1);
+        pMsg->msg = (char *)malloc(msg.length() + 1);
         pMsg->topic = (char *)malloc(topic.length() + 1);
-        const char *pt = topic.c_str();
-        const char *pm = msg.c_str();
-
-        strcpy(pMsg->topic, pt);
-        strcpy(pMsg->msg, pm);
+        strcpy(pMsg->topic, topic.c_str());
+        strcpy(pMsg->msg, msg.c_str());
         return msgqueue.push(pMsg);
     }
 
-    bool subscribe(String topic, T_SUBS subs) {
+    int subscribe(String topic, T_SUBS subs) {
         T_SUBSCRIPTION sub;
         memset(&sub, 0, sizeof(sub));
         sub.topic = (char *)malloc(topic.length() + 1);
-        const char *pt = topic.c_str();
-        strcpy(sub.topic, pt);
+        strcpy(sub.topic, topic.c_str());
         sub.subs = subs;
+        ++subscriptionHandle;
+        sub.subscriptionHandle = subscriptionHandle;
         if (subscriptionList.add(sub) == -1)
-            return false;
+            return -1;
         else
-            return true;
+            return subscriptionHandle;
     }
 
-    bool unsubscribe(String topic, T_SUBS subs) {
+    /*
+    // give a c++11 lambda as callback for incoming mqttmessages:
+
+    std::function<void( char *, unsigned char *, unsigned int )> f =
+                                [=]( char *t, unsigned char *m, unsigned int l )
+    { this->onMqttReceive( t, m, l ); }; mqttClient.setCallback(f);
+
+    #ifdef ESP8266
+    #include <functional>
+    #define MQTT_CALLBACK_SIGNATURE std::function<void(char*, uint8_t*, unsigned
+    int)> callback #else #define MQTT_CALLBACK_SIGNATURE void (*callback)(char*,
+    uint8_t*, unsigned int) #endif
+    */
+
+    bool unsubscribe(int subscriptionHandle) {
         for (unsigned int i = 0; i < subscriptionList.length(); i++) {
-            if ((String(subscriptionList[i].topic) == topic) &&
-                (subscriptionList[i].subs == subs)) {
+            if (subscriptionList[i].subscriptionHandle == subscriptionHandle) {
                 free(subscriptionList[i].topic);
                 subscriptionList.erase(i);
                 return true;
