@@ -3,6 +3,11 @@
 #pragma once
 
 #if defined(__ESP__)
+
+#ifdef __ESP32__
+#include <WiFi.h>
+#endif
+
 #include "../ustd/array.h"
 #include "../ustd/map.h"
 #include "../ustd/platform.h"
@@ -10,8 +15,10 @@
 #include "../muwerk/scheduler.h"
 
 #include <ArduinoJson.h>
-#include <ESP8266WiFi.h>
+
+#ifndef __ESP32__
 #include <FS.h>
+#endif
 
 namespace ustd {
 class Net {
@@ -32,7 +39,7 @@ class Net {
     unsigned long tick1sec;
     unsigned long tick10sec;
     ustd::sensorprocessor rssival;
-    ustd::map<String, String> netServices; // XXX: ustdification
+    ustd::map<String, String> netServices;
     String macAddress;
 
     Net() {
@@ -185,7 +192,7 @@ class Net {
     void publishNetworks() {
         int numSsid = WiFi.scanNetworks();
         if (numSsid == -1) {
-            pSched->publish("net/networks", "{}"); // "{\"state\":\"error\"}");
+            pSched->publish("net/networks", "{}");  // "{\"state\":\"error\"}");
             return;
         }
         String netlist = "{";
@@ -270,6 +277,6 @@ class Net {
         }
     }
 };
-} // namespace ustd
+}  // namespace ustd
 
-#endif // defined(__ESP__)
+#endif  // defined(__ESP__)
