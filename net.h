@@ -4,9 +4,9 @@
 
 #if defined(__ESP__)
 
-#ifdef __ESP32__
-#include <WiFi.h>
-#endif
+//#ifdef __ESP32__
+//#include <WiFi.h>
+//#endif
 
 #include "../ustd/array.h"
 #include "../ustd/map.h"
@@ -16,9 +16,9 @@
 
 #include <ArduinoJson.h>
 
-#ifndef __ESP32__
+//#ifndef __ESP32__
 #include <FS.h>
-#endif
+//#endif
 
 namespace ustd {
 class Net {
@@ -124,6 +124,7 @@ class Net {
     }
 
     bool readNetConfig() {
+        #if !(defined(__ESP32__) && !defined(__ESP32DEV__)) // SPIFFS is not yet in ESP32 standard
         SPIFFS.begin();
         File f = SPIFFS.open("/net.json", "r");
         if (!f) {
@@ -153,6 +154,9 @@ class Net {
             }
             return true;
         }
+        #else
+        return false;
+        #endif
     }
 
     void connectAP() {
@@ -161,13 +165,18 @@ class Net {
         macAddress = WiFi.macAddress();
 
         if (localHostname != "")
+#if defined(__ESP32__)
+            WiFi.setHostname(localHostname.c_str());
+#else
             WiFi.hostname(localHostname.c_str());
+#endif
         state = CONNECTINGAP;
         conTime = millis();
     }
 
     String strEncryptionType(int thisType) {
         // read the encryption type and print out the name:
+#if !defined(__ESP32__)
         switch (thisType) {
         case ENC_TYPE_WEP:
             return "WEP";
@@ -188,11 +197,34 @@ class Net {
             return "unknown";
             break;
         }
+#else
+    switch (thisType) {
+        case WIFI_AUTH_OPEN:
+            return "None";
+            break;
+        case WIFI_AUTH_WEP:
+            return "WEP";
+            break;
+        case WIFI_AUTH_WPA_PSK:
+            return "WPA_PSK";
+            break;
+        case WIFI_AUTH_WPA2_PSK:
+            return "WPA2_PSK";
+            break;
+        case WIFI_AUTH_WPA_WPA2_PSK:
+            return "WPA_WPA2_PSK";
+            break;
+        case WIFI_AUTH_WPA2_ENTERPRISE:
+            return "WPA2_ENTERPRISE";
+            break;            
+        }
+#endif
     }
+
     void publishNetworks() {
         int numSsid = WiFi.scanNetworks();
         if (numSsid == -1) {
-            pSched->publish("net/networks", "{}");  // "{\"state\":\"error\"}");
+            pSched->publish("net/networks", "{}"); // "{\"state\":\"error\"}");
             return;
         }
         String netlist = "{";
@@ -277,6 +309,6 @@ class Net {
         }
     }
 };
-}  // namespace ustd
+} // namespace ustd
 
-#endif  // defined(__ESP__)
+#endif // defined(__ESP__)

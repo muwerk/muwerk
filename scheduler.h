@@ -81,7 +81,7 @@ class Scheduler {
           subscriptionList(nSubscriptionListSize) {
         subscriptionHandle = 0;
         taskID = 0;
-#ifdef __ESP__
+#if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtDisable();
         ESP.wdtEnable(WDTO_8S);
 #endif
@@ -246,11 +246,11 @@ class Scheduler {
         for (unsigned int i = 0; i < taskList.length(); i++) {
             checkMsgQueue();
             runTask(&taskList[i]);
-#ifdef __ESP__
+#if defined(__ESP__) && !defined(__ESP32__)
             yield();
 #endif
         }
-#ifdef __ESP__
+#if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtFeed();
 #endif
     }
