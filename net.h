@@ -8,9 +8,9 @@
 //#include <WiFi.h>
 //#endif
 
+#include "../ustd/platform.h"
 #include "../ustd/array.h"
 #include "../ustd/map.h"
-#include "../ustd/platform.h"
 
 #include "../muwerk/scheduler.h"
 
@@ -124,7 +124,8 @@ class Net {
     }
 
     bool readNetConfig() {
-        #if !(defined(__ESP32__) && !defined(__ESP32DEV__)) // SPIFFS is not yet in ESP32 standard
+#if !(defined(__ESP32__) &&                                                    \
+      !defined(__ESP32DEV__))  // SPIFFS is not yet in ESP32 standard
         SPIFFS.begin();
         File f = SPIFFS.open("/net.json", "r");
         if (!f) {
@@ -154,9 +155,9 @@ class Net {
             }
             return true;
         }
-        #else
+#else
         return false;
-        #endif
+#endif
     }
 
     void connectAP() {
@@ -175,7 +176,7 @@ class Net {
     }
 
     String strEncryptionType(int thisType) {
-        // read the encryption type and print out the name:
+    // read the encryption type and print out the name:
 #if !defined(__ESP32__)
         switch (thisType) {
         case ENC_TYPE_WEP:
@@ -198,7 +199,7 @@ class Net {
             break;
         }
 #else
-    switch (thisType) {
+        switch (thisType) {
         case WIFI_AUTH_OPEN:
             return "None";
             break;
@@ -216,7 +217,7 @@ class Net {
             break;
         case WIFI_AUTH_WPA2_ENTERPRISE:
             return "WPA2_ENTERPRISE";
-            break;            
+            break;
         }
 #endif
     }
@@ -224,7 +225,7 @@ class Net {
     void publishNetworks() {
         int numSsid = WiFi.scanNetworks();
         if (numSsid == -1) {
-            pSched->publish("net/networks", "{}"); // "{\"state\":\"error\"}");
+            pSched->publish("net/networks", "{}");  // "{\"state\":\"error\"}");
             return;
         }
         String netlist = "{";
@@ -309,6 +310,6 @@ class Net {
         }
     }
 };
-} // namespace ustd
+}  // namespace ustd
 
-#endif // defined(__ESP__)
+#endif  // defined(__ESP__)

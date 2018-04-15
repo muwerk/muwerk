@@ -109,7 +109,7 @@ class Scheduler {
         int lp = strlen(pub);
         int ls = strlen(sub);
 
-        bool wPos = true; // sub wildcard is legal now
+        bool wPos = true;  // sub wildcard is legal now
         int ps = 0;
         for (int pp = 0; pp < lp; pp++) {
             // if ( pp >= ls || ps > ls ) {
@@ -118,7 +118,7 @@ class Scheduler {
             //    sub
             // }
             if (pub[pp] == '+' || pub[pp] == '#') {
-                return false; // Illegal wildcards in pub
+                return false;  // Illegal wildcards in pub
             }
             if (wPos) {
                 wPos = false;
@@ -126,8 +126,8 @@ class Scheduler {
                     if (ps == ls - 1) {
                         return true;
                     } else {
-                        return false; // In sub, # must not be followed by
-                                      // anything else
+                        return false;  // In sub, # must not be followed by
+                                       // anything else
                     }
                 }
                 if (sub[ps] == '+') {
@@ -144,7 +144,7 @@ class Scheduler {
                 }
             } else {
                 if (sub[ps] == '+' || sub[ps] == '#') {
-                    return false; // Illegal wildcard-position
+                    return false;  // Illegal wildcard-position
                 }
             }
             if (pub[pp] != sub[ps] && strcmp(&sub[ps], "/#")) {
@@ -282,4 +282,4 @@ class Scheduler {
         return false;
     }
 };
-} // namespace ustd
+}  // namespace ustd
