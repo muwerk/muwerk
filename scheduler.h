@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../ustd/array.h"
-#include "../ustd/platform.h"
+#include "platform.h"
+#include "array.h"
 #include "../ustd/queue.h"
 
 #include <stdio.h>

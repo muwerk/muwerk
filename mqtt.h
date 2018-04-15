@@ -8,11 +8,11 @@
 // ESP32: patch required currently: #if defined(ESP8266) or defined(ESP32)
 #include <PubSubClient.h>
 
-#include "../ustd/platform.h"
-#include "../ustd/array.h"
-#include "../ustd/map.h"
+#include "platform.h"
+#include "array.h"
+#include "map.h"
 
-#include "../muwerk/scheduler.h"
+#include "scheduler.h"
 
 #include <ArduinoJson.h>
 //#include <ESP8266WiFi.h>
