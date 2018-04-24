@@ -124,8 +124,8 @@ class Net {
     }
 
     bool readNetConfig() {
-#if !(defined(__ESP32__) &&                                                    \
-      !defined(__ESP32DEV__))  // SPIFFS is not yet in ESP32 standard
+        // #if !(defined(__ESP32__) && !defined(__ESP32DEV__))
+        // SPIFFS is not yet in ESP32 standard
         SPIFFS.begin();
         File f = SPIFFS.open("/net.json", "r");
         if (!f) {
@@ -155,9 +155,9 @@ class Net {
             }
             return true;
         }
-#else
-        return false;
-#endif
+        // #else
+        //        return false;
+        //#endif
     }
 
     void connectAP() {
