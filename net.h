@@ -124,8 +124,9 @@ class Net {
     }
 
     bool readNetConfig() {
-        // #if !(defined(__ESP32__) && !defined(__ESP32DEV__))
-        // SPIFFS is not yet in ESP32 standard
+#ifdef USE_SERIAL
+        Serial.println("Reading net.json");
+#endif
         SPIFFS.begin();
         File f = SPIFFS.open("/net.json", "r");
         if (!f) {
@@ -155,22 +156,25 @@ class Net {
             }
             return true;
         }
-        // #else
-        //        return false;
-        //#endif
     }
 
     void connectAP() {
+#ifdef USE_SERIAL
+        Serial.println("Connect-AP");
+        Serial.println(SSID.c_str());
+        Serial.println(password.c_str());
+#endif
         WiFi.mode(WIFI_STA);
         WiFi.begin(SSID.c_str(), password.c_str());
         macAddress = WiFi.macAddress();
 
-        if (localHostname != "")
+        if (localHostname != "") {
 #if defined(__ESP32__)
             WiFi.setHostname(localHostname.c_str());
 #else
             WiFi.hostname(localHostname.c_str());
 #endif
+        }
         state = CONNECTINGAP;
         conTime = millis();
     }
@@ -278,12 +282,18 @@ class Net {
             break;
         case CONNECTINGAP:
             if (WiFi.status() == WL_CONNECTED) {
+#ifdef USE_SERIAL
+                Serial.println("Connected!");
+#endif
                 state = CONNECTED;
                 IPAddress ip = WiFi.localIP();
                 ipAddress = String(ip[0]) + '.' + String(ip[1]) + '.' +
                             String(ip[2]) + '.' + String(ip[3]);
             }
             if (ustd::timeDiff(conTime, millis()) > conTimeout) {
+#ifdef USE_SERIAL
+                Serial.println("Timeout connecting!");
+#endif
                 state = NOTCONFIGURED;
             }
             break;
@@ -305,6 +315,11 @@ class Net {
             break;
         }
         if (state != oldState) {
+#ifdef USE_SERIAL
+            char msg[128];
+            sprintf(msg, "Netstate: %d->%d", oldState, state);
+            Serial.println(msg);
+#endif
             oldState = state;
             publishNetwork();
         }
