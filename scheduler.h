@@ -73,6 +73,8 @@ class Scheduler {
     int subscriptionHandle;
     int taskID;
     ustd::queue<T_MSG> msgqueue;
+    bool bSingleTaskMode = false;
+    int singleTaskID = -1;
 
   public:
     Scheduler(int nTaskListSize = 2, int queueSize = 2,
@@ -242,10 +244,18 @@ class Scheduler {
     }
 
     void loop() {
-        checkMsgQueue();
-        for (unsigned int i = 0; i < taskList.length(); i++) {
+        if (!bSingleTaskMode) {
             checkMsgQueue();
-            runTask(&taskList[i]);
+        }
+        for (unsigned int i = 0; i < taskList.length(); i++) {
+            if (!bSingleTaskMode) {
+                checkMsgQueue();
+                runTask(&taskList[i]);
+            } else {
+                if (taskList[i].taskID == singleTaskID) {
+                    runTask(&taskList[i]);
+                }
+            }
 #if defined(__ESP__) && !defined(__ESP32__)
             yield();
 #endif
@@ -280,6 +290,15 @@ class Scheduler {
             }
         }
         return false;
+    }
+
+    void singleTaskMode(int _singleTaskID) {
+        singleTaskID = _singleTaskID;
+        if (_singleTaskID == -1) {
+            bSingleTaskMode = false;
+        } else {
+            bSingleTaskMode = true;
+        }
     }
 };
 }  // namespace ustd

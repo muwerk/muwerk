@@ -35,6 +35,7 @@ class Net {
     ustd::sensorprocessor rssival = ustd::sensorprocessor(5, 60, 0.9);
     ustd::map<String, String> netServices;
     String macAddress;
+    unsigned int tz_sec = 3600, dst_sec = 3600;
 
     Net() {
         oldState = NOTDEFINED;
@@ -49,14 +50,27 @@ class Net {
         mode = _mode;
         tick1sec = millis();
         tick10sec = millis();
-        if (SSID == "") {
-            if (readNetConfig()) {
-                connectAP();
-            }
-        } else {
-            localHostname = "";
-            connectAP();
+        bool directInit = false;
+
+        if (_ssid != "")
+            directInit = true;
+
+        readNetConfig();
+
+        if (netServices.find("timeserver") != -1) {
+            configTime(tz_sec, dst_sec, netServices["timeserver"].c_str());
         }
+
+        if (directInit) {
+            SSID = _ssid;
+            password = _password;
+#if defined(__ESP32__)
+            localHostname = WiFi.getHostname();
+#else
+            localHostname = WiFi.hostname();
+#endif
+        }
+        connectAP();
 
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
