@@ -4,10 +4,6 @@
 
 #if defined(__ESP__)
 
-//#ifdef __ESP32__
-//#include <WiFi.h>
-//#endif
-
 #include "platform.h"
 #include "array.h"
 #include "map.h"
@@ -16,9 +12,7 @@
 
 #include <ArduinoJson.h>
 
-//#ifndef __ESP32__
 #include <FS.h>
-//#endif
 
 namespace ustd {
 class Net {
@@ -38,7 +32,7 @@ class Net {
     Scheduler *pSched;
     unsigned long tick1sec;
     unsigned long tick10sec;
-    ustd::sensorprocessor rssival;
+    ustd::sensorprocessor rssival = ustd::sensorprocessor(5, 60, 0.9);
     ustd::map<String, String> netServices;
     String macAddress;
 
@@ -174,13 +168,19 @@ class Net {
 #else
             WiFi.hostname(localHostname.c_str());
 #endif
+        } else {
+#if defined(__ESP32__)
+            localHostname = WiFi.getHostname();
+#else
+            localHostname = WiFi.hostname();
+#endif
         }
         state = CONNECTINGAP;
         conTime = millis();
     }
 
     String strEncryptionType(int thisType) {
-    // read the encryption type and print out the name:
+        // read the encryption type and print out the name:
 #if !defined(__ESP32__)
         switch (thisType) {
         case ENC_TYPE_WEP:

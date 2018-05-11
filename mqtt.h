@@ -45,7 +45,7 @@ class Mqtt {
         }
     }
 
-    void begin(Scheduler *_pSched, String _clientName) {
+    void begin(Scheduler *_pSched, String _clientName = "") {
         // Make sure _clientName is Unique! Otherwise MQTT server will rapidly
         // disconnect.
         pSched = _pSched;
@@ -53,6 +53,13 @@ class Mqtt {
         mqttClient = wifiClient;
 
         mqttTicker = millis();
+        if (clientName == "") {
+#if defined(__ESP32__)
+            clientName = WiFi.getHostname();
+#else
+            clientName = WiFi.hostname();
+#endif
+        }
 
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
@@ -86,7 +93,7 @@ class Mqtt {
                         // Attempt to connect
                         if (mqttClient.connect(clientName.c_str())) {
                             mqttConnected = true;
-                            mqttClient.subscribe("mw/#");
+                            mqttClient.subscribe("mu/#");
                             bWarned = false;
                         } else {
                             if (!bWarned) {
@@ -105,7 +112,7 @@ class Mqtt {
         String msg = "";
         String topic;
         if (strlen(ctopic) > 3)
-            topic = (char *)(&ctopic[3]);  // strip mw/   XXX: regex
+            topic = (char *)(&ctopic[3]);  // strip mu/   XXX: regex
         for (int i = 0; i < length; i++) {
             msg += (char)payload[i];
         }
@@ -114,19 +121,17 @@ class Mqtt {
 
     void subsMsg(String topic, String msg, String originator) {
         if (mqttConnected) {
-            if (topic.indexOf("display/set") == -1) {
-                // XXX: better filter config needed. (get/set)
-                unsigned int len = msg.length() + 1;
-                if (mqttClient.publish(topic.c_str(), msg.c_str(), len)) {
-                    // DBG("MQTT publish: " + topic + " | " + String(msg));
-                } else {
-                    // DBG("MQTT ERROR len=" + String(len) +
-                    //    ", not published: " + topic + " | " + String(msg));
-                    if (len > 128) {
-                        //  DBG("FATAL ERROR: you need to re-compile the "
-                        //      "PubSubClient library and increase #define "
-                        //      "MQTT_MAX_PACKET_SIZE.");
-                    }
+            unsigned int len = msg.length() + 1;
+            String tpc = clientName + "/" + topic;
+            if (mqttClient.publish(tpc.c_str(), msg.c_str(), len)) {
+                // DBG("MQTT publish: " + topic + " | " + String(msg));
+            } else {
+                // DBG("MQTT ERROR len=" + String(len) +
+                //    ", not published: " + topic + " | " + String(msg));
+                if (len > 128) {
+                    //  DBG("FATAL ERROR: you need to re-compile the "
+                    //      "PubSubClient library and increase #define "
+                    //      "MQTT_MAX_PACKET_SIZE.");
                 }
             }
         } else {
