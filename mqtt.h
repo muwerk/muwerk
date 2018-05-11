@@ -5,7 +5,7 @@
 
 #include <functional>
 
-// ESP32: patch required currently: #if defined(ESP8266) or defined(ESP32)
+// ESP32: patch required currently: #if defined(ESP8266) || defined(ESP32)
 #include <PubSubClient.h>
 
 #include "platform.h"
@@ -15,7 +15,6 @@
 #include "scheduler.h"
 
 #include <ArduinoJson.h>
-//#include <ESP8266WiFi.h>
 
 namespace ustd {
 class Mqtt {
@@ -46,11 +45,9 @@ class Mqtt {
         }
     }
 
-    void plotzel() {
-        int a = 1;
-    }
-
     void begin(Scheduler *_pSched, String _clientName) {
+        // Make sure _clientName is Unique! Otherwise MQTT server will rapidly
+        // disconnect.
         pSched = _pSched;
         clientName = _clientName;
         mqttClient = wifiClient;
@@ -117,8 +114,8 @@ class Mqtt {
 
     void subsMsg(String topic, String msg, String originator) {
         if (mqttConnected) {
-            if (topic.indexOf("display/set") ==
-                -1) {  // XXX: better filter config needed. (get/set)
+            if (topic.indexOf("display/set") == -1) {
+                // XXX: better filter config needed. (get/set)
                 unsigned int len = msg.length() + 1;
                 if (mqttClient.publish(topic.c_str(), msg.c_str(), len)) {
                     // DBG("MQTT publish: " + topic + " | " + String(msg));
