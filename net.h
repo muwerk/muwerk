@@ -58,9 +58,6 @@ class Net {
         if (netServices.find("timeserver") != -1) {
             if (netServices.find("dstrules") != -1) {  // XXX: unfinished!
                 String dstrules = netServices["dstrules"];
-                char szDst[256];
-                szDst[255] = 0;
-                strncpy(szDst, dstrules.c_str(), 255);
             }
             unsigned int tz_sec = 3600, dst_sec = 3600;  // XXX: dummy init
             configTime(tz_sec, dst_sec, netServices["timeserver"].c_str());
