@@ -12,8 +12,6 @@
 
 #include <ArduinoJson.h>
 
-#include <FS.h>
-
 namespace ustd {
 class Net {
   public:
@@ -143,7 +141,7 @@ class Net {
         Serial.println("Reading net.json");
 #endif
         SPIFFS.begin();
-        File f = SPIFFS.open("/net.json", "r");
+        fs::File f = SPIFFS.open("/net.json", "r");
         if (!f) {
             return false;
         } else {

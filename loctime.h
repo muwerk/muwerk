@@ -16,8 +16,6 @@
 
 #include <ArduinoJson.h>
 
-#include <FS.h>
-
 namespace ustd {
 class LocTime {
   public:
