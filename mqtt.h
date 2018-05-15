@@ -113,7 +113,7 @@ class Mqtt {
         String topic;
         if (strlen(ctopic) > 3)
             topic = (char *)(&ctopic[3]);  // strip mu/   XXX: regex
-        for (int i = 0; i < length; i++) {
+        for (unsigned int i = 0; i < length; i++) {
             msg += (char)payload[i];
         }
         pSched->publish(topic, msg, "mqtt");

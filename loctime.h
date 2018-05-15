@@ -22,27 +22,27 @@ namespace ustd {
 class LocTime {
   public:
     Scheduler *pSched;
-    TimeChangeRule CESTtz;
-    TimeChangeRule CETtz;
-    Timezone *CEtz;
+    Timezone *pTz;
 
     LocTime() {
     }
 
-    void begin(Scheduler *_pSched) {
+    bool parseDstRules(String dstrules, TimeChangeRule *stdRule,
+                       TimeChangeRule *dstRule) {
+        return false;
+    }
+    void begin(Scheduler *_pSched, String dstrules) {
+        TimeChangeRule tcDst;  //  = {"CEST", Last, Sun, Mar, 2, 120};
+        TimeChangeRule tcStd;  // = {"CET ", Last, Sun, Oct, 3, 60};
         pSched = _pSched;
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
         std::function<void()> ft = [=]() { this->loop(); };
         pSched->add(ft);
 
-        // Central European Summer Time
-        TimeChangeRule tc = {"CEST", Last, Sun, Mar, 2, 120};
-        CESTtz = tc;
-        // Central European Standard Time
-        TimeChangeRule tcw = {"CET ", Last, Sun, Oct, 3, 60};
-        CETtz = tcw;
-        CEtz = new Timezone(CESTtz, CETtz);
+        if (parseDstRules(dstrules, &tcStd, &tcDst)) {
+            pTz = new Timezone(tcDst, tcStd);
+        }
 
         // give a c++11 lambda as callback for incoming mqttmessages:
         std::function<void(String, String, String)> fng =

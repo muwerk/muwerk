@@ -24,7 +24,7 @@ class Net {
     Netstate oldState;
     Netmode mode;
     long conTime;
-    long conTimeout = 15000;
+    unsigned long conTimeout = 15000;
     String SSID;
     String password;
     String localHostname;
@@ -35,7 +35,7 @@ class Net {
     ustd::sensorprocessor rssival = ustd::sensorprocessor(5, 60, 0.9);
     ustd::map<String, String> netServices;
     String macAddress;
-    unsigned int tz_sec = 3600, dst_sec = 3600;
+    // unsigned int tz_sec = 3600, dst_sec = 3600;
 
     Net() {
         oldState = NOTDEFINED;
@@ -58,6 +58,13 @@ class Net {
         readNetConfig();
 
         if (netServices.find("timeserver") != -1) {
+            if (netServices.find("dstrules") != -1) {  // XXX: unfinished!
+                String dstrules = netServices["dstrules"];
+                char szDst[256];
+                szDst[255] = 0;
+                strncpy(szDst, dstrules.c_str(), 255);
+            }
+            unsigned int tz_sec = 3600, dst_sec = 3600;  // XXX: dummy init
             configTime(tz_sec, dst_sec, netServices["timeserver"].c_str());
         }
 
@@ -155,7 +162,7 @@ class Net {
                 password = root["password"].as<char *>();
                 localHostname = root["hostname"].as<char *>();
                 JsonArray &servs = root["services"];
-                for (int i = 0; i < servs.size(); i++) {
+                for (unsigned int i = 0; i < servs.size(); i++) {
                     JsonObject &srv = servs[i];
                     for (auto obj : srv) {
                         netServices[obj.key] = obj.value.as<char *>();
@@ -260,7 +267,7 @@ class Net {
     }
 
     void publishServices() {
-        for (int i = 0; i < netServices.length(); i++) {
+        for (unsigned int i = 0; i < netServices.length(); i++) {
             pSched->publish("net/services/" + netServices.keys[i],
                             "{\"server\":\"" + netServices.values[i] + "\"}");
         }
@@ -277,7 +284,7 @@ class Net {
     }
 
     void subsNetServicesGet(String topic, String msg, String originator) {
-        for (int i = 0; i < netServices.length(); i++) {
+        for (unsigned int i = 0; i < netServices.length(); i++) {
             if (topic == "net/services/" + netServices.keys[i] + "/get") {
                 pSched->publish("net/services/" + netServices.keys[i],
                                 "{\"server\":\"" + netServices.values[i] +
