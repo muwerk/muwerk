@@ -12,42 +12,147 @@
 
 #include "scheduler.h"
 
-#include <Time.h>
-#include <TimeLib.h>
-#include <Timezone.h>
+//#include <Time.h>
+//#include <TimeLib.h>
+//#include <Timezone.h>
+
+// to platform.h:
+//#include <time.h>       // time() ctime()
+//#include <sys/time.h>   // struct timeval
+//#include <coredecls.h>  // settimeofday_cb()
 
 #include <ArduinoJson.h>
 
 namespace ustd {
+
+/*
+bool cbtime_set = false;
+void time_is_set(void) {
+    timeval cbtime;
+    gettimeofday(&cbtime, NULL);
+    cbtime_set = true;
+#ifdef USE_SERIAL
+    Serial.println(
+        "------------------ settimeofday() was called ------------------");
+#endif
+}
+extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
+*/
+
 class LocTime {
   public:
     Scheduler *pSched;
-    Timezone *pTz;
+
+    LocTime() {
+    }
+    /* to port and replace Timezone.h:
+    WDORDER = {'last': -1, 'first': 1, 'second': 2, 'third': 3, 'fourth': 4}
+    WDNAME = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5, 'sun':
+    6} MONNAME = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+               'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12}
+
+
+    def time_border(yr, mons, wds, nums, hr):
+        if nums not in WDORDER:
+            return None
+        num = WDORDER[nums]
+        if wds not in WDNAME:
+            return None
+        wd = WDNAME[wds]
+        if mons not in MONNAME:
+            return None
+        mon = MONNAME[mons]
+        t = calendar.timegm((yr, mon, 1, 0, 0, 0, -1, -1, -1))
+        tm = time.gmtime(t)
+        dt = wd - tm.tm_wday + 1
+        if dt < 1:
+            dt = dt + 7
+        if num > 1:
+            dt += (num - 1) * 7
+        if num == -1:
+            dt = dt + 4 * 7
+            if dt > 31:
+                dt = dt - 7
+        tb = calendar.timegm((yr, mon, dt, hr, 0, 0, -1, -1, -1))
+        return tb
+
+
+    def isdst(t):
+        tm = time.gmtime(t)
+        if tm.tm_mon < 3 or tm.tm_mon > 10:
+            return 0
+        if tm.tm_mon > 3 and tm.tm_mon < 10:
+            return 1
+        if tm.tm_mon == 3:
+            sd = tm.tm_mday - tm.tm_wday + 6 - 7
+            while sd <= 31:
+                sd = sd + 7
+            sd = sd - 7
+            # print(sd)
+            if tm.tm_mday < sd:
+                return 0
+            if tm.tm_mday > sd:
+                return 1
+            if tm.tm_hour < 1:
+                return 0
+            if tm.tm_hour >= 1:
+                return 1
+        if tm.tm_mon == 10:
+            sd = tm.tm_mday - tm.tm_wday + 6 - 7
+            while sd <= 31:
+                sd = sd + 7
+            sd = sd - 7
+            # print(sd)
+            if tm.tm_mday < sd:
+                return 1
+            if tm.tm_mday > sd:
+                return 0
+            if tm.tm_hour < 1:
+                return 1
+            if tm.tm_hour >= 1:
+                return 0
+        return -1
+    */
+    // from Timezone.h
+    // convenient constants for TimeChangeRules
+    enum week_t { Last, First, Second, Third, Fourth };
+    enum dow_t { Sun = 1, Mon, Tue, Wed, Thu, Fri, Sat };
+    enum month_t {
+        Jan = 1,
+        Feb,
+        Mar,
+        Apr,
+        May,
+        Jun,
+        Jul,
+        Aug,
+        Sep,
+        Oct,
+        Nov,
+        Dec
+    };
+
+    // structure to describe rules for when daylight/summer time begins,
+    // or when standard time begins.
+    struct TimeChangeRule {
+        char abbrev[6];  // five chars max
+        uint8_t
+            week;     // First, Second, Third, Fourth, or Last week of the month
+        uint8_t dow;  // day of week, 1=Sun, 2=Mon, ... 7=Sat
+        uint8_t month;  // 1=Jan, 2=Feb, ... 12=Dec
+        uint8_t hour;   // 0-23
+        int offset;     // offset from UTC in minutes
+    };
+
+    TimeChangeRule tcDst;  //  = {"CEST", Last, Sun, Mar, 2, 120};
+    TimeChangeRule tcStd;  // = {"CET ", Last, Sun, Oct, 3, 60};
+    // XXX: Timezone *pTz;
     int tz_sec = 0;
     int dst_sec = 0;
     bool isDst = false;
     String timeserver;
+    bool bActive = false;
 
-    LocTime() {
-    }
-    /* from Timezone.h
-    // convenient constants for TimeChangeRules
-    enum week_t {Last, First, Second, Third, Fourth};
-    enum dow_t {Sun=1, Mon, Tue, Wed, Thu, Fri, Sat};
-    enum month_t {Jan=1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec};
-
-    // structure to describe rules for when daylight/summer time begins,
-    // or when standard time begins.
-    struct TimeChangeRule
-    {
-    char abbrev[6];    // five chars max
-    uint8_t week;      // First, Second, Third, Fourth, or Last week of the
-    month uint8_t dow;       // day of week, 1=Sun, 2=Mon, ... 7=Sat uint8_t
-    month;     // 1=Jan, 2=Feb, ... 12=Dec
-    uint8_t hour;      // 0-23
-    int offset;        // offset from UTC in minutes
-    };
-     */
     ustd::map<String, week_t> week_toks;
     ustd::map<String, dow_t> dow_toks;
     ustd::map<String, month_t> month_toks;
@@ -136,33 +241,62 @@ class LocTime {
     }
 
     void checkSetDst(bool bCache = true) {
-        bool newIsDst = pTz->utcIsDST(time(NULL));
+        timespec tp;
+        bool newIsDst = true;  // XXX: = pTz->utcIsDST(time(NULL));
         if (isDst != newIsDst || !bCache) {
+#ifdef USE_SERIAL
+            char msg[256];
+            sprintf(msg, "(1) %s tz_sec: %d, %s dst_sec: %d", tcStd.abbrev,
+                    tz_sec, tcDst.abbrev, dst_sec);
+            Serial.println(msg);
+#endif
             if (newIsDst) {
+                pSched->publish("timezone", tcDst.abbrev);
                 configTime(tz_sec, dst_sec, timeserver.c_str());
             } else {
+                pSched->publish("timezone", tcStd.abbrev);
                 configTime(tz_sec, 0, timeserver.c_str());
             }
+#ifdef USE_SERIAL
+            sprintf(msg, "(2) %s tz_sec: %d, %s dst_sec: %d", tcStd.abbrev,
+                    tz_sec, tcDst.abbrev, dst_sec);
+            Serial.println(msg);
+#endif
         }
         isDst = newIsDst;
     }
 
     void begin(Scheduler *_pSched, String _timeserver, String dstrules) {
-        TimeChangeRule tcDst;  //  = {"CEST", Last, Sun, Mar, 2, 120};
-        TimeChangeRule tcStd;  // = {"CET ", Last, Sun, Oct, 3, 60};
         pSched = _pSched;
         timeserver = _timeserver;
+
+#ifdef USE_SERIAL
+        Serial.println("Loctime.begin() start");
+#endif
+        // settimeofday_cb(time_is_set);
+
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
         std::function<void()> ft = [=]() { this->loop(); };
         pSched->add(ft, 100000);  // loop every 100ms.
 
         if (parseDstRules(dstrules, &tcStd, &tcDst)) {
-            pTz = new Timezone(tcDst, tcStd);
-            tz_sec = tcStd.offset * 60;
-            dst_sec = tcDst.offset * 60 - tz_sec;
+            // XXX: pTz = new Timezone(tcDst, tcStd);
+            tz_sec = 3600;   // XXX: tcStd.offset * 60;
+            dst_sec = 3600;  // XXX: tcDst.offset * 60 - tz_sec;
+#ifdef USE_SERIAL
+            char msg[256];
+            sprintf(msg, "%s tz_sec: %d, %s dst_sec: %d", tcStd.abbrev, tz_sec,
+                    tcDst.abbrev, dst_sec);
+            Serial.println(msg);
+#endif
+            checkSetDst(false);
+            bActive = true;
+        } else {
+#ifdef USE_SERIAL
+            Serial.println("No valid DST rules received!");
+#endif
         }
-        checkSetDst(false);
 
         // give a c++11 lambda as callback for incoming mqttmessages:
         std::function<void(String, String, String)> fng =
@@ -176,7 +310,9 @@ class LocTime {
     }
 
     void loop() {
-        checkSetDst();
+        if (bActive) {
+            checkSetDst(true);
+        }
     }
 };  // namespace ustd
 }  // namespace ustd

@@ -66,6 +66,9 @@ class Net {
             } else {
                 unsigned int tz_sec = 0, dst_sec = 0;  // no DST-rules, -> UTC
                 configTime(tz_sec, dst_sec, netServices["timeserver"].c_str());
+#ifdef USE_SERIAL
+                Serial.println("No dstrules found, using UTC");
+#endif
             }
         }
 
@@ -178,7 +181,6 @@ class Net {
 #ifdef USE_SERIAL
         Serial.println("Connect-AP");
         Serial.println(SSID.c_str());
-        Serial.println(password.c_str());
 #endif
         WiFi.mode(WIFI_STA);
         WiFi.begin(SSID.c_str(), password.c_str());
