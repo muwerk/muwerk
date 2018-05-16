@@ -1,4 +1,6 @@
-// loctime.h - the muwerk local time handler
+// loctime.h - the muwerk local time and dst handler
+// at some point this will hopefully be replaced by something within the ESP
+// SDK.
 
 #pragma once
 
@@ -21,10 +23,14 @@ class LocTime {
   public:
     Scheduler *pSched;
     Timezone *pTz;
+    int tz_sec = 0;
+    int dst_sec = 0;
+    bool isDst = false;
+    String timeserver;
 
     LocTime() {
     }
-    /*
+    /* from Timezone.h
     // convenient constants for TimeChangeRules
     enum week_t {Last, First, Second, Third, Fourth};
     enum dow_t {Sun=1, Mon, Tue, Wed, Thu, Fri, Sat};
@@ -128,18 +134,35 @@ class LocTime {
             return false;
         return true;
     }
-    void begin(Scheduler *_pSched, String dstrules) {
+
+    void checkSetDst(bool bCache = true) {
+        bool newIsDst = pTz->utcIsDST(time(NULL));
+        if (isDst != newIsDst || !bCache) {
+            if (newIsDst) {
+                configTime(tz_sec, dst_sec, timeserver.c_str());
+            } else {
+                configTime(tz_sec, 0, timeserver.c_str());
+            }
+        }
+        isDst = newIsDst;
+    }
+
+    void begin(Scheduler *_pSched, String _timeserver, String dstrules) {
         TimeChangeRule tcDst;  //  = {"CEST", Last, Sun, Mar, 2, 120};
         TimeChangeRule tcStd;  // = {"CET ", Last, Sun, Oct, 3, 60};
         pSched = _pSched;
+        timeserver = _timeserver;
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
         std::function<void()> ft = [=]() { this->loop(); };
-        pSched->add(ft);
+        pSched->add(ft, 100000);  // loop every 100ms.
 
         if (parseDstRules(dstrules, &tcStd, &tcDst)) {
             pTz = new Timezone(tcDst, tcStd);
+            tz_sec = tcStd.offset * 60;
+            dst_sec = tcDst.offset * 60 - tz_sec;
         }
+        checkSetDst(false);
 
         // give a c++11 lambda as callback for incoming mqttmessages:
         std::function<void(String, String, String)> fng =
@@ -153,8 +176,9 @@ class LocTime {
     }
 
     void loop() {
+        checkSetDst();
     }
-};
+};  // namespace ustd
 }  // namespace ustd
 
 #endif  // defined(__ESP__)

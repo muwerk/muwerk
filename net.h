@@ -9,6 +9,7 @@
 #include "map.h"
 
 #include "scheduler.h"
+#include "loctime.h"
 
 #include <ArduinoJson.h>
 
@@ -32,6 +33,7 @@ class Net {
     unsigned long tick10sec;
     ustd::sensorprocessor rssival = ustd::sensorprocessor(5, 60, 0.9);
     ustd::map<String, String> netServices;
+    ustd::LocTime ltime;
     String macAddress;
     // unsigned int tz_sec = 3600, dst_sec = 3600;
 
@@ -56,11 +58,15 @@ class Net {
         readNetConfig();
 
         if (netServices.find("timeserver") != -1) {
-            if (netServices.find("dstrules") != -1) {  // XXX: unfinished!
+            if (netServices.find("dstrules") != -1) {
                 String dstrules = netServices["dstrules"];
+                ltime.begin(pSched, netServices["timeserver"],
+                            dstrules);  // ltime will change local clock on
+                                        // DST-changes.
+            } else {
+                unsigned int tz_sec = 0, dst_sec = 0;  // no DST-rules, -> UTC
+                configTime(tz_sec, dst_sec, netServices["timeserver"].c_str());
             }
-            unsigned int tz_sec = 3600, dst_sec = 3600;  // XXX: dummy init
-            configTime(tz_sec, dst_sec, netServices["timeserver"].c_str());
         }
 
         if (directInit) {
