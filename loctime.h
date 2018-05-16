@@ -2,6 +2,8 @@
 // at some point this will hopefully be replaced by something within the ESP
 // SDK.
 
+// That point is now. loctime.h is completely replace by SDK functionality!
+
 #pragma once
 
 #if defined(__ESP__)

@@ -9,7 +9,6 @@
 #include "map.h"
 
 #include "scheduler.h"
-#include "loctime.h"
 
 #include <ArduinoJson.h>
 
@@ -33,7 +32,6 @@ class Net {
     unsigned long tick10sec;
     ustd::sensorprocessor rssival = ustd::sensorprocessor(5, 60, 0.9);
     ustd::map<String, String> netServices;
-    ustd::LocTime ltime;
     String macAddress;
     // unsigned int tz_sec = 3600, dst_sec = 3600;
 
@@ -58,17 +56,16 @@ class Net {
         readNetConfig();
 
         if (netServices.find("timeserver") != -1) {
+#define RTC_TEST 0  // = put a time_t from RTC in here...
+
+            timeval tv = {RTC_TEST, 0};
+            timezone tz = {0, 0};
+            settimeofday(&tv, &tz);
+            configTime(0, 0, netServices["timeserver"].c_str());
             if (netServices.find("dstrules") != -1) {
                 String dstrules = netServices["dstrules"];
-                ltime.begin(pSched, netServices["timeserver"],
-                            dstrules);  // ltime will change local clock on
-                                        // DST-changes.
-            } else {
-                unsigned int tz_sec = 0, dst_sec = 0;  // no DST-rules, -> UTC
-                configTime(tz_sec, dst_sec, netServices["timeserver"].c_str());
-#ifdef USE_SERIAL
-                Serial.println("No dstrules found, using UTC");
-#endif
+                setenv("TZ", dstrules.c_str(), 3);
+                tzset();
             }
         }
 
@@ -253,7 +250,8 @@ class Net {
     void publishNetworks() {
         int numSsid = WiFi.scanNetworks();
         if (numSsid == -1) {
-            pSched->publish("net/networks", "{}");  // "{\"state\":\"error\"}");
+            pSched->publish("net/networks",
+                            "{}");  // "{\"state\":\"error\"}");
             return;
         }
         String netlist = "{";
