@@ -343,7 +343,7 @@ class Net {
                                         "{\"rssi\":" + String(rssi) + "}");
                     }
                 } else {
-                    Wifi.reconnect();
+                    WiFi.reconnect();
                     state = CONNECTINGAP;
                     conTime = millis();
                 }
