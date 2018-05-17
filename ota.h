@@ -48,26 +48,26 @@ class Ota {
 
 // NOTE: if updating SPIFFS this would be the place to unmount
 // SPIFFS using SPIFFS.end()
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
             Serial.println("Start updating " + type);
 #endif
             bOTAUpdateActive = true;
             pSched->singleTaskMode(taskID);
         });
         ArduinoOTA.onEnd([&]() {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
             Serial.println("\nEnd");
 #endif
             pSched->singleTaskMode(-1);
             bOTAUpdateActive = false;
         });
         ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
             Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
 #endif
         });
         ArduinoOTA.onError([&](ota_error_t error) {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
             Serial.printf("Error[%u]: ", error);
             if (error == OTA_AUTH_ERROR)
                 Serial.println("Auth Failed");

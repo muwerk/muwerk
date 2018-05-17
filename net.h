@@ -140,7 +140,7 @@ class Net {
     }
 
     bool readNetConfig() {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
         Serial.println("Reading net.json");
 #endif
         SPIFFS.begin();
@@ -175,7 +175,7 @@ class Net {
     }
 
     void connectAP() {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
         Serial.println("Connect-AP");
         Serial.println(SSID.c_str());
 #endif
@@ -304,7 +304,7 @@ class Net {
             break;
         case CONNECTINGAP:
             if (WiFi.status() == WL_CONNECTED) {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
                 Serial.println("Connected!");
 #endif
                 state = CONNECTED;
@@ -313,7 +313,7 @@ class Net {
                             String(ip[2]) + '.' + String(ip[3]);
             }
             if (ustd::timeDiff(conTime, millis()) > conTimeout) {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
                 Serial.println("Timeout connecting!");
 #endif
                 state = NOTCONFIGURED;
@@ -337,7 +337,7 @@ class Net {
             break;
         }
         if (state != oldState) {
-#ifdef USE_SERIAL
+#ifdef USE_SERIAL_DBG
             char msg[128];
             sprintf(msg, "Netstate: %d->%d", oldState, state);
             Serial.println(msg);
