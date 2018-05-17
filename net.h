@@ -12,6 +12,8 @@
 
 #include <ArduinoJson.h>
 
+#define RECONNECT_MAX_TRIES 4
+
 namespace ustd {
 class Net {
   public:
@@ -33,6 +35,8 @@ class Net {
     ustd::sensorprocessor rssival = ustd::sensorprocessor(5, 60, 0.9);
     ustd::map<String, String> netServices;
     String macAddress;
+    bool bOnceConnected = false;
+    int deathCounter = RECONNECT_MAX_TRIES;
     // unsigned int tz_sec = 3600, dst_sec = 3600;
 
     Net() {
@@ -316,10 +320,20 @@ class Net {
 #ifdef USE_SERIAL_DBG
                 Serial.println("Timeout connecting!");
 #endif
-                state = NOTCONFIGURED;
+                if (bOnceConnected) {
+                    --deathCounter;
+                    if (deathCounter == 0)
+                        ESP.restart();
+                    WiFi.reconnect();
+                    conTime = millis();
+                } else {
+                    state = NOTCONFIGURED;
+                }
             }
             break;
         case CONNECTED:
+            bOnceConnected = true;
+            deathCounter = RECONNECT_MAX_TRIES;
             if (timeDiff(tick1sec, millis()) > 1000) {
                 tick1sec = millis();
                 if (WiFi.status() == WL_CONNECTED) {
@@ -329,7 +343,9 @@ class Net {
                                         "{\"rssi\":" + String(rssi) + "}");
                     }
                 } else {
-                    state = NOTCONFIGURED;
+                    Wifi.reconnect();
+                    state = CONNECTINGAP;
+                    conTime = millis();
                 }
             }
             break;
