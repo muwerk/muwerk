@@ -322,8 +322,15 @@ class Net {
 #endif
                 if (bOnceConnected) {
                     --deathCounter;
-                    if (deathCounter == 0)
+                    if (deathCounter == 0) {
+#ifdef USE_SERIAL_DBG
+                        Serial.println("Final failure, restarting...");
+#endif
                         ESP.restart();
+                    }
+#ifdef USE_SERIAL_DBG
+                    Serial.println("reconnecting...");
+#endif
                     WiFi.reconnect();
                     conTime = millis();
                 } else {
