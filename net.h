@@ -37,6 +37,7 @@ class Net {
     String macAddress;
     bool bOnceConnected = false;
     int deathCounter = RECONNECT_MAX_TRIES;
+    int initialCounter = RECONNECT_MAX_TRIES;
     // unsigned int tz_sec = 3600, dst_sec = 3600;
 
     Net() {
@@ -334,7 +335,22 @@ class Net {
                     WiFi.reconnect();
                     conTime = millis();
                 } else {
-                    state = NOTCONFIGURED;
+#ifdef USE_SERIAL_DBG
+                    Serial.println("retrying to connect...");
+#endif
+                    if (initialCounter > 0) {
+                        --initialCounter;
+                        WiFi.reconnect();
+                        conTime = millis();
+                        state = CONNECTINGAP;
+
+                    } else {
+#ifdef USE_SERIAL_DBG
+                        Serial.println(
+                            "Final connect failure, configuration invalid?");
+#endif
+                        state = NOTCONFIGURED;
+                    }
                 }
             }
             break;
