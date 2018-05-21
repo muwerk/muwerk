@@ -1,4 +1,5 @@
-// mqtt.h
+// MQTT.h
+
 #pragma once
 
 #if defined(__ESP__)
@@ -56,7 +57,7 @@ class Mqtt {
 #if defined(__ESP32__)
             clientName = WiFi.getHostname();
 #else
-            clientName = WiFi.hostname();
+            clientName = String(WiFi.hostname().c_str());
 #endif
         }
 
