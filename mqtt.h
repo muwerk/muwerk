@@ -120,6 +120,8 @@ class Mqtt {
     }
 
     void subsMsg(String topic, String msg, String originator) {
+        if (originator == "mqtt")
+            return;  // avoid loops
         if (mqttConnected) {
             unsigned int len = msg.length() + 1;
             String tpc = clientName + "/" + topic;
