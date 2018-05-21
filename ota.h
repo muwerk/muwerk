@@ -49,7 +49,8 @@ class Ota {
 // NOTE: if updating SPIFFS this would be the place to unmount
 // SPIFFS using SPIFFS.end()
 #ifdef USE_SERIAL_DBG
-            Serial.println("Start updating " + type);
+            Serial.print("Start updating ");
+            Serial.println(type.c_str());
 #endif
             bOTAUpdateActive = true;
             pSched->singleTaskMode(taskID);

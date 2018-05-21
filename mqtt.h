@@ -6,6 +6,7 @@
 #include <functional>
 
 // ESP32: patch required currently: #if defined(ESP8266) || defined(ESP32)
+#include <ArduinoJson.h>
 #include <PubSubClient.h>
 
 #include "platform.h"
@@ -13,8 +14,6 @@
 #include "map.h"
 
 #include "scheduler.h"
-
-#include <ArduinoJson.h>
 
 namespace ustd {
 class Mqtt {
