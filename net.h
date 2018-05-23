@@ -24,6 +24,7 @@ class Net {
     Netstate oldState;
     Netmode mode;
     long conTime;
+    uint8_t signalLed;
     unsigned long conTimeout = 15000;
     String SSID;
     String password;
@@ -40,9 +41,13 @@ class Net {
     int initialCounter = RECONNECT_MAX_TRIES;
     // unsigned int tz_sec = 3600, dst_sec = 3600;
 
-    Net() {
+    Net(uint8_t signalLed = 0xff) : signalLed(signalLed) {
         oldState = NOTDEFINED;
         state = NOTCONFIGURED;
+        if (signalLed != 0xff) {
+            pinMode(signalLed, OUTPUT);
+            digitalWrite(signalLed, HIGH);  // Turn the LED off
+        }
     }
 
     void begin(Scheduler *_pSched, String _ssid = "", String _password = "",
@@ -381,11 +386,20 @@ class Net {
             sprintf(msg, "Netstate: %d->%d", oldState, state);
             Serial.println(msg);
 #endif
+            if (state == NOTCONFIGURED || state == CONNECTED) {
+                if (signalLed != 0xff) {
+                    digitalWrite(signalLed, HIGH);  // Turn the LED off
+                }
+            } else {
+                if (signalLed != 0xff) {
+                    digitalWrite(signalLed, LOW);  // Turn the LED on
+                }
+            }
             oldState = state;
             publishNetwork();
         }
     }
-};
+};  // namespace ustd
 }  // namespace ustd
 
 #endif  // defined(__ESP__)
