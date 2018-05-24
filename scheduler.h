@@ -58,7 +58,6 @@ typedef struct {
     char *originator;
     char *topic;
     T_SUBS subs;
-    unsigned long msgTime;
 } T_SUBSCRIPTION;
 
 typedef struct {
@@ -85,8 +84,10 @@ class Scheduler {
     bool bSingleTaskMode = false;
     int singleTaskID = -1;
     unsigned long statTimer;
-    unsigned long idleTime = 0;
+    // unsigned long idleTime = 0;
+    unsigned long systemTimer;
     unsigned long systemTime = 0;
+    unsigned long mainTime = 0;  // Time spent with SCHEDULER_MAIN id.
 
   public:
     Scheduler(int nTaskListSize = 2, int queueSize = 2,
@@ -96,6 +97,7 @@ class Scheduler {
         subscriptionHandle = 0;
         taskID = 0;  // 0 is SCHEDULER_MAIN
         statTimer = micros();
+        systemTimer = micros();
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtDisable();
         ESP.wdtEnable(WDTO_8S);
@@ -181,6 +183,15 @@ class Scheduler {
         }
     }
 
+    int getIndexFromTaskID(int taskID) {
+        for (unsigned int i = 0; i < taskList.length(); i++) {
+            if (taskList[i].taskID == taskID) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     bool publish(String topic, String msg = "", String originator = "") {
         T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
         memset(pMsg, 0, sizeof(T_MSG));
@@ -235,7 +246,16 @@ class Scheduler {
                     unsigned long startTime = micros();
                     subscriptionList[i].subs(pMsg->topic, pMsg->msg,
                                              pMsg->originator);
-                    subscriptionList[i].msgTime += micros() - startTime;
+
+                    if (subscriptionList[i].taskID != SCHEDULER_MAIN) {
+                        int ind =
+                            getIndexFromTaskID(subscriptionList[i].taskID);
+                        if (ind != -1)
+                            taskList[ind].cpuTime +=
+                                timeDiff(startTime, micros());
+                    } else {
+                        mainTime += timeDiff(startTime, micros());
+                    }
                 }
             }
             free(pMsg->originator);
@@ -306,14 +326,36 @@ class Scheduler {
         unsigned long now = micros();
         unsigned long tDelta = timeDiff(statTimer, now);
         if (tDelta > 1000000) {
+#ifdef USE_SERIAL_DBG
+            Serial.println("-------------------------");
+            Serial.print("system ");
+            Serial.println((double)(systemTime / 1000.0));
+            Serial.print("main   ");
+            Serial.println((double)(mainTime / 1000.0));
+            Serial.print("# tasks: ");
+            Serial.println(taskList.length());
+#endif
             for (unsigned int i = 0; i < taskList.length(); i++) {
-                unsigned long millis = (taskList[i].cpuTime * 1000L) / tDelta;
+                double millis = (taskList[i].cpuTime * 1000.0) / tDelta;
+#ifdef USE_SERIAL_DBG
+                if (taskList[i].szName != nullptr) {
+                    Serial.print(taskList[i].szName);
+                } else {
+                    Serial.print("<null>");
+                }
+                Serial.print(" ");
+                Serial.println(millis);
+#endif
+                taskList[i].cpuTime = 0;
             }
             statTimer = now;
+            systemTime = 0;
+            mainTime = 0;
         }
     }
 
     void loop() {
+        systemTime += timeDiff(systemTimer, micros());
         if (!bSingleTaskMode) {
             checkStats();
             checkMsgQueue();
@@ -328,9 +370,12 @@ class Scheduler {
                 }
             }
 #if defined(__ESP__) && !defined(__ESP32__)
+            systemTimer = micros();
             yield();
+            systemTime += timeDiff(systemTimer, micros());
 #endif
         }
+        systemTimer = micros();
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtFeed();
 #endif
