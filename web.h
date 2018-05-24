@@ -24,6 +24,7 @@ namespace ustd {
 class Web {
   public:
     Scheduler *pSched;
+    int tID;
     bool isOn = false;
     bool netUp = false;
     String webServer;
@@ -50,13 +51,13 @@ class Web {
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
         std::function<void()> ft = [=]() { this->loop(); };
-        pSched->add(ft);
+        tID = pSched->add(ft, "web");
 
         std::function<void(String, String, String)> fnall =
             [=](String topic, String msg, String originator) {
                 this->subsMsg(topic, msg, originator);
             };
-        pSched->subscribe("#", fnall);
+        pSched->subscribe(tID, "#", fnall);
 
         pSched->publish("net/network/get");
         pSched->publish("net/services/webserver/get");

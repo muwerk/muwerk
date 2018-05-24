@@ -17,7 +17,7 @@ namespace ustd {
 class Ota {
   public:
     Scheduler *pSched;
-    int taskID;
+    int tID;
     String hostName;
     bool bOTAUpdateActive = false;
     bool bNetUp = false;
@@ -53,7 +53,7 @@ class Ota {
             Serial.println(type.c_str());
 #endif
             bOTAUpdateActive = true;
-            pSched->singleTaskMode(taskID);
+            pSched->singleTaskMode(tID);
         });
         ArduinoOTA.onEnd([&]() {
 #ifdef USE_SERIAL_DBG
@@ -96,13 +96,13 @@ class Ota {
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
         std::function<void()> ft = [=]() { this->loop(); };
-        taskID = pSched->add(ft, 25000L);  // check for ota every 25ms
+        tID = pSched->add(ft, "ota", 25000L);  // check for ota every 25ms
 
         std::function<void(String, String, String)> fnall =
             [=](String topic, String msg, String originator) {
                 this->subsMsg(topic, msg, originator);
             };
-        pSched->subscribe("#", fnall);
+        pSched->subscribe(tID, "#", fnall);
 
         pSched->publish("net/network/get");
     }

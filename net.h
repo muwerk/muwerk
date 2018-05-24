@@ -31,6 +31,7 @@ class Net {
     String localHostname;
     String ipAddress;
     Scheduler *pSched;
+    int tID;
     unsigned long tick1sec;
     unsigned long tick10sec;
     ustd::sensorprocessor rssival = ustd::sensorprocessor(5, 60, 0.9);
@@ -93,29 +94,29 @@ class Net {
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
         std::function<void()> ft = [=]() { this->loop(); };
-        pSched->add(ft);
+        tID = pSched->add(ft, "net");
 
         // give a c++11 lambda as callback for incoming mqttmessages:
         std::function<void(String, String, String)> fng =
             [=](String topic, String msg, String originator) {
                 this->subsNetGet(topic, msg, originator);
             };
-        pSched->subscribe("net/network/get", fng);
+        pSched->subscribe(tID, "net/network/get", fng);
         std::function<void(String, String, String)> fns =
             [=](String topic, String msg, String originator) {
                 this->subsNetSet(topic, msg, originator);
             };
-        pSched->subscribe("net/network/set", fns);
+        pSched->subscribe(tID, "net/network/set", fns);
         std::function<void(String, String, String)> fnsg =
             [=](String topic, String msg, String originator) {
                 this->subsNetsGet(topic, msg, originator);
             };
-        pSched->subscribe("net/networks/get", fnsg);
+        pSched->subscribe(tID, "net/networks/get", fnsg);
         std::function<void(String, String, String)> fsg =
             [=](String topic, String msg, String originator) {
                 this->subsNetServicesGet(topic, msg, originator);
             };
-        pSched->subscribe("net/services/+/get", fsg);
+        pSched->subscribe(tID, "net/services/+/get", fsg);
     }
 
     void publishNetwork() {

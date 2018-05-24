@@ -23,6 +23,7 @@ class Mqtt {
     PubSubClient mqttClient;
     bool bMqInit = false;
     Scheduler *pSched;
+    int tID;
 
     bool isOn = false;
     bool netUp = false;
@@ -64,13 +65,13 @@ class Mqtt {
         // give a c++11 lambda as callback scheduler task registration of
         // this.loop():
         std::function<void()> ft = [=]() { this->loop(); };
-        pSched->add(ft);
+        tID = pSched->add(ft, "mqtt");
 
         std::function<void(String, String, String)> fnall =
             [=](String topic, String msg, String originator) {
                 this->subsMsg(topic, msg, originator);
             };
-        pSched->subscribe("#", fnall);
+        pSched->subscribe(tID, "#", fnall);
 
         pSched->publish("net/network/get");
         pSched->publish("net/services/mqttserver/get");
@@ -93,7 +94,7 @@ class Mqtt {
                         // Attempt to connect
                         if (mqttClient.connect(clientName.c_str())) {
                             mqttConnected = true;
-                            mqttClient.subscribe("mu/#");
+                            mqttClient.subscribe((clientName + "/#").c_str());
                             bWarned = false;
                         } else {
                             if (!bWarned) {
@@ -111,12 +112,18 @@ class Mqtt {
                      unsigned int length) {
         String msg = "";
         String topic;
-        if (strlen(ctopic) > 3)
-            topic = (char *)(&ctopic[3]);  // strip mu/   XXX: regex
-        for (unsigned int i = 0; i < length; i++) {
-            msg += (char)payload[i];
+        if (strlen(ctopic) > clientName.length()) {
+            if (!strncmp(ctopic, (clientName + "/").c_str(),
+                         clientName.length() + 1)) {
+                // strip clientName/
+                // XXX: regex
+                topic = (char *)(&ctopic[clientName.length() + 1]);
+                for (unsigned int i = 0; i < length; i++) {
+                    msg += (char)payload[i];
+                }
+                pSched->publish(topic, msg, "mqtt");
+            }
         }
-        pSched->publish(topic, msg, "mqtt");
     }
 
     void subsMsg(String topic, String msg, String originator) {
@@ -126,30 +133,43 @@ class Mqtt {
             unsigned int len = msg.length() + 1;
             String tpc = clientName + "/" + topic;
             if (mqttClient.publish(tpc.c_str(), msg.c_str(), len)) {
-                // DBG("MQTT publish: " + topic + " | " + String(msg));
+#ifdef USE_SERIAL_DBG
+                Serial.println(
+                    ("MQTT publish: " + topic + " | " + String(msg)).c_str());
+#endif
             } else {
-                // DBG("MQTT ERROR len=" + String(len) +
-                //    ", not published: " + topic + " | " + String(msg));
+#ifdef USE_SERIAL_DBG
+                Serial.println(("MQTT ERROR len=" + String(len) +
+                                ", not published: " + topic + " | " +
+                                String(msg))
+                                   .c_str());
+#endif
                 if (len > 128) {
-                    //  DBG("FATAL ERROR: you need to re-compile the "
-                    //      "PubSubClient library and increase #define "
-                    //      "MQTT_MAX_PACKET_SIZE.");
+#ifdef USE_SERIAL_DBG
+                    Serial.println("FATAL ERROR: you need to re-compile the "
+                                   "PubSubClient library and increase #define "
+                                   "MQTT_MAX_PACKET_SIZE.");
+#endif
                 }
             }
         } else {
-            // DBG("MQTT can't publish, MQTT down: " + topic);
+#ifdef USE_SERIAL_DBG
+            Serial.println(("MQTT can't publish, MQTT down: " + topic).c_str());
+#endif
         }
         DynamicJsonBuffer jsonBuffer(200);
         JsonObject &root = jsonBuffer.parseObject(msg);
         if (!root.success()) {
-            // DBG("mqtt: Invalid JSON received: " + String(msg));
+#ifdef USE_SERIAL_DBG
+            Serial.println(
+                ("mqtt: Invalid JSON received: " + String(msg)).c_str());
+#endif
             return;
         }
         if (topic == "net/services/mqttserver") {
             if (!bMqInit) {
                 mqttServer = root["server"].as<char *>();
                 bCheckConnection = true;
-                // DBG("mqtt: received server address: " + mqttServer);
                 mqttClient.setServer(mqttServer.c_str(), 1883);
                 // give a c++11 lambda as callback for incoming mqtt messages:
                 std::function<void(char *, unsigned char *, unsigned int)> f =
@@ -161,7 +181,6 @@ class Mqtt {
                 // to allow functionals for callback signature
                 mqttClient.setCallback(f);
                 bMqInit = true;
-                // mqttClient.setCallback( onMqttReceive );
             }
         }
         if (topic == "net/network") {

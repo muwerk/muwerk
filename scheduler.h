@@ -14,6 +14,8 @@
 
 namespace ustd {
 
+#define SCHEDULER_MAIN 0
+
 enum T_PRIO {
     PRIO_SYSTEMCRITICAL = 0,
     PRIO_TIMECRITICAL = 1,
@@ -52,18 +54,25 @@ typedef void (*T_SUBS)(String topic, String msg, String originator);
 
 typedef struct {
     int subscriptionHandle;
+    int taskID;
     char *originator;
     char *topic;
     T_SUBS subs;
+    unsigned long msgTime;
 } T_SUBSCRIPTION;
 
 typedef struct {
     int taskID;
+    char *szName;
     T_TASK task;
     T_PRIO prio;
     unsigned long minMicros;
     unsigned long lastCall;
     unsigned long lateTime;
+    unsigned long cpuTime;
+    unsigned int cpuMillis1;
+    unsigned int cpuMillis4;
+    unsigned int cpuMillis16;
 } T_TASKENTRY;
 
 class Scheduler {
@@ -75,6 +84,9 @@ class Scheduler {
     int taskID;
     bool bSingleTaskMode = false;
     int singleTaskID = -1;
+    unsigned long statTimer;
+    unsigned long idleTime = 0;
+    unsigned long systemTime = 0;
 
   public:
     Scheduler(int nTaskListSize = 2, int queueSize = 2,
@@ -82,7 +94,8 @@ class Scheduler {
         : taskList(nTaskListSize), msgqueue(queueSize),
           subscriptionList(nSubscriptionListSize) {
         subscriptionHandle = 0;
-        taskID = 0;
+        taskID = 0;  // 0 is SCHEDULER_MAIN
+        statTimer = micros();
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtDisable();
         ESP.wdtEnable(WDTO_8S);
@@ -114,11 +127,6 @@ class Scheduler {
         bool wPos = true;  // sub wildcard is legal now
         int ps = 0;
         for (int pp = 0; pp < lp; pp++) {
-            // if ( pp >= ls || ps > ls ) {
-            //    DBG( "Pub more spec than sub: " + String( pp ) + "," +
-            //    String( ps ) ); return false; // Pub is more specific than
-            //    sub
-            // }
             if (pub[pp] == '+' || pub[pp] == '#') {
                 return false;  // Illegal wildcards in pub
             }
@@ -185,9 +193,11 @@ class Scheduler {
         return msgqueue.push(pMsg);
     }
 
-    int subscribe(String topic, T_SUBS subs, String originator = "") {
+    int subscribe(int taskID, String topic, T_SUBS subs,
+                  String originator = "") {
         T_SUBSCRIPTION sub;
         memset(&sub, 0, sizeof(sub));
+        sub.taskID = taskID;
         sub.topic = (char *)malloc(topic.length() + 1);
         strcpy(sub.topic, topic.c_str());
         sub.originator = (char *)malloc(originator.length() + 1);
@@ -222,8 +232,10 @@ class Scheduler {
                         if (String(pMsg->originator) ==
                             String(subscriptionList[i].originator))
                             continue;
+                    unsigned long startTime = micros();
                     subscriptionList[i].subs(pMsg->topic, pMsg->msg,
                                              pMsg->originator);
+                    subscriptionList[i].msgTime += micros() - startTime;
                 }
             }
             free(pMsg->originator);
@@ -233,18 +245,77 @@ class Scheduler {
         }
     }
 
+    int add(T_TASK task, String name, unsigned long minMicroSecs = 100000L,
+            T_PRIO prio = PRIO_NORMAL) {
+
+        T_TASKENTRY taskEnt;
+        memset(&taskEnt, 0, sizeof(taskEnt));
+        ++taskID;
+        taskEnt.taskID = taskID;
+        taskEnt.task = task;
+        taskEnt.minMicros = minMicroSecs;
+        taskEnt.prio = prio;
+        if (name != "") {
+            taskEnt.szName = (char *)malloc(name.length() + 1);
+            strcpy(taskEnt.szName, name.c_str());
+        } else {
+            taskEnt.szName = nullptr;
+        }
+        if (taskList.add(taskEnt) >= 0)
+            return taskID;
+        else {
+            if (taskEnt.szName != nullptr)
+                free(taskEnt.szName);
+            return -1;
+        }
+    }
+
+    bool remove(int taskID) {
+        for (unsigned int i = 0; i < taskList.length(); i++) {
+            if (taskList[i].taskID == taskID) {
+                if (taskList[i].szName != nullptr)
+                    free(taskList[i].szName);
+                taskList.erase(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void singleTaskMode(int _singleTaskID) {
+        singleTaskID = _singleTaskID;
+        if (_singleTaskID == -1) {
+            bSingleTaskMode = false;
+        } else {
+            bSingleTaskMode = true;
+        }
+    }
+
     void runTask(T_TASKENTRY *pTaskEnt) {
-        unsigned long ticker = micros();
-        unsigned long tDelta = timeDiff(pTaskEnt->lastCall, ticker);
+        unsigned long startTime = micros();
+        unsigned long tDelta = timeDiff(pTaskEnt->lastCall, startTime);
         if (tDelta >= pTaskEnt->minMicros) {
             pTaskEnt->task();
-            pTaskEnt->lastCall = micros();
+            pTaskEnt->lastCall = startTime;
             pTaskEnt->lateTime += tDelta - pTaskEnt->minMicros;
+            pTaskEnt->cpuTime += timeDiff(startTime, micros());
+        }
+    }
+
+    void checkStats() {
+        unsigned long now = micros();
+        unsigned long tDelta = timeDiff(statTimer, now);
+        if (tDelta > 1000000) {
+            for (unsigned int i = 0; i < taskList.length(); i++) {
+                unsigned long millis = (taskList[i].cpuTime * 1000L) / tDelta;
+            }
+            statTimer = now;
         }
     }
 
     void loop() {
         if (!bSingleTaskMode) {
+            checkStats();
             checkMsgQueue();
         }
         for (unsigned int i = 0; i < taskList.length(); i++) {
@@ -263,42 +334,6 @@ class Scheduler {
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtFeed();
 #endif
-    }
-
-    int add(T_TASK task, unsigned long minMicroSecs = 100000L,
-            T_PRIO prio = PRIO_NORMAL) {
-
-        T_TASKENTRY taskEnt;
-        memset(&taskEnt, 0, sizeof(taskEnt));
-        ++taskID;
-        taskEnt.taskID = taskID;
-        taskEnt.task = task;
-        taskEnt.minMicros = minMicroSecs;
-        taskEnt.prio = prio;
-
-        if (taskList.add(taskEnt) >= 0)
-            return taskID;
-        else
-            return -1;
-    }
-
-    bool remove(int taskID) {
-        for (unsigned int i = 0; i < taskList.length(); i++) {
-            if (taskList[i].taskID == taskID) {
-                taskList.erase(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void singleTaskMode(int _singleTaskID) {
-        singleTaskID = _singleTaskID;
-        if (_singleTaskID == -1) {
-            bSingleTaskMode = false;
-        } else {
-            bSingleTaskMode = true;
-        }
     }
 };
 }  // namespace ustd
