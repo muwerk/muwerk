@@ -87,6 +87,8 @@ class Scheduler {
     // unsigned long idleTime = 0;
     unsigned long systemTimer;
     unsigned long systemTime = 0;
+    unsigned long appTimer;
+    unsigned long appTime = 0;
     unsigned long mainTime = 0;  // Time spent with SCHEDULER_MAIN id.
 
   public:
@@ -330,6 +332,8 @@ class Scheduler {
             Serial.println("-------------------------");
             Serial.print("system ");
             Serial.println((double)(systemTime / 1000.0));
+            Serial.print("app-total ");
+            Serial.println((double)(appTime / 1000.0));
             Serial.print("main   ");
             Serial.println((double)(mainTime / 1000.0));
             Serial.print("# tasks: ");
@@ -344,18 +348,23 @@ class Scheduler {
                     Serial.print("<null>");
                 }
                 Serial.print(" ");
+                Serial.print(taskList[i].lateTime);
+                Serial.print(" ");
                 Serial.println(millis);
 #endif
                 taskList[i].cpuTime = 0;
+                taskList[i].lateTime = 0;
             }
             statTimer = now;
             systemTime = 0;
+            appTime = 0;
             mainTime = 0;
         }
     }
 
     void loop() {
         systemTime += timeDiff(systemTimer, micros());
+        appTimer = micros();
         if (!bSingleTaskMode) {
             checkStats();
             checkMsgQueue();
@@ -370,11 +379,14 @@ class Scheduler {
                 }
             }
 #if defined(__ESP__) && !defined(__ESP32__)
+            appTime += timeDiff(appTimer, micros());
             systemTimer = micros();
             yield();
             systemTime += timeDiff(systemTimer, micros());
+            appTimer = micros();
 #endif
         }
+        appTime += timeDiff(appTimer, micros());
         systemTimer = micros();
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtFeed();
