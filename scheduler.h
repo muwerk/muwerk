@@ -100,6 +100,18 @@ class Scheduler {
         taskID = 0;  // 0 is SCHEDULER_MAIN
         statTimer = micros();
         systemTimer = micros();
+
+        systemTime = 0;
+        appTime = 0;
+        mainTime = 0;
+
+#ifdef USE_SERIAL_DBG
+        Serial.println("___INIT___");
+        Serial.println(systemTime);
+        Serial.println(statTimer);
+        Serial.println(systemTimer);
+#endif
+
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtDisable();
         ESP.wdtEnable(WDTO_8S);
@@ -330,6 +342,12 @@ class Scheduler {
         if (tDelta > 1000000) {
 #ifdef USE_SERIAL_DBG
             Serial.println("-------------------------");
+            Serial.print("tDelta ");
+            Serial.print((unsigned long)now);
+            Serial.print(" ");
+            Serial.print(statTimer);
+            Serial.print(" ");
+            Serial.println(tDelta);
             Serial.print("system ");
             Serial.println((double)(systemTime / 1000.0));
             Serial.print("app-total ");
@@ -337,7 +355,7 @@ class Scheduler {
             Serial.print("main   ");
             Serial.println((double)(mainTime / 1000.0));
             Serial.print("# tasks: ");
-            Serial.println(taskList.length());
+            Serial.println((unsigned long)taskList.length());
 #endif
             for (unsigned int i = 0; i < taskList.length(); i++) {
                 double millis = (taskList[i].cpuTime * 1000.0) / tDelta;
