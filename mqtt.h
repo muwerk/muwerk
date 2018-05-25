@@ -23,6 +23,7 @@ class Mqtt {
     PubSubClient mqttClient;
     bool bMqInit = false;
     Scheduler *pSched;
+    String domainToken = "mu";
     int tID;
 
     bool isOn = false;
@@ -95,6 +96,7 @@ class Mqtt {
                         if (mqttClient.connect(clientName.c_str())) {
                             mqttConnected = true;
                             mqttClient.subscribe((clientName + "/#").c_str());
+                            mqttClient.subscribe((domainToken + "/#").c_str());
                             bWarned = false;
                         } else {
                             if (!bWarned) {
@@ -110,18 +112,24 @@ class Mqtt {
 
     void mqttReceive(char *ctopic, unsigned char *payload,
                      unsigned int length) {
-        String msg = "";
+        String msg;
         String topic;
-        if (strlen(ctopic) > clientName.length()) {
-            if (!strncmp(ctopic, (clientName + "/").c_str(),
-                         clientName.length() + 1)) {
-                // strip clientName/
-                // XXX: regex
-                topic = (char *)(&ctopic[clientName.length() + 1]);
-                for (unsigned int i = 0; i < length; i++) {
-                    msg += (char)payload[i];
+        String tokn;
+        ustd::array<String> toks;
+        msg = "";
+        for (unsigned int i = 0; i < length; i++) {
+            msg += (char)payload[i];
+        }
+        toks.add(clientName);
+        String genTok = domainToken;
+        toks.add(genTok);
+        for (unsigned int i = 0; i < toks.length(); i++) {
+            if (strlen(ctopic) > toks[i].length()) {
+                tokn = toks[i] + '/';
+                if (!strncmp(ctopic, tokn.c_str(), tokn.length())) {
+                    topic = (const char *)(&ctopic[tokn.length()]);
+                    pSched->publish(topic, msg, "mqtt");
                 }
-                pSched->publish(topic, msg, "mqtt");
             }
         }
     }
@@ -171,7 +179,8 @@ class Mqtt {
                 mqttServer = root["server"].as<char *>();
                 bCheckConnection = true;
                 mqttClient.setServer(mqttServer.c_str(), 1883);
-                // give a c++11 lambda as callback for incoming mqtt messages:
+                // give a c++11 lambda as callback for incoming mqtt
+                // messages:
                 std::function<void(char *, unsigned char *, unsigned int)> f =
                     [=](char *t, unsigned char *m, unsigned int l) {
                         this->mqttReceive(t, m, l);
