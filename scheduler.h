@@ -120,6 +120,10 @@ class Scheduler {
 
 #ifndef __ATTINY__
     virtual ~Scheduler() {
+        for (int i = 0; i < taskList.length(); i++) {
+            if (taskList[i].szName != nullptr)
+                free(taskList[i].szName);
+        }
         int l = msgqueue.length();
         for (int i = 0; i < l; i++) {
             msgqueue.pop();
