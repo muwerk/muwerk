@@ -31,6 +31,7 @@ class Net {
     String localHostname;
     String ipAddress;
     Scheduler *pSched;
+    bool bReboot;
     int tID;
     unsigned long tick1sec;
     unsigned long tick10sec;
@@ -51,9 +52,10 @@ class Net {
         }
     }
 
-    void begin(Scheduler *_pSched, String _ssid = "", String _password = "",
-               Netmode _mode = AP) {
+    void begin(Scheduler *_pSched, bool _restartEspOnRepeatedFailure = true,
+               String _ssid = "", String _password = "", Netmode _mode = AP) {
         pSched = _pSched;
+        bReboot = _restartEspOnRepeatedFailure;
         SSID = _ssid;
         password = _password;
         mode = _mode;
@@ -322,40 +324,44 @@ class Net {
                 IPAddress ip = WiFi.localIP();
                 ipAddress = String(ip[0]) + '.' + String(ip[1]) + '.' +
                             String(ip[2]) + '.' + String(ip[3]);
-            }
-            if (ustd::timeDiff(conTime, millis()) > conTimeout) {
+            } else {
+                if (ustd::timeDiff(conTime, millis()) > conTimeout) {
 #ifdef USE_SERIAL_DBG
-                Serial.println("Timeout connecting!");
+                    Serial.println("Timeout connecting!");
 #endif
-                if (bOnceConnected) {
-                    --deathCounter;
-                    if (deathCounter == 0) {
+                    if (bOnceConnected) {
+                        --deathCounter;
+                        if (deathCounter == 0) {
 #ifdef USE_SERIAL_DBG
-                        Serial.println("Final failure, restarting...");
+                            Serial.println("Final failure, restarting...");
 #endif
-                        ESP.restart();
-                    }
+                            if (bReboot)
+                                ESP.restart();
+                        }
 #ifdef USE_SERIAL_DBG
-                    Serial.println("reconnecting...");
+                        Serial.println("reconnecting...");
 #endif
-                    WiFi.reconnect();
-                    conTime = millis();
-                } else {
-#ifdef USE_SERIAL_DBG
-                    Serial.println("retrying to connect...");
-#endif
-                    if (initialCounter > 0) {
-                        --initialCounter;
                         WiFi.reconnect();
                         conTime = millis();
-                        state = CONNECTINGAP;
-
                     } else {
 #ifdef USE_SERIAL_DBG
-                        Serial.println(
-                            "Final connect failure, configuration invalid?");
+                        Serial.println("retrying to connect...");
 #endif
-                        state = NOTCONFIGURED;
+                        if (initialCounter > 0) {
+                            --initialCounter;
+                            WiFi.reconnect();
+                            conTime = millis();
+                            state = CONNECTINGAP;
+
+                        } else {
+#ifdef USE_SERIAL_DBG
+                            Serial.println("Final connect failure, "
+                                           "configuration invalid?");
+#endif
+                            state = NOTCONFIGURED;
+                            if (bReboot)
+                                ESP.restart();
+                        }
                     }
                 }
             }
