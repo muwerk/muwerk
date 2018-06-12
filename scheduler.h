@@ -368,8 +368,8 @@ class Scheduler {
             Serial.println((unsigned long)taskList.length());
 #endif
             for (unsigned int i = 0; i < taskList.length(); i++) {
-                double millis = (taskList[i].cpuTime * 1000.0) / tDelta;
 #ifdef USE_SERIAL_DBG
+                double millis = (taskList[i].cpuTime * 1000.0) / tDelta;
                 if (taskList[i].szName != nullptr) {
                     Serial.print(taskList[i].szName);
                 } else {
