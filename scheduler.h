@@ -74,6 +74,12 @@ typedef struct {
     unsigned int cpuMillis16;
 } T_TASKENTRY;
 
+unsigned long timeDiff(unsigned long first, unsigned long second) {
+    if (second >= first)
+        return second - first;
+    return (unsigned long)-1 - first + second + 1;
+}
+
 class Scheduler {
   private:
     ustd::array<T_TASKENTRY> taskList;
