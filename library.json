@@ -1,7 +1,7 @@
 {
     "name": "muwerk",
     "keywords": "scheduler",
-    "description": "non-preemptive scheduler and mqtt-like communication queues",
+    "description": "cooperative scheduler and mqtt-like communication queues",
     "authors": [{
         "name": "Dominik Schlösser",
         "email": "dsc@dosc.net",
