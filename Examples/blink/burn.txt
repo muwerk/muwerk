@@ -1,0 +1,2 @@
+ avrdude -v -c STK500 -p t84 -P /dev/ttyACM0 -U flash:w:.pioenvs/attiny/firmware.hex
+
