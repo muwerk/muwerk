@@ -2,8 +2,10 @@
 
 #include "platform.h"
 #include "scheduler.h"
+#if defined(__ESP__)
 #include "net.h"
 #include "mqtt.h"
+#endif
 
 void appLoop();
 

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "platform.h"
-#include "array.h"
+#include "../ustd/platform.h"
+#include "../ustd/array.h"
 #include "../ustd/queue.h"
 
 #include <stdio.h>
@@ -346,6 +346,7 @@ class Scheduler {
         }
     }
 
+#ifndef __ATTINY__
     void checkStats() {
         unsigned long now = micros();
         unsigned long tDelta = timeDiff(statTimer, now);
@@ -389,12 +390,15 @@ class Scheduler {
             mainTime = 0;
         }
     }
+#endif
 
     void loop() {
         systemTime += timeDiff(systemTimer, micros());
         appTimer = micros();
         if (!bSingleTaskMode) {
+#ifndef __ATTINY__
             checkStats();
+#endif
             checkMsgQueue();
         }
         for (unsigned int i = 0; i < taskList.length(); i++) {
