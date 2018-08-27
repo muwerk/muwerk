@@ -1,9 +1,0 @@
-{
-"SSID":"my-network-SSID",
-"password":"myS3cr3t",
-"hostname":"myhost",
-"services": [
-   {"timeserver": "time.nist.gov"},
-   {"mqttserver": "my.mqtt.server"}
-]
-}
