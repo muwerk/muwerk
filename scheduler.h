@@ -83,7 +83,7 @@ unsigned long timeDiff(unsigned long first, unsigned long second) {
 class Scheduler {
   private:
     ustd::array<T_TASKENTRY> taskList;
-    ustd::queue<T_MSG> msgqueue;
+    ustd::queue<T_MSG *> msgqueue;
     ustd::array<T_SUBSCRIPTION> subscriptionList;
     int subscriptionHandle;
     int taskID;
