@@ -2,6 +2,28 @@
 
 #pragma once
 
+/*! \mainpage Muwerk a cooperative scheduler wit MQTT-like communication queues
+\section Introduction
+
+muwerk implements the classes:
+
+* * \ref ustd::Scheduler cooperative scheduler and MQTT-like queues
+* * \ref ustd::sensorprocessor Exponential sensor value filter
+
+libraries are header-only and should work with any c++11 compiler
+and support platforms starting with 8k attiny, avr, arduinos, up to esp8266,
+esp32.
+
+\section Reference
+<a href="https://github.com/muwerk/muwerk">muwerk github repository</a>
+
+depends on:
+* * <a href="https://github.com/muwerk/ustd">ustd github repository</a>
+
+used by:
+* * <a href="https://github.com/muwerk/munet">munet github repository</a>
+*/
+
 #include "../ustd/platform.h"
 #include "../ustd/array.h"
 #include "../ustd/queue.h"
