@@ -41,6 +41,29 @@ class sensorprocessor {
         @param eps The minimal change required for the smoothed sensor value in
         order to create a new valid reading. Useful for supressing small
         fluctuations.
+
+        Example:
+
+        ```{.cpp}
+        void setup() {
+            // generate a filter that exponentially averages over 10 values,
+            // generates a new reading at least every 3600sec (even on no
+            // change)
+            // and generates a new reading every time, the filter value changes
+            // for more than 0.1
+            ustd::sensorprocessor mySensor(10,3600,0.1)
+        }
+
+        void loop() {
+            double rawValue=ReadMyRawSensor();
+            double filtered=rawValue;
+            if mySensor.filter(&filtered) {
+                printf("We got a new, filtered reading: %f\n", filtered);
+            } else {
+                // no valid new reading, do nothing.
+            }
+        }
+        ```
         */
         reset();
     }
