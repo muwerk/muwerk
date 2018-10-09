@@ -7,12 +7,18 @@ Dependency: CMAKE
 ```bash
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 ```
 
 then start test with:
 
 ```bash
-./mustd-test
+./muwerk-test
+```
+
+Memory-leak checks:
+
+```
+valgrind --leak-check=full ./muwerk-test 
 ```
