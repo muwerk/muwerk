@@ -43,10 +43,10 @@ Muwerk relies only on [ustd](https://github.com/muwerk/ustd).
 +------------+       |        +----------------+    OTA-update, MQTT (via PubSubClient)
        |             |                |
 +----------------------------------------------+  
-|                   muwerk                     |  Cooperative scheduler and  
+|                   muwerk                     |  Cooperative scheduler and task-to-task  
 +----------------------------------------------+    MQTT-like communication (pub/sub)
        |             |                |
-+----------------------------------------------+    MQTT-like communication (pub/sub)
++----------------------------------------------+    
 |                    ustd                      |  Minimal implementations of Queue, Map (Dicts),
 +----------------------------------------------+    Arrays
        |             |                |
