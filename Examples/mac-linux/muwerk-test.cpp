@@ -95,7 +95,11 @@ unsigned int testcases() {
 }
 
 void subs1(String topic, String message, String originator) {
-    printf("Subs: %s: %s\n", topic.c_str(), message.c_str());
+    static int noise = 0;
+    if (noise < 6) {
+        printf("Subs: %s: %s\n", topic.c_str(), message.c_str());
+        ++noise;
+    }
 }
 
 void t1() {
@@ -125,13 +129,9 @@ int main() {
     map<String, int> mp = map<String, int>(7, 100, 1);
 
     for (int i = 0; i < 100; i++) {
-        printf("%d ", i);
         ar[i] = i;
-        printf(" - ");
-        qu.push(int(i));
-        printf(" - ");
+        qu.push(i);
         mp[std::to_string(i)] = i;
-        printf("\n");
     }
     printf("ar len: %d, alloc=%d\n", ar.length(), ar.alloclen());
     printf("qu len: %d, alloc=%d\n", qu.length(), ar.alloclen());
