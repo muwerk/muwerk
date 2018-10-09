@@ -22,7 +22,7 @@ using ustd::array;
 using ustd::map;
 using ustd::queue;
 
-ustd::Scheduler sched;  // = ustd::Scheduler();
+ustd::Scheduler sched = ustd::Scheduler();
 
 typedef struct t_testcase {
     String pub;
@@ -103,7 +103,6 @@ void subs1(String topic, String message, String originator) {
 }
 
 void t1() {
-    printf("t1\n");
     String s1 = "t1";
     String s2 = "is working";
     sched.publish(s1, s2);
@@ -113,7 +112,6 @@ void t1() {
 }
 
 void t2() {
-    printf("t2\n");
     String s1 = "t2";
     String s2 = "is working";
     sched.publish(s1, s2);
@@ -126,12 +124,12 @@ int main() {
     cout << "Testing mustd..." << endl;
     array<int> ar = array<int>(1, 100, 1);
     queue<int> qu = queue<int>(128);
-    map<String, int> mp = map<String, int>(7, 100, 1);
+    map<int, int> mp = map<int, int>(7, 100, 1);
 
     for (int i = 0; i < 100; i++) {
         ar[i] = i;
         qu.push(i);
-        mp[std::to_string(i)] = i;
+        mp[i] = i;
     }
     printf("ar len: %d, alloc=%d\n", ar.length(), ar.alloclen());
     printf("qu len: %d, alloc=%d\n", qu.length(), ar.alloclen());
@@ -142,9 +140,8 @@ int main() {
 
     bool merr = false;
     for (int i = 0; i < mp.length(); i++) {
-        if (mp.keys[i] != std::to_string(i) || i != mp.values[i]) {
-            printf("Maps err at %d: %s<->%d\n", i, mp.keys[i].c_str(),
-                   mp.values[i]);
+        if (mp.keys[i] != i || i != mp.values[i]) {
+            printf("Maps err at %d: ds<->%d\n", i, mp.keys[i], mp.values[i]);
             merr = true;
         }
     }
@@ -187,7 +184,9 @@ int main() {
     sched.unsubscribe(sH);
     cout << "Done sched test" << endl;
 
-    testcases();
-
-    return 0;
+    int nerrs = testcases();
+    if (nerrs > 0)
+        return -1;
+    else
+        return 0;
 }
