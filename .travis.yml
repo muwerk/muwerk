@@ -15,4 +15,4 @@ install:
     - platformio lib -g install 5710
 
 script:
-    - pio ci --lib="." --project-option="build_flags=-D __ESP__" --board=adafruit_feather_m0 --board=esp12e Examples/minimal/mu_minimal.cpp
+    - pio ci --lib="." --project-option="build_flags=-D __ESP__" --board=esp12e Examples/minimal/mu_minimal.cpp
