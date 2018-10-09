@@ -1,22 +1,22 @@
 matrix:
   include:
-    language: python
-    python:
-        - "2.7"
-    sudo: false
-    cache:
-        directories:
-            - "~/.platformio"
+    - language: python
+        python:
+            - "2.7"
+        sudo: false
+        cache:
+            directories:
+                - "~/.platformio"
 
-    env:
-        - PLATFORMIO_CI_SRC=test/buildtest.cpp
+        env:
+            - PLATFORMIO_CI_SRC=test/buildtest.cpp
 
-    install:
-        - pip install -U platformio
-        - platformio lib -g install 5710
+        install:
+            - pip install -U platformio
+            - platformio lib -g install 5710
 
-    script:
-        - pio ci --lib="." --project-option="build_flags=-D __ESP__" --board=esp12e Examples/minimal/mu_minimal.cpp
+        script:
+            - pio ci --lib="." --project-option="build_flags=-D __ESP__" --board=esp12e Examples/minimal/mu_minimal.cpp
 
     - language: cpp
       compiler: gcc
