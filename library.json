@@ -1,5 +1,9 @@
 {
     "name": "muwerk",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/muwerk/muwerk.git"
+    },
     "keywords": "scheduler",
     "description": "cooperative scheduler and mqtt-like communication queues",
     "authors": [{
