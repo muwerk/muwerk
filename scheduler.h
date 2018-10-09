@@ -24,9 +24,14 @@ used by:
 * * <a href="https://github.com/muwerk/munet">munet github repository</a>
 */
 
+/*
 #include "../ustd/platform.h"
 #include "../ustd/array.h"
 #include "../ustd/queue.h"
+*/
+#include "platform.h"
+#include "array.h"
+#include "queue.h"
 
 #include <stdio.h>
 

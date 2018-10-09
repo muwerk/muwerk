@@ -3,9 +3,10 @@
 #include "platform.h"
 #include "scheduler.h"
 
-ustd::Scheduler sched;  // = ustd::scheduler();
+ustd::Scheduler sched;
 
 int led;
+void appLoop();
 
 void task0(String topic, String msg, String originator) {
 
