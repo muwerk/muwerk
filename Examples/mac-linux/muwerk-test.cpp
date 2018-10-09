@@ -165,8 +165,8 @@ int main() {
         printf("Array selftest ok over %d!\n", ar.length());
     cout << "Done ustd." << endl;
 
-    sched.add(t1, "task1", 50000);
-    sched.add(t2, "task2", 75000);
+    int tID1 = sched.add(t1, "task1", 50000);
+    int tID2 = sched.add(t2, "task2", 75000);
     time_t t1 = time(nullptr);
     int sH = sched.subscribe(SCHEDULER_MAIN, "#", subs1);
     unsigned long oldt = -1;
@@ -176,6 +176,12 @@ int main() {
             Serial.print("========Timestamp: ");
             Serial.println(oldt);
         }
+        sched.loop();
+    }
+    sched.remove(tID1);
+    sched.remove(tID2);
+    t1 = time(nullptr);
+    while (time(nullptr) - t1 < 2) {
         sched.loop();
     }
     sched.unsubscribe(sH);
