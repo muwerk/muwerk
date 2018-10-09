@@ -23,11 +23,11 @@ This calls the muwerk scheduler who dispatches the registered tasks.
 
 if `USE_SERIAL_DEBUG` is defined, detailed timing information and statistics for each tasks are provided. (Not available on ATTINY platforms). 
 
-A more complete example is available at [muwerk-blink](muwerk/Examples/blob/master/blink/README.md).
+A more complete example is available at [blink](https://github.com/muwerk/Examples/blob/master/blink).
 
-Tasks can communicate with each other using an MQTT-like pub/sub mechanism. On ESP8266 or ESP32 platforms, the internal communication can be exported transparently using [munet](muwerk/munet/blob/master/README.md)'s interface to the [PubSubClient](https://github.com/knolleary/pubsubclient) Arduino MQTT library.
+Tasks can communicate with each other using an MQTT-like pub/sub mechanism. On ESP8266 or ESP32 platforms, the internal communication can be exported transparently using [munet](https://github.com/muwerk/munet)'s interface to the [PubSubClient](https://github.com/knolleary/pubsubclient) Arduino MQTT library.
 
-Muwerk relies only on [ustd](muwerk/ustd/blob/master/README.md). 
+Muwerk relies only on [ustd](https://github.com/muwerk/ustd). 
 
 ```
                +-------------------------------+
@@ -57,7 +57,7 @@ Muwerk relies only on [ustd](muwerk/ustd/blob/master/README.md).
 
 ## Related projects:
 
-* [ustd](muwerk/ustd/blob/master/README.md) (micro-stdlib), a minimal implementation of array, vector and map c++ classes that work on all arduino platforms, from 8kb attiny up to ESP32 and Unixoids Mac or Linux (for testing).
-* [muwerk](muwerk/muwerk/blob/master/README.md) (microWerk), a cooperative scheduler and an MQTT-like communication-queue for all arduino devices (attiny up to ESP32 [and Unixoids Mac or Linux for testing])
-* [munet](muwerk/munet/blob/master/README.md), modules for network connectivity for ESP8266 and ESP32 devices, implements Wireless connection to access point, NTP time protocol, OTA over-the-air udpate, MQTT-stack (using [PubSubClient]).
-* [mupplets](muwerk/mupplets/blob/master/README.md), a number of implementations for sensors and io-devices. Mupplets implement processes for muwerk and expose muwerk's pub/sub interface to allow other tinkers or Apps to access the mupplet's functionality. Mupplets can be sensor-drivers or or more specialized modules, e.g. clock functionality for a led display.
+* [ustd](https://github.com/muwerk/ustd/blob/master/README.md) (micro-stdlib), a minimal implementation of array, vector and map c++ classes that work on all arduino platforms, from 8kb attiny up to ESP32 and Unixoids Mac or Linux (for testing).
+* [muwerk](https://github.com/muwerk/muwerk/blob/master/README.md) (microWerk), a cooperative scheduler and an MQTT-like communication-queue for all arduino devices (attiny up to ESP32 [and Unixoids Mac or Linux for testing])
+* [munet](https://github.com/muwerk/munet/blob/master/README.md), modules for network connectivity for ESP8266 and ESP32 devices, implements Wireless connection to access point, NTP time protocol, OTA over-the-air udpate, MQTT-stack (using [PubSubClient]).
+* [mupplets](https://github.com/muwerk/mupplets/blob/master/README.md), a number of implementations for sensors and io-devices. Mupplets implement processes for muwerk and expose muwerk's pub/sub interface to allow other tinkers or Apps to access the mupplet's functionality. Mupplets can be sensor-drivers or or more specialized modules, e.g. clock functionality for a led display.
