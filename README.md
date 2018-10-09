@@ -1,5 +1,7 @@
 # muwerk
 
+ESP12e: [![ESP12e build](https://travis-ci.org/muwerk/muwerk.svg?branch=master)](https://travis-ci.org/muwerk/muwerk)
+
 Muwerk cooperative scheduler with mqtt-like queues.
 
 
