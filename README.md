@@ -5,7 +5,7 @@
 Muwerk cooperative scheduler with mqtt-like queues.
 
 ## Dependencies
-Muwerk relies only on [ustd](https://github.com/muwerk/ustd). CHeck documentation of required [platform defines](https://github.com/muwerk/ustd/blob/master/README.md).
+Muwerk relies only on [ustd](https://github.com/muwerk/ustd). Check documentation for required [platform defines](https://github.com/muwerk/ustd/blob/master/README.md).
 
 ## Projekt overview
 
@@ -13,6 +13,9 @@ Muwerk provides a cooperative scheduler that allows fixed-intervall task creatio
 
 Tasks can simply be created by:
 ```c++
+#define __ESP__ 1  // replace with appropriate platform define
+#include "scheduler.h"
+
 int tID=sched.add(taskSerial, "serial", 50000L);
 ```
 This example creates a task identified by function `void taskSerial()` with task-name `serial` that is executed every 50ms (50000us). On ESP8266 minimum schedule time is around 50us.
