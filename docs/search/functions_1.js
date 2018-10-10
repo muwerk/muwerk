@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['checkmsgqueue',['checkMsgQueue',['../classustd_1_1Scheduler.html#ae621671601f77ee8b5aae84e9895ca3c',1,'ustd::Scheduler']]],
-  ['checkstats',['checkStats',['../classustd_1_1Scheduler.html#afec1333566b1143c954fb5c0e11d412b',1,'ustd::Scheduler']]]
+  ['filter',['filter',['../classustd_1_1sensorprocessor.html#a9034c548d2787f744c2057e32e0f0aaa',1,'ustd::sensorprocessor::filter(double *pvalue)'],['../classustd_1_1sensorprocessor.html#a4bf344587d3eb2e063cf0741c5554377',1,'ustd::sensorprocessor::filter(long *plvalue)']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['loop',['loop',['../classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a',1,'ustd::Scheduler']]]
+  ['publish',['publish',['../classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39',1,'ustd::Scheduler']]]
 ];

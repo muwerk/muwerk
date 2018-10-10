@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['unsubscribe',['unsubscribe',['../classustd_1_1Scheduler.html#af22b2534ad447b8da9cb07afc83da261',1,'ustd::Scheduler']]],
-  ['ustd',['ustd',['../namespaceustd.html',1,'']]]
+  ['_7escheduler',['~Scheduler',['../classustd_1_1Scheduler.html#a1bb307893c1dd83bc0ca1e646dbf7df8',1,'ustd::Scheduler']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['mqttmatch',['mqttmatch',['../classustd_1_1Scheduler.html#a77d69676b5ab5fc4de09ccc2133725e9',1,'ustd::Scheduler']]]
+  ['remove',['remove',['../classustd_1_1Scheduler.html#afa39c8d7f98dbb988ad23a63357f7aed',1,'ustd::Scheduler']]],
+  ['reset',['reset',['../classustd_1_1sensorprocessor.html#a071c31a8633d4f5cc0cb3b8509c8e1a7',1,'ustd::sensorprocessor']]]
 ];

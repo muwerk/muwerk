@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['timediff',['timeDiff',['../namespaceustd.html#abfacaaf7557db523f979164738216df1',1,'ustd']]]
+  ['_7escheduler',['~Scheduler',['../classustd_1_1Scheduler.html#a1bb307893c1dd83bc0ca1e646dbf7df8',1,'ustd::Scheduler']]]
 ];

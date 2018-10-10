@@ -157,9 +157,6 @@ Public Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p>Example:</p>
-<p>```{.cpp} void setup() { generate a filter that exponentially averages over 10 values, generates a new reading at least every 3600sec (even on no change) and generates a new reading every time, the filter value changes for more than 0.1 <a class="el" href="classustd_1_1sensorprocessor.html">ustd::sensorprocessor</a> mySensor(10,3600,0.1) }</p>
-<p>void loop() { double rawValue=ReadMyRawSensor(); double filtered=rawValue; if mySensor.filter(&amp;filtered) { printf("We got a new, filtered reading: %f\n", filtered); } else { no valid new reading, do nothing. } } ```</p>
 
 </div>
 </div>
@@ -344,7 +341,10 @@ Public Attributes</h2></td></tr>
 <li>minimum change eps required to generate a new sensor reading, in order to ignore small fluctuations</li>
 <li>a time-interval in seconds that generates a new sensor reading regardless of change.</li>
 </ul>
-<p>This library requires the ustd library (for timeDiff) and requires a <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform define</a>. </p>
+<p>This library requires the ustd library (for timeDiff) and requires a <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform define</a>.</p>
+<p>Example:</p>
+<p>```{.cpp} void setup() { generate a filter that exponentially averages over 10 values, generates a new reading at least every 3600sec (even on no change) and generates a new reading every time, the filter value changes for more than 0.1 <a class="el" href="classustd_1_1sensorprocessor.html">ustd::sensorprocessor</a> mySensor(10,3600,0.1) }</p>
+<p>void loop() { double rawValue=ReadMyRawSensor(); double filtered=rawValue; if mySensor.filter(&amp;filtered) { printf("We got a new, filtered reading: %f\n", filtered); } else { no valid new reading, do nothing. } } ``` </p>
 
 </div>
 </div>
