@@ -29,7 +29,7 @@ A more complete example is available at [blink](https://github.com/muwerk/Exampl
 
 Tasks can communicate with each other using an MQTT-like pub/sub mechanism. On ESP8266 or ESP32 platforms, the internal communication can be exported transparently using [munet](https://github.com/muwerk/munet)'s interface to the [PubSubClient](https://github.com/knolleary/pubsubclient) Arduino MQTT library.
 
-Muwerk relies only on [ustd](https://github.com/muwerk/ustd). 
+Muwerk relies only on [ustd](https://github.com/muwerk/ustd). CHeck documentation of required [platform defines](https://github.com/muwerk/ustd/blob/master/README.md).
 
 ```
                +-------------------------------+
