@@ -17,7 +17,9 @@ class sensorprocessor {
      * * a time-interval in seconds that generates a new sensor reading
      * regardless of change.
      *
-     * This library requires the ustd library (for timeDiff)
+     * This library requires the ustd library (for timeDiff) and requires a
+     * <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform
+     * define</a>.
      */
   public:
     unsigned int noVals = 0;

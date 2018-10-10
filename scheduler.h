@@ -108,7 +108,9 @@ unsigned long timeDiff(unsigned long first, unsigned long second) {
 }
 
 class Scheduler {
-
+    /*! Scheduler class
+     * to be documented...
+     */
   private:
     ustd::array<T_TASKENTRY> taskList;
     ustd::queue<T_MSG *> msgqueue;
