@@ -59,6 +59,11 @@ Tasks can communicate with each other using an MQTT-like pub/sub mechanism. On E
 | Mac, Linux | |Arduino SDK | | ESP8266/32 SDK |  OS and Arduino-Frameworks
 +------------+ +------------+ +----------------+
 ```
+## Documentation
+
+* [ustd::muwerk documentation.](https://muwerk.github.io/muwerk/docs/index.html)
+* `ustd` required [platform defines.](https://github.com/muwerk/ustd/blob/master/README.md)
+* [ustd::ustd documentation.](https://muwerk.github.io/ustd/docs/index.html)
 
 ## Related projects:
 
