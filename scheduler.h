@@ -14,6 +14,10 @@ libraries are header-only and should work with any c++11 compiler
 and support platforms starting with 8k attiny, avr, arduinos, up to esp8266,
 esp32.
 
+This library requires the ustd library (for timeDiff) and requires a
+<a href="https://github.com/muwerk/ustd/blob/master/README.md">platform
+define</a>.
+
 \section Reference
 <a href="https://github.com/muwerk/muwerk">muwerk github repository</a>
 
@@ -107,10 +111,113 @@ unsigned long timeDiff(unsigned long first, unsigned long second) {
     return (unsigned long)-1 - first + second + 1;
 }
 
+/*! \brief Muwerk Scheduler class
+
+Implements a cooperative task scheduler. Tasks are defined as `void
+myTask()` type functions and can be added to the scheduler for execution
+at fixed intervals. Tasks can communicate with each other via pub/sub
+messages, using MQTT-style topics for subscription and publishing of
+messages.
+
+The library header-only.
+
+Make sure to provide the <a
+href="https://github.com/muwerk/ustd/blob/master/README.md">required platform
+define</a> before including ustd headers.
+
+## Minimal scheduler:
+
+~~~{.cpp}
+#define __ATTINY__ 1   // Platform defines required, see doc, mainpage.
+#include <scheduler.h>
+
+ustd::Scheduler sched;
+void appLoop();
+
+void someTask() {
+    // This is called every 50ms (50000us)
+    // Do things here
+}
+
+void setup() {
+    // Create a task for the main application loop code:
+    int tID = sched.add(appLoop, "main");
+
+    // Create a second task that is called every 50ms
+    sched.add(someTask, "someTask", 50000L);
+}
+
+void appLoop() {
+    // your code you would normally put into Arduino's loop goes here.
+    // use async programming to prevent locking the cooperative scheduler.
+}
+
+// Never add code to this loop, use appLoop() instead.
+void loop() {
+    sched.loop();
+}
+~~~
+
+## Pub/Sub communication between tasks
+
+~~~{.cpp}
+#define __ESP__ 1   // Platform defines required, see doc, mainpage.
+#include "scheduler.h"
+
+ustd::Scheduler sched;
+void appLoop();
+
+void subMsg(String topic, String msg, String originator) {
+    if (msg == "on")
+        digitalWrite(LED_BUILTIN, LOW);  // Turn the LED on
+    if (msg == "off")
+        digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off
+}
+
+void pubTask() {
+    // Publish a "led" "on/off" message every 500ms
+    static int s1 = 0;
+    static unsigned long t1;
+    if (ustd::timeDiff(t1, millis()) > 500L) {
+        if (s1 == 0) {
+            s1 = 1;
+            sched.publish("led", "on");
+        } else {
+            s1 = 0;
+            sched.publish("led", "off");
+        }
+        t1 = millis();
+    }
+    if (t1 == 0)
+        t1 = millis();
+}
+
+void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    // Create a task for general use:
+    int tID = sched.add(appLoop, "main");
+
+    // Subscribe to "led" messages. subMsg will be called on receive of "led"
+    // dmessages.
+    sched.subscribe(tID, "led", subMsg);
+
+    // Create a task that will publish "led" messages
+    sched.add(pubTask, "pubTask", 50000L);
+}
+
+void appLoop() {
+    // your code goes here.
+}
+
+// Never add code to this loop, use appLoop() instead.
+void loop() {
+    sched.loop();
+}
+~~~
+ */
+
 class Scheduler {
-    /*! Scheduler class
-     * to be documented...
-     */
   private:
     ustd::array<T_TASKENTRY> taskList;
     ustd::queue<T_MSG *> msgqueue;
@@ -132,6 +239,11 @@ class Scheduler {
               int nSubscriptionListSize = 2)
         : taskList(nTaskListSize), msgqueue(queueSize),
           subscriptionList(nSubscriptionListSize) {
+        /*! Instantiate a cooperative scheduler
+         *
+         * All list sizes are optional, they will be dynamically incremented, if
+         * necessary.
+         */
         subscriptionHandle = 0;
         taskID = 0;  // 0 is SCHEDULER_MAIN
         statTimer = micros();
@@ -166,9 +278,16 @@ class Scheduler {
         }
     }
 #endif
+
     bool mqttmatch(const String pubstr, const String substr) {
-        // compares publish and subscribe topics.
-        // subscriptions can contain the MQTT wildcards '#' and '+'.
+        /*! compare publish and subscribe topics.
+         *
+         * subscriptions can contain the MQTT wildcards '#' and '+'.
+         * @param pubstr Topic that is being published. No wildcards allowed.
+         * @param substr Topics that are subscribed, allows MQTT wildcards '#'
+         * and '*'.
+         * @return true, if pubstr matches substr, false otherwise.
+         */
         if (pubstr == substr)
             return true;
 
@@ -237,6 +356,7 @@ class Scheduler {
         }
     }
 
+  private:
     int getIndexFromTaskID(int taskID) {
         for (unsigned int i = 0; i < taskList.length(); i++) {
             if (taskList[i].taskID == taskID) {
@@ -246,7 +366,15 @@ class Scheduler {
         return -1;
     }
 
+  public:
     bool publish(String topic, String msg = "", String originator = "") {
+        /*! publish a message to a given topic
+         *
+         * @param topic MQTT-style topic of the message (no wildcards allowed)
+         * @param msg Message content
+         * @param originator Optional name of originator-task
+         * @return true on successful publish.
+         */
         T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
         memset(pMsg, 0, sizeof(T_MSG));
         pMsg->originator = (char *)malloc(originator.length() + 1);
@@ -260,6 +388,19 @@ class Scheduler {
 
     int subscribe(int taskID, String topic, T_SUBS subs,
                   String originator = "") {
+        /*! Subscribe to a topic to receive messages published to this topic
+         *
+         * @param taskID taskID of the task that is associated with this
+         * subscriptions (only used for statistics)
+         * @param topic MQTT-style topic to be subscribed, can contain MQTT
+         * wildcards '#' and '*'. (A subscription to '#' receives all pubs)
+         * @param subs Callback of type void myCallback(String topic, String
+         * msg, String originator) that is called, if a matching message is
+         * received. On ESP or Unixoid platforms, this can be a member function.
+         * @param originator Optional name of associated task.
+         * @return subscriptionHandle on success (needed for unsubscribe), or -1
+         * on error.
+         */
         T_SUBSCRIPTION sub;
         memset(&sub, 0, sizeof(sub));
         sub.taskID = taskID;
@@ -277,6 +418,13 @@ class Scheduler {
     }
 
     bool unsubscribe(int subscriptionHandle) {
+        /*! Unsubscribe a subscription
+         *
+         * @param subscriptionHandle Handle to subscription as returned by
+         * Subscribe
+         * @return true on successful unsubscription, false if no corresponding
+         * subscription is found.
+         */
         for (unsigned int i = 0; i < subscriptionList.length(); i++) {
             if (subscriptionList[i].subscriptionHandle == subscriptionHandle) {
                 free(subscriptionList[i].topic);
@@ -288,6 +436,7 @@ class Scheduler {
         return false;
     }
 
+  private:
     void checkMsgQueue() {
         T_MSG *pMsg;
         while ((pMsg = msgqueue.pop()) != nullptr) {
@@ -319,9 +468,22 @@ class Scheduler {
         }
     }
 
+  public:
     int add(T_TASK task, String name, unsigned long minMicroSecs = 100000L,
             T_PRIO prio = PRIO_NORMAL) {
-
+        /*! Add a task to the schedule
+         *
+         * @param task Task function of type void myTask() that will be called
+         * by the scheduler. This can be a member function for ESP and Unixoid
+         * platforms (Functional support).
+         * @param name Task name (for statistics)
+         * @param minMicroSecs Task function is called every minMicroSecs. Note
+         * this is not guaranteed, because it's a cooperative scheduler. If
+         * USE_SERIAL_DEBUG is defined, periodic statistics are printed that
+         * show how precise the scheduler can execute each task.
+         * @param prio Not yet supported.
+         * @return taskID is successful, -1 on error.
+         */
         T_TASKENTRY taskEnt;
         memset(&taskEnt, 0, sizeof(taskEnt));
         ++taskID;
@@ -345,6 +507,11 @@ class Scheduler {
     }
 
     bool remove(int taskID) {
+        /*! Remove an existing task
+         *
+         * @param taskID Remove the corresponding task from scheduler
+         * @return true, if task was found and removed, false on error
+         */
         for (unsigned int i = 0; i < taskList.length(); i++) {
             if (taskList[i].taskID == taskID) {
                 if (taskList[i].szName != nullptr)
@@ -357,6 +524,13 @@ class Scheduler {
     }
 
     void singleTaskMode(int _singleTaskID) {
+        /*! Instruct scheduler to go into single-task mode
+         *
+         * @param _singleTaskID taskID of the task that should be executed
+         * exclusively. This is useful for time-critical procedures like OTA
+         * firmware updates. If _singleTaskID is -1, normal schedule operation
+         * of all existing tasks resumed.
+         */
         singleTaskID = _singleTaskID;
         if (_singleTaskID == -1) {
             bSingleTaskMode = false;
@@ -365,6 +539,7 @@ class Scheduler {
         }
     }
 
+  private:
     void runTask(T_TASKENTRY *pTaskEnt) {
         unsigned long startTime = micros();
         unsigned long tDelta = timeDiff(pTaskEnt->lastCall, startTime);
@@ -422,7 +597,12 @@ class Scheduler {
     }
 #endif
 
+  public:
     void loop() {
+        /*! Main scheduler loop
+         * This loop() function should be called in Arduino's loop() function.
+         * Preferably no other code should be in Arduino's loop().
+         */
         systemTime += timeDiff(systemTimer, micros());
         appTimer = micros();
         if (!bSingleTaskMode) {
