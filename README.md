@@ -16,9 +16,17 @@ Tasks can simply be created by:
 #define __ESP__ 1  // replace with appropriate platform define
 #include "scheduler.h"
 
-int tID=sched.add(taskSerial, "serial", 50000L);
+ustd::Scheduler sched;
+
+void myTask() {
+// add code for this task here
+}
+
+void setup() {
+    int tID=sched.add(myTask, "taskname", 50000L);
+}
 ```
-This example creates a task identified by function `void taskSerial()` with task-name `serial` that is executed every 50ms (50000us). On ESP8266 minimum schedule time is around 50us.
+This example creates a task identified by function `void myTask()` with task-name `taskname` that is executed every 50ms (50000us). On ESP8266 minimum schedule time is around 50us.
 
 The arduino main look simply needs to contain the line:
 ```c++
