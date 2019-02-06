@@ -7,7 +7,7 @@ Muwerk cooperative scheduler with mqtt-like queues.
 ## Dependencies
 Muwerk relies only on [ustd](https://github.com/muwerk/ustd). Check documentation for required [platform defines](https://github.com/muwerk/ustd/blob/master/README.md).
 
-## Projekt overview
+## Project overview
 
 Muwerk provides a cooperative scheduler that allows fixed-intervall task creation on platforms from attiny up to ESP32 and Linux. (Linux support for testing with debuggers and valgrind.)
 
