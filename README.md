@@ -38,7 +38,7 @@ This calls the muwerk scheduler who dispatches the registered tasks.
 
 if `USE_SERIAL_DEBUG` is defined, detailed timing information and statistics for each tasks are provided. (Not available on ATTINY platforms). 
 
-A more complete example is available at [blink](https://github.com/muwerk/Examples/blob/master/blink).
+A more complete example is available at [blink](https://github.com/muwerk/muwerk/blob/master/Examples/minimal/mu_minimal.cpp) that shows how tasks can communicate MQTT-style with each other and -- blink a led.
 
 Tasks can communicate with each other using an MQTT-like pub/sub mechanism. On ESP8266 or ESP32 platforms, the internal communication can be exported transparently using [munet](https://github.com/muwerk/munet)'s interface to the [PubSubClient](https://github.com/knolleary/pubsubclient) Arduino MQTT library.
 
