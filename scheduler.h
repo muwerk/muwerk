@@ -32,10 +32,12 @@ used by:
 #include "../ustd/platform.h"
 #include "../ustd/array.h"
 #include "../ustd/queue.h"
+#include "../ustd/functional.h"
 */
 #include "platform.h"
 #include "array.h"
 #include "queue.h"
+#include "functional.h"
 
 #include <stdio.h>
 
@@ -68,7 +70,8 @@ enum T_MSGTYPE {
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void()> T_TASK;
 #else
-typedef void (*T_TASK)();
+//typedef void (*T_TASK)();
+typedef ustd::function<void()> T_TASK;
 #endif
 
 typedef struct {
@@ -80,7 +83,8 @@ typedef struct {
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
 #else
-typedef void (*T_SUBS)(String topic, String msg, String originator);
+//typedef void (*T_SUBS)(String topic, String msg, String originator);
+typedef ustd::function<void(String topic, String msg, String originator)> T_SUBS;
 #endif
 
 typedef struct {

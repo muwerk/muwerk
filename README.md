@@ -84,4 +84,8 @@ See the [documentation](https://muwerk.github.io/muwerk/docs/classustd_1_1Schedu
 
 ## History
 
+* 0.2.1 (2019-09-19) Functional support for AVRs via [`ustd::function<>`].
+
+## References
+
 `muwerk` is a derivative and lightweight version of [Meisterwerk](https://github.com/yeasoft/Meisterwerk).
