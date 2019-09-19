@@ -73,7 +73,7 @@ See the [documentation](https://muwerk.github.io/muwerk/docs/classustd_1_1Schedu
 
 * [ustd::muwerk documentation.](https://muwerk.github.io/muwerk/docs/index.html)
 * `ustd` required [platform defines.](https://github.com/muwerk/ustd/blob/master/README.md)
-* [ustd::ustd documentation.](https://muwerk.github.io/ustd/docs/index.html)
+* [ustd:: documentation.](https://muwerk.github.io/ustd/docs/index.html)
 
 ## Related projects:
 
@@ -84,7 +84,7 @@ See the [documentation](https://muwerk.github.io/muwerk/docs/classustd_1_1Schedu
 
 ## History
 
-* 0.2.1 (2019-09-19) Functional support for AVRs via [`ustd::function<>`].
+* 0.2.1 (2019-09-19) Functional support for AVRs via [`ustd::function<>`](https://muwerk.github.io/ustd/docs/index.html).
 
 ## References
 
