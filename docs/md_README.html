@@ -66,7 +66,7 @@ $(function() {
 <div class="title">muwerk </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a href="https://travis-ci.org/muwerk/muwerk"><img src="https://travis-ci.org/muwerk/muwerk.svg?branch=master" alt="ESP12e build" class="inline"/></a></p>
+<div class="textblock"><p><a href="https://travis-ci.org/muwerk/muwerk"><img src="https://travis-ci.org/muwerk/muwerk.svg?branch=master" alt="ESP12e build" class="inline"/></a> <a href="https://muwerk.github.io/muwerk/docs/index.html"><img src="https://img.shields.io/badge/docs-dev-blue.svg" alt="Dev Docs" class="inline"/></a></p>
 <p>Muwerk cooperative scheduler with mqtt-like queues.</p>
 <h1>Dependencies</h1>
 <p>Muwerk relies only on <a href="https://github.com/muwerk/ustd">ustd</a>. Check documentation for required <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform defines</a>.</p>
@@ -91,9 +91,31 @@ $(function() {
 <div class="line">    sched.loop();</div>
 <div class="line">}</div>
 </div><!-- fragment --><p> This calls the muwerk scheduler who dispatches the registered tasks.</p>
-<p>if <code>USE_SERIAL_DEBUG</code> is defined, detailed timing information and statistics for each tasks are provided. (Not available on ATTINY platforms).</p>
+<h1>Statistics</h1>
+<p>If a message with topic <code>$SYS/stat/get</code> with string-encoded integer <code>N</code> as message is received, the scheduler sends a statistics json object to topic <code>$SYS/stat</code> every <code>N</code> milliseconds. If <code>N</code> is zero, no more stat information is published.</p>
+<p>Sample stat json (single output-line from <code>Examples/mac-linux</code>):</p>
+<div class="fragment"><div class="line">{&quot;dt&quot;:500001,&quot;syt&quot;:57340,&quot;apt&quot;:347452,&quot;mat&quot;:10,&quot;tsks&quot;:2,&quot;tdt&quot;:[[&quot;task1&quot;,10,99240,7],[&quot;task2&quot;,7,34937,0]]}</div>
+</div><!-- fragment --><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">field  </th><th class="markdownTableHeadNone">explanation   </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">dt  </td><td class="markdownTableBodyNone">usec since last stat sample   </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">syt  </td><td class="markdownTableBodyNone">time in usec used by OS   </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">apt  </td><td class="markdownTableBodyNone">time in usec used by mwerk tasks   </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">mat  </td><td class="markdownTableBodyNone">time in usec for housekeeping   </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">tsks  </td><td class="markdownTableBodyNone">number of muwerk tasks <code>tn</code>   </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">tdt  </td><td class="markdownTableBodyNone">array of <code>tn</code> entries for each task, containing: task-name <code>tname</code> , number of times task was executed during sample time <code>cn</code>, usecs used by this task during this sample <code>sct</code>, accumulated usecs task execution was later than scheduled <code>slt</code>   </td></tr>
+</table>
+<p>This example shows a <code>dt=500ms</code> sample, it has two tasks, <code>task1</code> was called 10 times and used average 9.9240ms per call (task-code has approx. 10ms sleep), and <code>task2</code> was called 7 times and used average 4.991ms (5ms sleep in code). Both tasks were always executed as schedules (negligable late-times <code>cn</code>).</p>
+<p>See <code>Examples\mac-linux</code>. (Not available on ATTINY platforms, only ATMEGA and better).</p>
+<h1>MQTT-like communcations and architecture overview</h1>
 <p>A more complete example is available at <a href="https://github.com/muwerk/muwerk/blob/master/Examples/minimal/mu_minimal.cpp">blink</a> that shows how tasks can communicate MQTT-style with each other and &ndash; blink a led.</p>
-<p>Tasks can communicate with each other using an MQTT-like pub/sub mechanism. On ESP8266 or ESP32 platforms, the internal communication can be exported transparently using <a href="https://github.com/muwerk/munet">munet</a>'s interface to the <a href="https://github.com/knolleary/pubsubclient">PubSubClient</a> Arduino MQTT library.</p>
+<p>Tasks can communicate with each other using an MQTT-like pub/sub mechanism. On ESP8266 or ESP32 platforms, the internal communication can be exported transparently using <a href="https://github.com/muwerk/munet">munet</a>'s interface to the <a href="https://github.com/knolleary/pubsubclient">PubSubClient</a> Arduino MQTT library. The scheduler's task information is also exported via MQTT.</p>
 <p>See the <a href="https://muwerk.github.io/muwerk/docs/classustd_1_1Scheduler.html">documentation</a> for more samples on muwerk's task scheduler and pub/sub intertask communication.</p>
 <div class="fragment"><div class="line">               +-------------------------------+</div>
 <div class="line">               |            Apps               |  Samples</div>
@@ -122,7 +144,7 @@ $(function() {
 <ul>
 <li><a href="https://muwerk.github.io/muwerk/docs/index.html">ustd::muwerk documentation.</a></li>
 <li><code>ustd</code> required <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform defines.</a></li>
-<li><a href="https://muwerk.github.io/ustd/docs/index.html">ustd::ustd documentation.</a></li>
+<li><a href="https://muwerk.github.io/ustd/docs/index.html">ustd:: documentation.</a></li>
 </ul>
 <h1>Related projects:</h1>
 <ul>
@@ -133,7 +155,8 @@ $(function() {
 </ul>
 <h1>History</h1>
 <ul>
-<li>0.2.1 (2019-09-19) Functional support for AVRs via [<code>ustd::function&lt;&gt;</code>].</li>
+<li>0.3.0 (2019-11-28) Statistical information is no longer flooding serial port, but is published (on demand) to topic <code>$SYS/stat</code>. Use publish to <code>$SYS/stat/get</code>, message body <code>number</code> (as string encoded) to receive stat information every <code>number</code> milliseconds.</li>
+<li>0.2.1 (2019-09-19) Functional support for AVRs via <a href="https://muwerk.github.io/ustd/docs/index.html"><code>ustd::function&lt;&gt;</code></a>.</li>
 </ul>
 <h1>References</h1>
 <p><code>muwerk</code> is a derivative and lightweight version of <a href="https://github.com/yeasoft/Meisterwerk">Meisterwerk</a>. </p>

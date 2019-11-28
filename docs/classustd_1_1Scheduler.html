@@ -311,7 +311,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">task</td><td>Task function of type void myTask() that will be called by the scheduler. This can be a member function for ESP and Unixoid platforms (Functional support). </td></tr>
     <tr><td class="paramname">name</td><td>Task name (for statistics) </td></tr>
-    <tr><td class="paramname">minMicroSecs</td><td>Task function is called every minMicroSecs. Note this is not guaranteed, because it's a cooperative scheduler. If USE_SERIAL_DEBUG is defined, periodic statistics are printed that show how precise the scheduler can execute each task. </td></tr>
+    <tr><td class="paramname">minMicroSecs</td><td>Task function is called every minMicroSecs. Note this is not guaranteed, because it's a cooperative scheduler. </td></tr>
     <tr><td class="paramname">prio</td><td>Not yet supported. </td></tr>
   </table>
   </dd>
@@ -607,13 +607,13 @@ Public Member Functions</h2></td></tr>
 <li><a class="el" href="scheduler_8h_source.html">scheduler.h</a></li>
 </ul>
 </div><!-- contents -->
-<div class="ttc" id="aclassustd_1_1Scheduler_html_ad4bc560843bbf84408eca8ad194c6e6a"><div class="ttname"><a href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">ustd::Scheduler::loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition:</b> scheduler.h:605</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html_a23ee4eba2bc076d8cd69328225d16eea"><div class="ttname"><a href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">ustd::Scheduler::add</a></div><div class="ttdeci">int add(T_TASK task, String name, unsigned long minMicroSecs=100000L, T_PRIO prio=PRIO_NORMAL)</div><div class="ttdef"><b>Definition:</b> scheduler.h:476</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_ad4bc560843bbf84408eca8ad194c6e6a"><div class="ttname"><a href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">ustd::Scheduler::loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition:</b> scheduler.h:624</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_a23ee4eba2bc076d8cd69328225d16eea"><div class="ttname"><a href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">ustd::Scheduler::add</a></div><div class="ttdeci">int add(T_TASK task, String name, unsigned long minMicroSecs=100000L, T_PRIO prio=PRIO_NORMAL)</div><div class="ttdef"><b>Definition:</b> scheduler.h:487</div></div>
 <div class="ttc" id="ascheduler_8h_html"><div class="ttname"><a href="scheduler_8h.html">scheduler.h</a></div></div>
-<div class="ttc" id="anamespaceustd_html_abfacaaf7557db523f979164738216df1"><div class="ttname"><a href="namespaceustd.html#abfacaaf7557db523f979164738216df1">ustd::timeDiff</a></div><div class="ttdeci">unsigned long timeDiff(unsigned long first, unsigned long second)</div><div class="ttdef"><b>Definition:</b> scheduler.h:112</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">Muwerk Scheduler class.</div><div class="ttdef"><b>Definition:</b> scheduler.h:224</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html_a56e51944c02ba44cb0132e8959fe9fbe"><div class="ttname"><a href="classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe">ustd::Scheduler::subscribe</a></div><div class="ttdeci">int subscribe(int taskID, String topic, T_SUBS subs, String originator=&quot;&quot;)</div><div class="ttdef"><b>Definition:</b> scheduler.h:393</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html_a4c1a991b2a80657192534733ae1d7f39"><div class="ttname"><a href="classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39">ustd::Scheduler::publish</a></div><div class="ttdeci">bool publish(String topic, String msg=&quot;&quot;, String originator=&quot;&quot;)</div><div class="ttdef"><b>Definition:</b> scheduler.h:374</div></div>
+<div class="ttc" id="anamespaceustd_html_abfacaaf7557db523f979164738216df1"><div class="ttname"><a href="namespaceustd.html#abfacaaf7557db523f979164738216df1">ustd::timeDiff</a></div><div class="ttdeci">unsigned long timeDiff(unsigned long first, unsigned long second)</div><div class="ttdef"><b>Definition:</b> scheduler.h:110</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">Muwerk Scheduler class.</div><div class="ttdef"><b>Definition:</b> scheduler.h:222</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_a56e51944c02ba44cb0132e8959fe9fbe"><div class="ttname"><a href="classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe">ustd::Scheduler::subscribe</a></div><div class="ttdeci">int subscribe(int taskID, String topic, T_SUBS subs, String originator=&quot;&quot;)</div><div class="ttdef"><b>Definition:</b> scheduler.h:404</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_a4c1a991b2a80657192534733ae1d7f39"><div class="ttname"><a href="classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39">ustd::Scheduler::publish</a></div><div class="ttdeci">bool publish(String topic, String msg=&quot;&quot;, String originator=&quot;&quot;)</div><div class="ttdef"><b>Definition:</b> scheduler.h:382</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['publish_79',['publish',['../classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39',1,'ustd::Scheduler']]]
+  ['publish_77',['publish',['../classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39',1,'ustd::Scheduler']]]
 ];
