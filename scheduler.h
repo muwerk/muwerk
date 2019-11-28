@@ -358,6 +358,7 @@ class Scheduler {
         return -1;
     }
 
+#ifndef __ATTINY__
     bool schedReceive(String topic, String msg, String originator) {
         const char *p0,*p1;
         p0=topic.c_str();
@@ -375,6 +376,7 @@ class Scheduler {
         }
         return false;
     }
+#endif
 
   public:
     bool publish(String topic, String msg = "", String originator = "") {
@@ -385,7 +387,9 @@ class Scheduler {
          * @param originator Optional name of originator-task
          * @return true on successful publish.
          */
+#ifndef __ATTINY__
         if (!strncmp(topic.c_str(),"$SYS",4)) if (schedReceive(topic,msg,originator)) return true;
+#endif
         T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
         memset(pMsg, 0, sizeof(T_MSG));
         pMsg->originator = (char *)malloc(originator.length() + 1);
@@ -489,9 +493,7 @@ class Scheduler {
          * platforms (Functional support).
          * @param name Task name (for statistics)
          * @param minMicroSecs Task function is called every minMicroSecs. Note
-         * this is not guaranteed, because it's a cooperative scheduler. If
-         * USE_SERIAL_DEBUG is defined, periodic statistics are printed that
-         * show how precise the scheduler can execute each task.
+         * this is not guaranteed, because it's a cooperative scheduler.
          * @param prio Not yet supported.
          * @return taskID is successful, -1 on error.
          */
@@ -608,49 +610,11 @@ class Scheduler {
                 if (taskList.length()>0) --p; // no final ','
                 strcpy(p,skeleton_tail);
 
-                Serial.print(memreq); Serial.print(" "); Serial.println(strlen(jsonstr));
-                Serial.println(jsonstr);
+                // Serial.print(memreq); Serial.print(" "); Serial.println(strlen(jsonstr));
+                // Serial.println(jsonstr);
                 publish("$SYS/stat",jsonstr,"scheduler");
                 free(jsonstr);
             }
-            /*
-            // tdelta, systemTime, appTime, mainTime
-            // # tasks
-            //   * name, cpuTime, lateTime
-#ifdef USE_SERIAL_DBG
-            Serial.println("-------------------------");
-            Serial.print("tDelta ");
-            Serial.print((unsigned long)now);
-            Serial.print(" ");
-            Serial.print(statTimer);
-            Serial.print(" ");
-            Serial.println(tDelta);
-            Serial.print("system ");
-            Serial.println((double)(systemTime / 1000.0));
-            Serial.print("app-total ");
-            Serial.println((double)(appTime / 1000.0));
-            Serial.print("main   ");
-            Serial.println((double)(mainTime / 1000.0));
-            Serial.print("# tasks: ");
-            Serial.println((unsigned long)taskList.length());
-#endif
-
-            for (unsigned int i = 0; i < taskList.length(); i++) {
-#ifdef USE_SERIAL_DBG
-
-                double millis = (taskList[i].cpuTime * 1000.0) / tDelta;
-                if (taskList[i].szName != nullptr) {
-                    Serial.print(taskList[i].szName);
-                } else {
-                    Serial.print("<null>");
-                }
-                Serial.print(" ");
-                Serial.print(taskList[i].lateTime);
-                Serial.print(" ");
-                Serial.println(millis);
-#endif
-            }
-            */
             resetStats(false);
         }
     }
