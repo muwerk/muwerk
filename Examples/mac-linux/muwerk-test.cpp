@@ -121,6 +121,7 @@ void t2() {
 }
 
 int main() {
+    sched.publish("$SYS/stat/get","500"); // get task statistics very 500ms
     cout << "Testing mustd..." << endl;
     array<int> ar = array<int>(1, 100, 1);
     queue<int> qu = queue<int>(128);

@@ -104,9 +104,7 @@ typedef struct {
     unsigned long lastCall;
     unsigned long lateTime;
     unsigned long cpuTime;
-    unsigned int cpuMillis1;
-    unsigned int cpuMillis4;
-    unsigned int cpuMillis16;
+    unsigned long callCount;
 } T_TASKENTRY;
 
 unsigned long timeDiff(unsigned long first, unsigned long second) {
@@ -230,6 +228,8 @@ class Scheduler {
     int taskID;
     bool bSingleTaskMode = false;
     int singleTaskID = -1;
+    bool bGenStats=false;
+    unsigned long statIntervallMs=0;
     unsigned long statTimer;
     // unsigned long idleTime = 0;
     unsigned long systemTimer;
@@ -250,19 +250,7 @@ class Scheduler {
          */
         subscriptionHandle = 0;
         taskID = 0;  // 0 is SCHEDULER_MAIN
-        statTimer = micros();
-        systemTimer = micros();
-
-        systemTime = 0;
-        appTime = 0;
-        mainTime = 0;
-
-#ifdef USE_SERIAL_DBG
-        Serial.println("___INIT___");
-        Serial.println(systemTime);
-        Serial.println(statTimer);
-        Serial.println(systemTimer);
-#endif
+        resetStats(true);
 
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtDisable();
@@ -370,6 +358,24 @@ class Scheduler {
         return -1;
     }
 
+    bool schedReceive(String topic, String msg, String originator) {
+        const char *p0,*p1;
+        p0=topic.c_str();
+        p1=strchr(p0,'/');
+        if (p1) {
+            ++p1;
+            if (!strcmp(p1,"stat/get")) {
+                statIntervallMs=atoi(msg.c_str());
+                if (statIntervallMs) {
+                    bGenStats=true;
+                    resetStats(true);
+                } else bGenStats=false;
+                return true;
+           }
+        }
+        return false;
+    }
+
   public:
     bool publish(String topic, String msg = "", String originator = "") {
         /*! publish a message to a given topic
@@ -379,6 +385,7 @@ class Scheduler {
          * @param originator Optional name of originator-task
          * @return true on successful publish.
          */
+        if (!strncmp(topic.c_str(),"$SYS",4)) if (schedReceive(topic,msg,originator)) return true;
         T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
         memset(pMsg, 0, sizeof(T_MSG));
         pMsg->originator = (char *)malloc(originator.length() + 1);
@@ -552,14 +559,64 @@ class Scheduler {
             pTaskEnt->lastCall = startTime;
             pTaskEnt->lateTime += tDelta - pTaskEnt->minMicros;
             pTaskEnt->cpuTime += timeDiff(startTime, micros());
+            ++pTaskEnt->callCount;
         }
     }
 
 #ifndef __ATTINY__
+    void resetStats(bool bHard=false) {
+        for (unsigned int i = 0; i < taskList.length(); i++) {
+            taskList[i].cpuTime = 0;
+            taskList[i].lateTime = 0;
+            taskList[i].callCount = 0;
+        }
+        statTimer = micros();
+        if (bHard) systemTimer = micros();
+        systemTime = 0;
+        appTime = 0;
+        mainTime = 0;
+    }
+    
     void checkStats() {
+        if (!bGenStats || !statIntervallMs) return;
         unsigned long now = micros();
         unsigned long tDelta = timeDiff(statTimer, now);
-        if (tDelta > 1000000) {
+        if (tDelta > statIntervallMs*1000) {
+            const char *null_name="<null>";
+            const char *skeleton_head="{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,\"mat\":%ld,\"tsks\":%ld,\"tdt\":[";
+            const char *skeleton_tail="]}";
+            const char *bone="[\"%s\",%ld,%ld,%ld],";
+            unsigned long memreq=strlen(skeleton_head)+7*5  + (strlen(bone)+7*3)*taskList.length();
+            for (unsigned int i=0; i<taskList.length(); i++) {
+                if (taskList[i].szName==nullptr) memreq+=strlen(null_name);
+                else memreq+=strlen(taskList[i].szName);
+            }
+            memreq+=1;
+            char *jsonstr=(char *)malloc(memreq);
+            if (jsonstr!=nullptr) {
+                memset(jsonstr,0,memreq);
+                sprintf(jsonstr,skeleton_head,tDelta,systemTime,appTime,mainTime,taskList.length());
+                for (unsigned int i=0; i<taskList.length(); i++) {
+                    char *p=&jsonstr[strlen(jsonstr)];
+                    if (taskList[i].szName==nullptr) {
+                        sprintf(p,bone,null_name,taskList[i].callCount,taskList[i].cpuTime,taskList[i].lateTime);
+                    } else {
+                        sprintf(p,bone,taskList[i].szName,taskList[i].callCount,taskList[i].cpuTime,taskList[i].lateTime);
+                    }
+                }
+                char *p=&jsonstr[strlen(jsonstr)];
+                if (taskList.length()>0) --p; // no final ','
+                strcpy(p,skeleton_tail);
+
+                Serial.print(memreq); Serial.print(" "); Serial.println(strlen(jsonstr));
+                Serial.println(jsonstr);
+                publish("$SYS/stat",jsonstr,"scheduler");
+                free(jsonstr);
+            }
+            /*
+            // tdelta, systemTime, appTime, mainTime
+            // # tasks
+            //   * name, cpuTime, lateTime
 #ifdef USE_SERIAL_DBG
             Serial.println("-------------------------");
             Serial.print("tDelta ");
@@ -577,8 +634,10 @@ class Scheduler {
             Serial.print("# tasks: ");
             Serial.println((unsigned long)taskList.length());
 #endif
+
             for (unsigned int i = 0; i < taskList.length(); i++) {
 #ifdef USE_SERIAL_DBG
+
                 double millis = (taskList[i].cpuTime * 1000.0) / tDelta;
                 if (taskList[i].szName != nullptr) {
                     Serial.print(taskList[i].szName);
@@ -590,13 +649,9 @@ class Scheduler {
                 Serial.print(" ");
                 Serial.println(millis);
 #endif
-                taskList[i].cpuTime = 0;
-                taskList[i].lateTime = 0;
             }
-            statTimer = now;
-            systemTime = 0;
-            appTime = 0;
-            mainTime = 0;
+            */
+            resetStats(false);
         }
     }
 #endif
