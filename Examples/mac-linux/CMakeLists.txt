@@ -19,7 +19,7 @@ set(CMAKE_CXX)
 
 project(muwerk-test)
 
-include_directories(../.. ustd)
+include_directories(../.. ../../../ustd ustd)
 
 add_executable(muwerk-test muwerk-test.cpp)
 
