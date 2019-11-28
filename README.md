@@ -36,9 +36,11 @@ void loop() {
 ```
 This calls the muwerk scheduler who dispatches the registered tasks.
 
+## Statistics 
+
 If a message with topic `$SYS/stat/get` with string-encoded integer `N` as message is received, the scheduler sends a statistics json object to topic `$SYS/stat` every `N` milliseconds. If `N` is zero, no more stat information is published.
 
-Sample stat json (single output from `Examples/mac-linux`):
+Sample stat json (single output-line from `Examples/mac-linux`):
 
 ```json
 {"dt":500001,"syt":57340,"apt":347452,"mat":10,"tsks":2,"tdt":[["task1",10,99240,7],["task2",7,34937,0]]}
@@ -53,11 +55,12 @@ Sample stat json (single output from `Examples/mac-linux`):
 | tsks | number of muwerk tasks `tn` |
 | tdt | array of `tn` entries for each task, containing: task-name `tname` , number of times task was executed during sample time `cn`, usecs used by this task during this sample `sct`, accumulated usecs task execution was later than scheduled `slt` |
 
-This example has two tasks, `task1` used average 9.9240ms per call (task-code has approx. 10ms sleep), and `task2` used average 4.991ms (5ms sleep in code).
+This example shows a `dt=500ms` sample, it has two tasks, `task1` was called 10 times and used average 9.9240ms per call (task-code has approx. 10ms sleep), and `task2` was called 7 times and used average 4.991ms (5ms sleep in code).
 Both tasks were always executed as schedules (negligable late-times `cn`).
 
-
 See `Examples\mac-linux`. (Not available on ATTINY platforms, only ATMEGA and better). 
+
+## MQTT-like communcations and architecture overview
 
 A more complete example is available at [blink](https://github.com/muwerk/muwerk/blob/master/Examples/minimal/mu_minimal.cpp) that shows how tasks can communicate MQTT-style with each other and -- blink a led.
 
