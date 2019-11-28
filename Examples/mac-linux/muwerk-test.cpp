@@ -102,6 +102,11 @@ void subs1(String topic, String message, String originator) {
     }
 }
 
+void stats(String topic, String message, String originator) {
+    printf("Stat-topic: %s, originator: %s\n",topic.c_str(),originator.c_str());
+    printf("Stat-json: %s\n\n",message.c_str());
+}
+
 void t1() {
     String s1 = "t1";
     String s2 = "is working";
@@ -121,7 +126,6 @@ void t2() {
 }
 
 int main() {
-    sched.publish("$SYS/stat/get","500"); // get task statistics very 500ms
     cout << "Testing mustd..." << endl;
     array<int> ar = array<int>(1, 100, 1);
     queue<int> qu = queue<int>(128);
@@ -167,6 +171,10 @@ int main() {
     int tID2 = sched.add(t2, "task2", 75000);
     time_t t1 = time(nullptr);
     int sH = sched.subscribe(SCHEDULER_MAIN, "#", subs1);
+
+    sched.publish("$SYS/stat/get","500"); // get task statistics very 500ms
+    sched.subscribe(SCHEDULER_MAIN, "$SYS/stat", stats);
+
     unsigned long oldt = -1;
     while (time(nullptr) - t1 < 5) {
         if (time(nullptr) - t1 != oldt) {
