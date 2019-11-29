@@ -250,7 +250,9 @@ class Scheduler {
          */
         subscriptionHandle = 0;
         taskID = 0;  // 0 is SCHEDULER_MAIN
+        #ifndef __ATTINY__
         resetStats(true);
+        #endif
 
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtDisable();
