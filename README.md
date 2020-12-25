@@ -112,6 +112,7 @@ See the [documentation](https://muwerk.github.io/muwerk/docs/classustd_1_1Schedu
 
 ## History
 
+* 0.3.2 (2020-12-25) Small platform updates, no functional change.
 * 0.3.1 (2019-11-29) Compile problem with attiny: resetStats() referenced for attiny.
 * 0.3.0 (2019-11-28) Statistical information is no longer flooding serial port, but is published (on demand) to topic `$SYS/stat`. Use publish to `$SYS/stat/get`, message body `number` (as string encoded) to receive stat information every `number` milliseconds.
 * 0.2.1 (2019-09-19) Functional support for AVRs via [`ustd::function<>`](https://muwerk.github.io/ustd/docs/index.html).
