@@ -1,4 +1,4 @@
-# muwerk
+#muwerk
 
 [![ESP12e build](https://travis-ci.org/muwerk/muwerk.svg?branch=master)](https://travis-ci.org/muwerk/muwerk)
 [![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://muwerk.github.io/muwerk/docs/index.html)
@@ -20,11 +20,11 @@ Tasks can simply be created by:
 ustd::Scheduler sched;
 
 void myTask() {
-// add code for this task here
+    // add code for this task here
 }
 
 void setup() {
-    int tID=sched.add(myTask, "taskname", 50000L);
+    int tID = sched.add(myTask, "taskname", 50000L);
 }
 ```
 This example creates a task identified by function `void myTask()` with task-name `taskname` that is executed every 50ms (50000us). On ESP8266 minimum schedule time is around 50us.
@@ -44,7 +44,9 @@ If a message with topic `$SYS/stat/get` with string-encoded integer `N` as messa
 Sample stat json (single output-line from `Examples/mac-linux`):
 
 ```json
-{"dt":500001,"syt":57340,"apt":347452,"mat":10,"tsks":2,"tdt":[["task1",10,99240,7],["task2",7,34937,0]]}
+{
+    "dt" : 500001, "syt" : 57340, "apt" : 347452, "mat" : 10, "tsks" : 2,
+        "tdt" : [["task1", 10, 99240, 7], ["task2", 7, 34937, 0]]}
 ```
 
 | field | explanation |

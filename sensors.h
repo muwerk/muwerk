@@ -56,8 +56,8 @@ class sensorprocessor {
     double lastVal = SENSOR_VALUE_INVALID;
     unsigned long last;
 
-    sensorprocessor(unsigned int smoothInterval = 5,
-                    int unsigned pollTimeSec = 60, double eps = 0.1)
+    sensorprocessor(unsigned int smoothInterval = 5, int unsigned pollTimeSec = 60,
+                    double eps = 0.1)
         : smoothInterval{smoothInterval}, pollTimeSec{pollTimeSec}, eps{eps} {
         /*! Creates a new sensorprocessor
         @param smoothInterval The size of the interval of sensor value history
