@@ -84,7 +84,8 @@ typedef struct {
 typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
 #else
 // typedef void (*T_SUBS)(String topic, String msg, String originator);
-typedef ustd::function<void(String topic, String msg, String originator)> T_SUBS;
+typedef ustd::function<void(String topic, String msg, String originator)>
+    T_SUBS;
 #endif
 
 typedef struct {
@@ -585,12 +586,12 @@ class Scheduler {
         unsigned long tDelta = timeDiff(statTimer, now);
         if (tDelta > statIntervallMs * 1000) {
             const char *null_name = "<null>";
-            const char *skeleton_head =
-                "{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,\"mat\":%ld,\"tsks\":%ld,\"tdt\":[";
+            const char *skeleton_head = "{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,"
+                                        "\"mat\":%ld,\"tsks\":%ld,\"tdt\":[";
             const char *skeleton_tail = "]}";
             const char *bone = "[\"%s\",%ld,%ld,%ld],";
-            unsigned long memreq =
-                strlen(skeleton_head) + 7 * 5 + (strlen(bone) + 7 * 3) * taskList.length();
+            unsigned long memreq = strlen(skeleton_head) + 7 * 5 +
+                                   (strlen(bone) + 7 * 3) * taskList.length();
             for (unsigned int i = 0; i < taskList.length(); i++) {
                 if (taskList[i].szName == nullptr)
                     memreq += strlen(null_name);
@@ -601,16 +602,17 @@ class Scheduler {
             char *jsonstr = (char *)malloc(memreq);
             if (jsonstr != nullptr) {
                 memset(jsonstr, 0, memreq);
-                sprintf(jsonstr, skeleton_head, tDelta, systemTime, appTime, mainTime,
-                        taskList.length());
+                sprintf(jsonstr, skeleton_head, tDelta, systemTime, appTime,
+                        mainTime, taskList.length());
                 for (unsigned int i = 0; i < taskList.length(); i++) {
                     char *p = &jsonstr[strlen(jsonstr)];
                     if (taskList[i].szName == nullptr) {
-                        sprintf(p, bone, null_name, taskList[i].callCount, taskList[i].cpuTime,
-                                taskList[i].lateTime);
-                    } else {
-                        sprintf(p, bone, taskList[i].szName, taskList[i].callCount,
+                        sprintf(p, bone, null_name, taskList[i].callCount,
                                 taskList[i].cpuTime, taskList[i].lateTime);
+                    } else {
+                        sprintf(p, bone, taskList[i].szName,
+                                taskList[i].callCount, taskList[i].cpuTime,
+                                taskList[i].lateTime);
                     }
                 }
                 char *p = &jsonstr[strlen(jsonstr)];
@@ -618,8 +620,8 @@ class Scheduler {
                     --p;  // no final ','
                 strcpy(p, skeleton_tail);
 
-                // Serial.print(memreq); Serial.print(" "); Serial.println(strlen(jsonstr));
-                // Serial.println(jsonstr);
+                // Serial.print(memreq); Serial.print(" ");
+                // Serial.println(strlen(jsonstr)); Serial.println(jsonstr);
                 publish("$SYS/stat", jsonstr, "scheduler");
                 free(jsonstr);
             }
