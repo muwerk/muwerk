@@ -76,12 +76,10 @@ unsigned int testcase(T_TESTCASE tc) {
     if (tc.groundTruth)
         gt = "true";
     if (sched.mqttmatch(tc.pub, tc.sub) != tc.groundTruth) {
-        Serial.println(tc.pub + "<->" + tc.sub + ", groundTruth=" + gt +
-                       ": ERROR.");
+        Serial.println(tc.pub + "<->" + tc.sub + ", groundTruth=" + gt + ": ERROR.");
         ++errs;
     } else {
-        Serial.println(tc.pub + "<->" + tc.sub + ", groundTruth=" + gt +
-                       ": OK.");
+        Serial.println(tc.pub + "<->" + tc.sub + ", groundTruth=" + gt + ": OK.");
     }
     return errs;
 }
@@ -103,8 +101,8 @@ void subs1(String topic, String message, String originator) {
 }
 
 void stats(String topic, String message, String originator) {
-    printf("Stat-topic: %s, originator: %s\n",topic.c_str(),originator.c_str());
-    printf("Stat-json: %s\n\n",message.c_str());
+    printf("Stat-topic: %s, originator: %s\n", topic.c_str(), originator.c_str());
+    printf("Stat-json: %s\n\n", message.c_str());
 }
 
 void t1() {
@@ -172,7 +170,7 @@ int main() {
     time_t t1 = time(nullptr);
     int sH = sched.subscribe(SCHEDULER_MAIN, "#", subs1);
 
-    sched.publish("$SYS/stat/get","500"); // get task statistics very 500ms
+    sched.publish("$SYS/stat/get", "500");  // get task statistics very 500ms
     sched.subscribe(SCHEDULER_MAIN, "$SYS/stat", stats);
 
     unsigned long oldt = -1;

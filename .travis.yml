@@ -2,7 +2,7 @@ matrix:
   include:
     - language: python
       python:
-        - "2.7"
+        - "3.8"
       sudo: false
       cache:
         directories:
@@ -12,7 +12,7 @@ matrix:
         - PLATFORMIO_CI_SRC=test/buildtest.cpp
 
       install:
-        - pip install -U platformio
+        - pip3 install -U platformio
         - platformio lib -g install 5710
 
       script:

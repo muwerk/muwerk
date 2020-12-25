@@ -1,4 +1,4 @@
-# muwerk
+#muwerk
 
 [![ESP12e build](https://travis-ci.org/muwerk/muwerk.svg?branch=master)](https://travis-ci.org/muwerk/muwerk)
 [![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://muwerk.github.io/muwerk/docs/index.html)
@@ -20,11 +20,11 @@ Tasks can simply be created by:
 ustd::Scheduler sched;
 
 void myTask() {
-// add code for this task here
+    // add code for this task here
 }
 
 void setup() {
-    int tID=sched.add(myTask, "taskname", 50000L);
+    int tID = sched.add(myTask, "taskname", 50000L);
 }
 ```
 This example creates a task identified by function `void myTask()` with task-name `taskname` that is executed every 50ms (50000us). On ESP8266 minimum schedule time is around 50us.
@@ -44,7 +44,9 @@ If a message with topic `$SYS/stat/get` with string-encoded integer `N` as messa
 Sample stat json (single output-line from `Examples/mac-linux`):
 
 ```json
-{"dt":500001,"syt":57340,"apt":347452,"mat":10,"tsks":2,"tdt":[["task1",10,99240,7],["task2",7,34937,0]]}
+{
+    "dt" : 500001, "syt" : 57340, "apt" : 347452, "mat" : 10, "tsks" : 2,
+        "tdt" : [["task1", 10, 99240, 7], ["task2", 7, 34937, 0]]}
 ```
 
 | field | explanation |
@@ -110,6 +112,8 @@ See the [documentation](https://muwerk.github.io/muwerk/docs/classustd_1_1Schedu
 
 ## History
 
+* 0.3.2 (2020-12-25) Small platform updates, no functional change.
+* 0.3.1 (2019-11-29) Compile problem with attiny: resetStats() referenced for attiny.
 * 0.3.0 (2019-11-28) Statistical information is no longer flooding serial port, but is published (on demand) to topic `$SYS/stat`. Use publish to `$SYS/stat/get`, message body `number` (as string encoded) to receive stat information every `number` milliseconds.
 * 0.2.1 (2019-09-19) Functional support for AVRs via [`ustd::function<>`](https://muwerk.github.io/ustd/docs/index.html).
 

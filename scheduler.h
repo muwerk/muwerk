@@ -70,7 +70,7 @@ enum T_MSGTYPE {
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void()> T_TASK;
 #else
-//typedef void (*T_TASK)();
+// typedef void (*T_TASK)();
 typedef ustd::function<void()> T_TASK;
 #endif
 
@@ -83,7 +83,7 @@ typedef struct {
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
 #else
-//typedef void (*T_SUBS)(String topic, String msg, String originator);
+// typedef void (*T_SUBS)(String topic, String msg, String originator);
 typedef ustd::function<void(String topic, String msg, String originator)> T_SUBS;
 #endif
 
@@ -228,8 +228,8 @@ class Scheduler {
     int taskID;
     bool bSingleTaskMode = false;
     int singleTaskID = -1;
-    bool bGenStats=false;
-    unsigned long statIntervallMs=0;
+    bool bGenStats = false;
+    unsigned long statIntervallMs = 0;
     unsigned long statTimer;
     // unsigned long idleTime = 0;
     unsigned long systemTimer;
@@ -239,10 +239,8 @@ class Scheduler {
     unsigned long mainTime = 0;  // Time spent with SCHEDULER_MAIN id.
 
   public:
-    Scheduler(int nTaskListSize = 2, int queueSize = 2,
-              int nSubscriptionListSize = 2)
-        : taskList(nTaskListSize), msgqueue(queueSize),
-          subscriptionList(nSubscriptionListSize) {
+    Scheduler(int nTaskListSize = 2, int queueSize = 2, int nSubscriptionListSize = 2)
+        : taskList(nTaskListSize), msgqueue(queueSize), subscriptionList(nSubscriptionListSize) {
         /*! Instantiate a cooperative scheduler
          *
          * All list sizes are optional, they will be dynamically incremented, if
@@ -250,7 +248,9 @@ class Scheduler {
          */
         subscriptionHandle = 0;
         taskID = 0;  // 0 is SCHEDULER_MAIN
+#ifndef __ATTINY__
         resetStats(true);
+#endif
 
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtDisable();
@@ -360,19 +360,20 @@ class Scheduler {
 
 #ifndef __ATTINY__
     bool schedReceive(String topic, String msg, String originator) {
-        const char *p0,*p1;
-        p0=topic.c_str();
-        p1=strchr(p0,'/');
+        const char *p0, *p1;
+        p0 = topic.c_str();
+        p1 = strchr(p0, '/');
         if (p1) {
             ++p1;
-            if (!strcmp(p1,"stat/get")) {
-                statIntervallMs=atoi(msg.c_str());
+            if (!strcmp(p1, "stat/get")) {
+                statIntervallMs = atoi(msg.c_str());
                 if (statIntervallMs) {
-                    bGenStats=true;
+                    bGenStats = true;
                     resetStats(true);
-                } else bGenStats=false;
+                } else
+                    bGenStats = false;
                 return true;
-           }
+            }
         }
         return false;
     }
@@ -388,7 +389,9 @@ class Scheduler {
          * @return true on successful publish.
          */
 #ifndef __ATTINY__
-        if (!strncmp(topic.c_str(),"$SYS",4)) if (schedReceive(topic,msg,originator)) return true;
+        if (!strncmp(topic.c_str(), "$SYS", 4))
+            if (schedReceive(topic, msg, originator))
+                return true;
 #endif
         T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
         memset(pMsg, 0, sizeof(T_MSG));
@@ -401,8 +404,7 @@ class Scheduler {
         return msgqueue.push(pMsg);
     }
 
-    int subscribe(int taskID, String topic, T_SUBS subs,
-                  String originator = "") {
+    int subscribe(int taskID, String topic, T_SUBS subs, String originator = "") {
         /*! Subscribe to a topic to receive messages published to this topic
          *
          * @param taskID taskID of the task that is associated with this
@@ -458,19 +460,15 @@ class Scheduler {
             for (unsigned int i = 0; i < subscriptionList.length(); i++) {
                 if (mqttmatch(pMsg->topic, subscriptionList[i].topic)) {
                     if (*(pMsg->originator) != 0)
-                        if (String(pMsg->originator) ==
-                            String(subscriptionList[i].originator))
+                        if (String(pMsg->originator) == String(subscriptionList[i].originator))
                             continue;
                     unsigned long startTime = micros();
-                    subscriptionList[i].subs(pMsg->topic, pMsg->msg,
-                                             pMsg->originator);
+                    subscriptionList[i].subs(pMsg->topic, pMsg->msg, pMsg->originator);
 
                     if (subscriptionList[i].taskID != SCHEDULER_MAIN) {
-                        int ind =
-                            getIndexFromTaskID(subscriptionList[i].taskID);
+                        int ind = getIndexFromTaskID(subscriptionList[i].taskID);
                         if (ind != -1)
-                            taskList[ind].cpuTime +=
-                                timeDiff(startTime, micros());
+                            taskList[ind].cpuTime += timeDiff(startTime, micros());
                     } else {
                         mainTime += timeDiff(startTime, micros());
                     }
@@ -566,53 +564,63 @@ class Scheduler {
     }
 
 #ifndef __ATTINY__
-    void resetStats(bool bHard=false) {
+    void resetStats(bool bHard = false) {
         for (unsigned int i = 0; i < taskList.length(); i++) {
             taskList[i].cpuTime = 0;
             taskList[i].lateTime = 0;
             taskList[i].callCount = 0;
         }
         statTimer = micros();
-        if (bHard) systemTimer = micros();
+        if (bHard)
+            systemTimer = micros();
         systemTime = 0;
         appTime = 0;
         mainTime = 0;
     }
-    
+
     void checkStats() {
-        if (!bGenStats || !statIntervallMs) return;
+        if (!bGenStats || !statIntervallMs)
+            return;
         unsigned long now = micros();
         unsigned long tDelta = timeDiff(statTimer, now);
-        if (tDelta > statIntervallMs*1000) {
-            const char *null_name="<null>";
-            const char *skeleton_head="{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,\"mat\":%ld,\"tsks\":%ld,\"tdt\":[";
-            const char *skeleton_tail="]}";
-            const char *bone="[\"%s\",%ld,%ld,%ld],";
-            unsigned long memreq=strlen(skeleton_head)+7*5  + (strlen(bone)+7*3)*taskList.length();
-            for (unsigned int i=0; i<taskList.length(); i++) {
-                if (taskList[i].szName==nullptr) memreq+=strlen(null_name);
-                else memreq+=strlen(taskList[i].szName);
+        if (tDelta > statIntervallMs * 1000) {
+            const char *null_name = "<null>";
+            const char *skeleton_head = "{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,"
+                                        "\"mat\":%ld,\"tsks\":%ld,\"tdt\":[";
+            const char *skeleton_tail = "]}";
+            const char *bone = "[\"%s\",%ld,%ld,%ld],";
+            unsigned long memreq =
+                strlen(skeleton_head) + 7 * 5 + (strlen(bone) + 7 * 3) * taskList.length();
+            for (unsigned int i = 0; i < taskList.length(); i++) {
+                if (taskList[i].szName == nullptr)
+                    memreq += strlen(null_name);
+                else
+                    memreq += strlen(taskList[i].szName);
             }
-            memreq+=1;
-            char *jsonstr=(char *)malloc(memreq);
-            if (jsonstr!=nullptr) {
-                memset(jsonstr,0,memreq);
-                sprintf(jsonstr,skeleton_head,tDelta,systemTime,appTime,mainTime,taskList.length());
-                for (unsigned int i=0; i<taskList.length(); i++) {
-                    char *p=&jsonstr[strlen(jsonstr)];
-                    if (taskList[i].szName==nullptr) {
-                        sprintf(p,bone,null_name,taskList[i].callCount,taskList[i].cpuTime,taskList[i].lateTime);
+            memreq += 1;
+            char *jsonstr = (char *)malloc(memreq);
+            if (jsonstr != nullptr) {
+                memset(jsonstr, 0, memreq);
+                sprintf(jsonstr, skeleton_head, tDelta, systemTime, appTime, mainTime,
+                        taskList.length());
+                for (unsigned int i = 0; i < taskList.length(); i++) {
+                    char *p = &jsonstr[strlen(jsonstr)];
+                    if (taskList[i].szName == nullptr) {
+                        sprintf(p, bone, null_name, taskList[i].callCount, taskList[i].cpuTime,
+                                taskList[i].lateTime);
                     } else {
-                        sprintf(p,bone,taskList[i].szName,taskList[i].callCount,taskList[i].cpuTime,taskList[i].lateTime);
+                        sprintf(p, bone, taskList[i].szName, taskList[i].callCount,
+                                taskList[i].cpuTime, taskList[i].lateTime);
                     }
                 }
-                char *p=&jsonstr[strlen(jsonstr)];
-                if (taskList.length()>0) --p; // no final ','
-                strcpy(p,skeleton_tail);
+                char *p = &jsonstr[strlen(jsonstr)];
+                if (taskList.length() > 0)
+                    --p;  // no final ','
+                strcpy(p, skeleton_tail);
 
-                // Serial.print(memreq); Serial.print(" "); Serial.println(strlen(jsonstr));
-                // Serial.println(jsonstr);
-                publish("$SYS/stat",jsonstr,"scheduler");
+                // Serial.print(memreq); Serial.print(" ");
+                // Serial.println(strlen(jsonstr)); Serial.println(jsonstr);
+                publish("$SYS/stat", jsonstr, "scheduler");
                 free(jsonstr);
             }
             resetStats(false);
