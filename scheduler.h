@@ -9,6 +9,7 @@ muwerk implements the classes:
 
 * * \ref ustd::Scheduler cooperative scheduler and MQTT-like queues
 * * \ref ustd::sensorprocessor Exponential sensor value filter
+* * \ref ustd::Console A serial debug console for the scheduler
 
 libraries are header-only and should work with any c++11 compiler
 and support platforms starting with 8k attiny, avr, arduinos, up to esp8266,
