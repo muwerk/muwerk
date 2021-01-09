@@ -1,4 +1,8 @@
 var searchData=
 [
-  ['originator_23',['originator',['../structustd_1_1T__MSG.html#a78a7faa8ba3419b51389af30d986ab0b',1,'ustd::T_MSG::originator()'],['../structustd_1_1T__SUBSCRIPTION.html#a0ecbfb26dc6638fb0e9d9dada7a64360',1,'ustd::T_SUBSCRIPTION::originator()']]]
+  ['last_31',['last',['../classustd_1_1sensorprocessor.html#a7e5e723dade84975d51f8a13b1982114',1,'ustd::sensorprocessor']]],
+  ['lastcall_32',['lastCall',['../structustd_1_1T__TASKENTRY.html#a2c66b4f8f76468e0d21d1f83a9c2f9a7',1,'ustd::T_TASKENTRY']]],
+  ['lastval_33',['lastVal',['../classustd_1_1sensorprocessor.html#aece4e66f8058ea0132ebd49c38aaba3e',1,'ustd::sensorprocessor']]],
+  ['latetime_34',['lateTime',['../structustd_1_1T__TASKENTRY.html#ab737e7050d4b6fc98cc02ea34682fa41',1,'ustd::T_TASKENTRY']]],
+  ['loop_35',['loop',['../classustd_1_1Console.html#a65196ce37bfd414e141efad9467eadd7',1,'ustd::Console::loop()'],['../classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a',1,'ustd::Scheduler::loop()']]]
 ];

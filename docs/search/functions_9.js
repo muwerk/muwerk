@@ -1,4 +1,8 @@
 var searchData=
 [
-  ['_7escheduler_86',['~Scheduler',['../classustd_1_1Scheduler.html#a1bb307893c1dd83bc0ca1e646dbf7df8',1,'ustd::Scheduler']]]
+  ['scheduler_138',['Scheduler',['../classustd_1_1Scheduler.html#a08fb718f763d4db0bc3f4fd58a8dfbde',1,'ustd::Scheduler']]],
+  ['sensorprocessor_139',['sensorprocessor',['../classustd_1_1sensorprocessor.html#af3295232cb60ec9e9a331700875d4961',1,'ustd::sensorprocessor']]],
+  ['shift_140',['shift',['../classustd_1_1Console.html#ab4909c6677b87eba5a8e65cc60826d75',1,'ustd::Console']]],
+  ['singletaskmode_141',['singleTaskMode',['../classustd_1_1Scheduler.html#a1916e661e513a686535e79367c16f5bd',1,'ustd::Scheduler']]],
+  ['subscribe_142',['subscribe',['../classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe',1,'ustd::Scheduler']]]
 ];

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['callcount_87',['callCount',['../structustd_1_1T__TASKENTRY.html#acd11c05e091e8c8f0e82cc7d9efbc19e',1,'ustd::T_TASKENTRY']]],
-  ['cputime_88',['cpuTime',['../structustd_1_1T__TASKENTRY.html#ac4facc67756e12b5313eda8d7b1e6ed0',1,'ustd::T_TASKENTRY']]]
+  ['args_148',['args',['../classustd_1_1Console.html#aa0e1af0702c9148de404d213ba117ed7',1,'ustd::Console']]]
 ];

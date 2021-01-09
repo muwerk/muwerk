@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unsubscribe',['unsubscribe',['../classustd_1_1Scheduler.html#af22b2534ad447b8da9cb07afc83da261',1,'ustd::Scheduler']]]
+  ['timediff_143',['timeDiff',['../namespaceustd.html#abfacaaf7557db523f979164738216df1',1,'ustd']]]
 ];

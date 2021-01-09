@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['callcount_1',['callCount',['../structustd_1_1T__TASKENTRY.html#acd11c05e091e8c8f0e82cc7d9efbc19e',1,'ustd::T_TASKENTRY']]],
-  ['cputime_2',['cpuTime',['../structustd_1_1T__TASKENTRY.html#ac4facc67756e12b5313eda8d7b1e6ed0',1,'ustd::T_TASKENTRY']]]
+  ['begin_3',['begin',['../classustd_1_1Console.html#a42a7bd4b32406d2b257293f6dac7a50d',1,'ustd::Console']]],
+  ['buffer_4',['buffer',['../classustd_1_1Console.html#a3f9d10b213b1da478f5271c47debffbf',1,'ustd::Console']]]
 ];

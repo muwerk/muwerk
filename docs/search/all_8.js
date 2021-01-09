@@ -1,12 +1,14 @@
 var searchData=
 [
-  ['polltimesec_24',['pollTimeSec',['../classustd_1_1sensorprocessor.html#ae295e11c0bad628cb3aa9ed017cb7c4a',1,'ustd::sensorprocessor']]],
-  ['prio_25',['prio',['../structustd_1_1T__TASKENTRY.html#a90ded48643ce60b145958135bae31304',1,'ustd::T_TASKENTRY']]],
-  ['prio_5fhigh_26',['PRIO_HIGH',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa8fe23cdf98f93f9eed93108b50726c7f',1,'ustd']]],
-  ['prio_5flow_27',['PRIO_LOW',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa4f093ecef0443e1bb0e76feacde1e0d1',1,'ustd']]],
-  ['prio_5flowest_28',['PRIO_LOWEST',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa861044fe2d1c4d16020f92bc19f928f2',1,'ustd']]],
-  ['prio_5fnormal_29',['PRIO_NORMAL',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa28864e5d139dd2decbd92010f4045fe0',1,'ustd']]],
-  ['prio_5fsystemcritical_30',['PRIO_SYSTEMCRITICAL',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa2f8ac63dcad4e7fba7212505c3c97f2f',1,'ustd']]],
-  ['prio_5ftimecritical_31',['PRIO_TIMECRITICAL',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa24d811d5c7a469e2a563e5a70e5535b4',1,'ustd']]],
-  ['publish_32',['publish',['../classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39',1,'ustd::Scheduler']]]
+  ['muwerk_20a_20cooperative_20scheduler_20wit_20mqtt_2dlike_20communication_20queues_36',['Muwerk a cooperative scheduler wit MQTT-like communication queues',['../index.html',1,'']]],
+  ['meanval_37',['meanVal',['../classustd_1_1sensorprocessor.html#ad55ccde8ffdc7ba878dab6a0225b10cf',1,'ustd::sensorprocessor']]],
+  ['minmicros_38',['minMicros',['../structustd_1_1T__TASKENTRY.html#a607022b303f90964c943c5d2832fb329',1,'ustd::T_TASKENTRY']]],
+  ['mqttmatch_39',['mqttmatch',['../classustd_1_1Scheduler.html#a77d69676b5ab5fc4de09ccc2133725e9',1,'ustd::Scheduler']]],
+  ['msg_40',['msg',['../structustd_1_1T__MSG.html#a857e72a64973f0a290f27babd4a0b1e1',1,'ustd::T_MSG']]],
+  ['msg_5fdirect_41',['MSG_DIRECT',['../namespaceustd.html#a298325f65e9e62258dfc9ced21fb9f07aea562759d19c8da0986ff9bec41def65',1,'ustd']]],
+  ['msg_5fnone_42',['MSG_NONE',['../namespaceustd.html#a298325f65e9e62258dfc9ced21fb9f07a660a8dca940dc143717f8d6f501cf337',1,'ustd']]],
+  ['msg_5fpublish_43',['MSG_PUBLISH',['../namespaceustd.html#a298325f65e9e62258dfc9ced21fb9f07a0644c47a33616be10eaee094ff1164bb',1,'ustd']]],
+  ['msg_5fpublishraw_44',['MSG_PUBLISHRAW',['../namespaceustd.html#a298325f65e9e62258dfc9ced21fb9f07a743e34fab7291e8f640e740d48baece3',1,'ustd']]],
+  ['msg_5fsubscribe_45',['MSG_SUBSCRIBE',['../namespaceustd.html#a298325f65e9e62258dfc9ced21fb9f07a8e967f13b4eb56ce12cfea269be107d7',1,'ustd']]],
+  ['msg_5funsubscribe_46',['MSG_UNSUBSCRIBE',['../namespaceustd.html#a298325f65e9e62258dfc9ced21fb9f07ae23a8877d58cac48e64077543c2a1c7a',1,'ustd']]]
 ];
