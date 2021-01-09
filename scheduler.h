@@ -219,8 +219,11 @@ void loop() {
 ~~~
  */
 
+class Console;
+
 class Scheduler {
   private:
+    friend class Console;
     ustd::array<T_TASKENTRY> taskList;
     ustd::queue<T_MSG *> msgqueue;
     ustd::array<T_SUBSCRIPTION> subscriptionList;
