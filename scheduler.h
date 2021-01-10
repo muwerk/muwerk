@@ -114,6 +114,9 @@ unsigned long timeDiff(unsigned long first, unsigned long second) {
     return (unsigned long)-1 - first + second + 1;
 }
 
+// forward declaration
+class Console;
+
 /*! \brief Muwerk Scheduler class
 
 Implements a cooperative task scheduler. Tasks are defined as `void
@@ -219,8 +222,6 @@ void loop() {
 }
 ~~~
  */
-
-class Console;
 
 class Scheduler {
   private:
