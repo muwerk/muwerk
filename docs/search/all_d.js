@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['scheduler_66',['Scheduler',['../classustd_1_1Scheduler.html',1,'ustd::Scheduler'],['../classustd_1_1Scheduler.html#a08fb718f763d4db0bc3f4fd58a8dfbde',1,'ustd::Scheduler::Scheduler()']]],
+  ['scheduler_66',['Scheduler',['../classustd_1_1Scheduler.html#a08fb718f763d4db0bc3f4fd58a8dfbde',1,'ustd::Scheduler::Scheduler()'],['../classustd_1_1Scheduler.html',1,'ustd::Scheduler']]],
   ['scheduler_2eh_67',['scheduler.h',['../scheduler_8h.html',1,'']]],
   ['scheduler_5fmain_68',['SCHEDULER_MAIN',['../scheduler_8h.html#a5d6a17d6284693edd88a8df183122a81',1,'scheduler.h']]],
   ['sensor_5fvalue_5finvalid_69',['SENSOR_VALUE_INVALID',['../sensors_8h.html#ac92815dda19ee46d6891605b574caa25',1,'sensors.h']]],
-  ['sensorprocessor_70',['sensorprocessor',['../classustd_1_1sensorprocessor.html',1,'ustd::sensorprocessor'],['../classustd_1_1sensorprocessor.html#af3295232cb60ec9e9a331700875d4961',1,'ustd::sensorprocessor::sensorprocessor()']]],
+  ['sensorprocessor_70',['sensorprocessor',['../classustd_1_1sensorprocessor.html#af3295232cb60ec9e9a331700875d4961',1,'ustd::sensorprocessor::sensorprocessor()'],['../classustd_1_1sensorprocessor.html',1,'ustd::sensorprocessor']]],
   ['sensors_2eh_71',['sensors.h',['../sensors_8h.html',1,'']]],
   ['shift_72',['shift',['../classustd_1_1Console.html#ab4909c6677b87eba5a8e65cc60826d75',1,'ustd::Console']]],
   ['singletaskmode_73',['singleTaskMode',['../classustd_1_1Scheduler.html#a1916e661e513a686535e79367c16f5bd',1,'ustd::Scheduler']]],
