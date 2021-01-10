@@ -23,7 +23,7 @@ class sensorprocessor {
      *
      * Example:
 
-    ```{.cpp}
+    ~~~{.cpp}
     void setup() {
         // generate a filter that exponentially averages over 10 values,
         // generates a new reading at least every 3600sec (even on no
@@ -42,7 +42,7 @@ class sensorprocessor {
             // no valid new reading, do nothing.
         }
     }
-    ```
+    ~~~
 
      */
   public:
