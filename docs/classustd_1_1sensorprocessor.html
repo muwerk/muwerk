@@ -75,6 +75,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Muwerk sensorprocessor class.  
+ <a href="classustd_1_1sensorprocessor.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="sensors_8h_source.html">sensors.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -109,7 +112,36 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a7e5e723dade84975d51f8a13b1982114"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1sensorprocessor.html#a7e5e723dade84975d51f8a13b1982114">last</a></td></tr>
 <tr class="separator:a7e5e723dade84975d51f8a13b1982114"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Muwerk sensorprocessor class. </p>
+<p>sensorprocessor implements an exponential filter that smoothens and throttles raw sensor data.</p>
+<p>It can be configured by:</p><ul>
+<li>size of smoothing interval: larger intervals generate larger averaging and slower response to change</li>
+<li>minimum change eps required to generate a new sensor reading, in order to ignore small fluctuations</li>
+<li>a time-interval in seconds that generates a new sensor reading regardless of change.</li>
+</ul>
+<p>This library requires the ustd library (for timeDiff) and requires a <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform define</a>.</p>
+<p>Example:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> setup() {</div>
+<div class="line">    <span class="comment">// generate a filter that exponentially averages over 10 values,</span></div>
+<div class="line">    <span class="comment">// generates a new reading at least every 3600sec (even on no</span></div>
+<div class="line">    <span class="comment">// change)</span></div>
+<div class="line">    <span class="comment">// and generates a new reading every time, the filter value changes</span></div>
+<div class="line">    <span class="comment">// for more than 0.1</span></div>
+<div class="line">    <a class="code" href="classustd_1_1sensorprocessor.html">ustd::sensorprocessor</a> mySensor(10,3600,0.1)</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> loop() {</div>
+<div class="line">    <span class="keywordtype">double</span> rawValue=ReadMyRawSensor();</div>
+<div class="line">    <span class="keywordtype">double</span> filtered=rawValue;</div>
+<div class="line">    <span class="keywordflow">if</span> mySensor.filter(&amp;filtered) {</div>
+<div class="line">        printf(<span class="stringliteral">&quot;We got a new, filtered reading: %f\n&quot;</span>, filtered);</div>
+<div class="line">    } <span class="keywordflow">else</span> {</div>
+<div class="line">        <span class="comment">// no valid new reading, do nothing.</span></div>
+<div class="line">    }</div>
+<div class="line">}</div>
+<div class="ttc" id="aclassustd_1_1sensorprocessor_html"><div class="ttname"><a href="classustd_1_1sensorprocessor.html">ustd::sensorprocessor</a></div><div class="ttdoc">Muwerk sensorprocessor class.</div><div class="ttdef"><b>Definition:</b> sensors.h:49</div></div>
+</div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af3295232cb60ec9e9a331700875d4961"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af3295232cb60ec9e9a331700875d4961">&#9670;&nbsp;</a></span>sensorprocessor()</h2>
 
@@ -335,16 +367,6 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>sensorprocessor implements an exponential filter that smoothens and throttles raw sensor data.</p>
-<p>It can be configured by:</p><ul>
-<li>size of smoothing interval: larger intervals generate larger averaging and slower response to change</li>
-<li>minimum change eps required to generate a new sensor reading, in order to ignore small fluctuations</li>
-<li>a time-interval in seconds that generates a new sensor reading regardless of change.</li>
-</ul>
-<p>This library requires the ustd library (for timeDiff) and requires a <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform define</a>.</p>
-<p>Example:</p>
-<p>~~~{.cpp} void setup() { generate a filter that exponentially averages over 10 values, generates a new reading at least every 3600sec (even on no change) and generates a new reading every time, the filter value changes for more than 0.1 <a class="el" href="classustd_1_1sensorprocessor.html">ustd::sensorprocessor</a> mySensor(10,3600,0.1) }</p>
-<p>void loop() { double rawValue=ReadMyRawSensor(); double filtered=rawValue; if mySensor.filter(&amp;filtered) { printf("We got a new, filtered reading: %f\n", filtered); } else { no valid new reading, do nothing. } } ~~~ </p>
 
 </div>
 </div>
