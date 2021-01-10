@@ -8,8 +8,9 @@
 
 namespace ustd {
 
-/*! \brief Extension function that implements a new command
-           for a Serial Console.
+/*! \brief Serial Console Extension Function
+
+Extension function that implements a new command for a Serial Console.
  */
 
 #if defined(__ESP__) || defined(__UNIXOID__)
