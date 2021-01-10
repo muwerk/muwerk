@@ -6,6 +6,10 @@
 #include "array.h"
 #include "scheduler.h"
 
+#ifdef __ESP__
+#include "filesystem.h"
+#endif
+
 namespace ustd {
 
 /*! \brief Serial Console Extension Function
@@ -270,13 +274,23 @@ class Console {
             cmd_info();
         } else if (cmd == "ps") {
             cmd_ps();
+#ifdef __ESP__
+        } else if (cmd == "ls") {
+            cmd_ls();
+        } else if (cmd == "cat") {
+            cmd_cat();
+#endif
         } else if (!cmd_custom(cmd)) {
             Serial.println("Unknown command " + cmd);
         }
     }
 
     void cmd_help() {
+#ifdef __ESP__
+        String help = "\rcommands: help, reboot, spy, pub, debug, wifi, info, ps, ls, cat";
+#else
         String help = "\rcommands: help, reboot, spy, pub, debug, wifi, info, ps";
+#endif
         for (unsigned int i = 0; i < commands.length(); i++) {
             help += ", ";
             help += commands[i].command;
@@ -430,6 +444,69 @@ class Console {
 #endif
     }
 
+#ifdef __ESP__
+    void cmd_ls() {
+        ustd::array<String> paths;
+        bool extended = false;
+
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (arg == "-h" || arg == "-H") {
+                Serial.println("\rusage: ls [-a] <path> [<path> [...]]");
+                return;
+            } else if (arg == "-l" || arg == "-L") {
+                extended = true;
+            } else {
+                paths.add(arg);
+            }
+        }
+
+        if (paths.length() == 0) {
+            String root = "/";
+            paths.add(root);
+        }
+
+        for (unsigned int i = 0; i < paths.length(); i++) {
+            fs::Dir dir = fsOpenDir(paths[i]);
+            while (dir.next()) {
+                if (extended) {
+                    Serial.printf("%crw-rw-rw-  %10u  ", (dir.isDirectory() ? 'd' : '-'),
+                                  dir.fileSize());
+                    time_t tt = dir.fileTime();
+                    struct tm *lt = localtime(&tt);
+                    if (lt) {
+                        Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i  ", lt->tm_year + 1900,
+                                      lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min,
+                                      lt->tm_sec);
+                    }
+                }
+                Serial.println(dir.fileName());
+            }
+        }
+    }
+
+    void cmd_cat() {
+        String arg = pullArg();
+        if (arg == "-h" || arg == "-H") {
+            Serial.println("\rusage: cat <filename>");
+            return;
+        }
+
+        fs::File f = fsOpen(arg, "r");
+        if (!f) {
+            Serial.println("\rERROR: File " + arg + " can't be opened.");
+            return;
+        }
+        if (!f.available()) {
+            f.close();
+            return;
+        }
+        while (f.available()) {
+            // Lets read line by line from the file
+            Serial.println(f.readStringUntil('\n'));
+        }
+        f.close();
+    }
+#endif
     bool cmd_custom(String &cmd) {
         for (unsigned int i = 0; i < commands.length(); i++) {
             if (cmd == commands[i].command) {
