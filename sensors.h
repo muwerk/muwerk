@@ -5,47 +5,49 @@
 namespace ustd {
 #define SENSOR_VALUE_INVALID -999999.0
 
+/*!  \brief Muwerk sensorprocessor class
+
+sensorprocessor implements an exponential filter that smoothens and
+    * throttles raw sensor data.
+    *
+    * It can be configured by:
+    * * size of smoothing interval: larger intervals generate larger averaging
+    * and slower response to change
+    * * minimum change eps required to generate a new sensor reading, in order
+    * to ignore small fluctuations
+    * * a time-interval in seconds that generates a new sensor reading
+    * regardless of change.
+    *
+    * This library requires the ustd library (for timeDiff) and requires a
+    * <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform
+    * define</a>.
+    *
+    * Example:
+
+~~~{.cpp}
+void setup() {
+    // generate a filter that exponentially averages over 10 values,
+    // generates a new reading at least every 3600sec (even on no
+    // change)
+    // and generates a new reading every time, the filter value changes
+    // for more than 0.1
+    ustd::sensorprocessor mySensor(10,3600,0.1)
+}
+
+void loop() {
+    double rawValue=ReadMyRawSensor();
+    double filtered=rawValue;
+    if mySensor.filter(&filtered) {
+        printf("We got a new, filtered reading: %f\n", filtered);
+    } else {
+        // no valid new reading, do nothing.
+    }
+}
+~~~
+*/
+
 class sensorprocessor {
-    /*! sensorprocessor implements an exponential filter that smoothens and
-     * throttles raw sensor data.
-     *
-     * It can be configured by:
-     * * size of smoothing interval: larger intervals generate larger averaging
-     * and slower response to change
-     * * minimum change eps required to generate a new sensor reading, in order
-     * to ignore small fluctuations
-     * * a time-interval in seconds that generates a new sensor reading
-     * regardless of change.
-     *
-     * This library requires the ustd library (for timeDiff) and requires a
-     * <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform
-     * define</a>.
-     *
-     * Example:
-
-    ~~~{.cpp}
-    void setup() {
-        // generate a filter that exponentially averages over 10 values,
-        // generates a new reading at least every 3600sec (even on no
-        // change)
-        // and generates a new reading every time, the filter value changes
-        // for more than 0.1
-        ustd::sensorprocessor mySensor(10,3600,0.1)
-    }
-
-    void loop() {
-        double rawValue=ReadMyRawSensor();
-        double filtered=rawValue;
-        if mySensor.filter(&filtered) {
-            printf("We got a new, filtered reading: %f\n", filtered);
-        } else {
-            // no valid new reading, do nothing.
-        }
-    }
-    ~~~
-
-     */
-  public:
+   public:
     unsigned int noVals = 0;
     unsigned int smoothInterval;
     unsigned int pollTimeSec;
