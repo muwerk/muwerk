@@ -5,7 +5,7 @@
 namespace ustd {
 #define SENSOR_VALUE_INVALID -999999.0
 
-/*!  \brief Muwerk sensorprocessor class
+/*!  \brief muwerk sensorprocessor class
 
 sensorprocessor implements an exponential filter that smoothens and
     * throttles raw sensor data.
@@ -47,7 +47,7 @@ void loop() {
 */
 
 class sensorprocessor {
-   public:
+  public:
     unsigned int noVals = 0;
     unsigned int smoothInterval;
     unsigned int pollTimeSec;

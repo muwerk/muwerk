@@ -18,7 +18,7 @@ typedef std::function<void(String command, String args)> T_COMMANDFN;
 typedef ustd::function<void(String command, String args)> T_COMMANDFN;
 #endif
 
-/*! \brief muWerk Serial Console Class
+/*! \brief muwerk Serial Console Class
 
 The console class implements a simple but effective serial console shell that
 allows to communicate to the device via the serial interface. The simple
@@ -251,7 +251,7 @@ class Console {
         Serial.print(buffer);
     }
 
-    virtual void commandparser() {
+    void commandparser() {
         String cmd = pullArg();
         if (cmd == "help") {
             cmd_help();

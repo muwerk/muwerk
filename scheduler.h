@@ -2,7 +2,7 @@
 
 #pragma once
 
-/*! \mainpage Muwerk a cooperative scheduler wit MQTT-like communication queues
+/*! \mainpage muwerk a cooperative scheduler wit MQTT-like communication queues
 \section Introduction
 
 muwerk implements the classes:
@@ -46,6 +46,8 @@ used by:
 #include <functional>
 #endif
 
+/*! \brief The muwerk namespace
+ */
 namespace ustd {
 
 #define SCHEDULER_MAIN 0
@@ -117,7 +119,7 @@ unsigned long timeDiff(unsigned long first, unsigned long second) {
 // forward declaration
 class Console;
 
-/*! \brief Muwerk Scheduler class
+/*! \brief muwerk Scheduler Class
 
 Implements a cooperative task scheduler. Tasks are defined as `void
 myTask()` type functions and can be added to the scheduler for execution
