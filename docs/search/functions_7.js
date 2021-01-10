@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['prompt_133',['prompt',['../classustd_1_1Console.html#acf87038f2016af4f8d2fbb51ca82ba6f',1,'ustd::Console']]],
-  ['publish_134',['publish',['../classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39',1,'ustd::Scheduler']]],
-  ['pullarg_135',['pullArg',['../classustd_1_1Console.html#a5282ccadbab4bff39b43f8bb1c4b68b3',1,'ustd::Console']]]
+  ['remove_42',['remove',['../classustd_1_1Scheduler.html#afa39c8d7f98dbb988ad23a63357f7aed',1,'ustd::Scheduler']]],
+  ['reset_43',['reset',['../classustd_1_1sensorprocessor.html#a071c31a8633d4f5cc0cb3b8509c8e1a7',1,'ustd::sensorprocessor']]]
 ];

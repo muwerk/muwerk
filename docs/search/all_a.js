@@ -1,4 +1,9 @@
 var searchData=
 [
-  ['originator_48',['originator',['../structustd_1_1T__MSG.html#a78a7faa8ba3419b51389af30d986ab0b',1,'ustd::T_MSG::originator()'],['../structustd_1_1T__SUBSCRIPTION.html#a0ecbfb26dc6638fb0e9d9dada7a64360',1,'ustd::T_SUBSCRIPTION::originator()']]]
+  ['t_5fcommandfn_22',['T_COMMANDFN',['../namespaceustd.html#afe8cf361a4bb42cdf2ef5a5b0bcfdd3b',1,'ustd']]],
+  ['t_5fmsgtype_23',['T_MSGTYPE',['../namespaceustd.html#a298325f65e9e62258dfc9ced21fb9f07',1,'ustd']]],
+  ['t_5fprio_24',['T_PRIO',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edba',1,'ustd']]],
+  ['t_5fsubs_25',['T_SUBS',['../namespaceustd.html#a86769335983eb6c2f9b0d01164dee833',1,'ustd']]],
+  ['t_5ftask_26',['T_TASK',['../namespaceustd.html#aa6f70addb9757f58d0a1102b6bb794c5',1,'ustd']]],
+  ['timediff_27',['timeDiff',['../namespaceustd.html#abfacaaf7557db523f979164738216df1',1,'ustd']]]
 ];

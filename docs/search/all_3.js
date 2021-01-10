@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['debug_22',['debug',['../classustd_1_1Console.html#a4ed9ff591e594c167ff76a466dddb2cd',1,'ustd::Console']]]
+  ['extend_3',['extend',['../classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a',1,'ustd::Console']]]
 ];

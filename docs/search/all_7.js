@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['last_31',['last',['../classustd_1_1sensorprocessor.html#a7e5e723dade84975d51f8a13b1982114',1,'ustd::sensorprocessor']]],
-  ['lastcall_32',['lastCall',['../structustd_1_1T__TASKENTRY.html#a2c66b4f8f76468e0d21d1f83a9c2f9a7',1,'ustd::T_TASKENTRY']]],
-  ['lastval_33',['lastVal',['../classustd_1_1sensorprocessor.html#aece4e66f8058ea0132ebd49c38aaba3e',1,'ustd::sensorprocessor']]],
-  ['latetime_34',['lateTime',['../structustd_1_1T__TASKENTRY.html#ab737e7050d4b6fc98cc02ea34682fa41',1,'ustd::T_TASKENTRY']]],
-  ['loop_35',['loop',['../classustd_1_1Console.html#a65196ce37bfd414e141efad9467eadd7',1,'ustd::Console::loop()'],['../classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a',1,'ustd::Scheduler::loop()']]]
+  ['prio_5fhigh_9',['PRIO_HIGH',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa8fe23cdf98f93f9eed93108b50726c7f',1,'ustd']]],
+  ['prio_5flow_10',['PRIO_LOW',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa4f093ecef0443e1bb0e76feacde1e0d1',1,'ustd']]],
+  ['prio_5flowest_11',['PRIO_LOWEST',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa861044fe2d1c4d16020f92bc19f928f2',1,'ustd']]],
+  ['prio_5fnormal_12',['PRIO_NORMAL',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa28864e5d139dd2decbd92010f4045fe0',1,'ustd']]],
+  ['prio_5ftimecritical_13',['PRIO_TIMECRITICAL',['../namespaceustd.html#ab368326473efd1bc4a7e821ed299edbaa24d811d5c7a469e2a563e5a70e5535b4',1,'ustd']]],
+  ['publish_14',['publish',['../classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39',1,'ustd::Scheduler']]]
 ];

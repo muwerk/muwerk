@@ -68,12 +68,15 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#friends">Friends</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classustd_1_1Scheduler-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">ustd::Scheduler Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>muwerk <a class="el" href="classustd_1_1Scheduler.html" title="muwerk Scheduler Class">Scheduler</a> Class  
+ <a href="classustd_1_1Scheduler.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="scheduler_8h_source.html">scheduler.h</a>&gt;</code></p>
 <table class="memberdecls">
@@ -81,10 +84,6 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a08fb718f763d4db0bc3f4fd58a8dfbde"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#a08fb718f763d4db0bc3f4fd58a8dfbde">Scheduler</a> (int nTaskListSize=2, int queueSize=2, int nSubscriptionListSize=2)</td></tr>
 <tr class="separator:a08fb718f763d4db0bc3f4fd58a8dfbde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bb307893c1dd83bc0ca1e646dbf7df8"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#a1bb307893c1dd83bc0ca1e646dbf7df8">~Scheduler</a> ()</td></tr>
-<tr class="separator:a1bb307893c1dd83bc0ca1e646dbf7df8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77d69676b5ab5fc4de09ccc2133725e9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#a77d69676b5ab5fc4de09ccc2133725e9">mqttmatch</a> (const String pubstr, const String substr)</td></tr>
-<tr class="separator:a77d69676b5ab5fc4de09ccc2133725e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c1a991b2a80657192534733ae1d7f39"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39">publish</a> (String topic, String msg=&quot;&quot;, String originator=&quot;&quot;)</td></tr>
 <tr class="separator:a4c1a991b2a80657192534733ae1d7f39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56e51944c02ba44cb0132e8959fe9fbe"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe">subscribe</a> (int taskID, String topic, <a class="el" href="namespaceustd.html#a86769335983eb6c2f9b0d01164dee833">T_SUBS</a> subs, String originator=&quot;&quot;)</td></tr>
@@ -100,12 +99,106 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad4bc560843bbf84408eca8ad194c6e6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">loop</a> ()</td></tr>
 <tr class="separator:ad4bc560843bbf84408eca8ad194c6e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
-Friends</h2></td></tr>
-<tr class="memitem:aaa98810874c67664127370c7d8dc2ece"><td class="memItemLeft" align="right" valign="top">class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#aaa98810874c67664127370c7d8dc2ece">Console</a></td></tr>
-<tr class="separator:aaa98810874c67664127370c7d8dc2ece"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a38d3c7d07aa6cf4ec48baa1f4d74698b"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Scheduler.html#a38d3c7d07aa6cf4ec48baa1f4d74698b">mqttmatch</a> (const String pubstr, const String substr)</td></tr>
+<tr class="separator:a38d3c7d07aa6cf4ec48baa1f4d74698b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>muwerk <a class="el" href="classustd_1_1Scheduler.html" title="muwerk Scheduler Class">Scheduler</a> Class </p>
+<p>Implements a cooperative task scheduler. Tasks are defined as <code>void myTask()</code> type functions and can be added to the scheduler for execution at fixed intervals. Tasks can communicate with each other via pub/sub messages, using MQTT-style topics for subscription and publishing of messages.</p>
+<p>The library header-only.</p>
+<p>Make sure to provide the <a href="https://github.com/muwerk/ustd/blob/master/README.md">required platform define</a> before including ustd headers.</p>
+<h2>Minimal scheduler:</h2>
+<div class="fragment"><div class="line"><span class="preprocessor">#define __ATTINY__ 1   </span><span class="comment">// Platform defines required, see doc, mainpage.</span></div>
+<div class="line"><span class="preprocessor">#include &lt;scheduler.h&gt;</span></div>
+<div class="line"> </div>
+<div class="line"><a class="code" href="classustd_1_1Scheduler.html">ustd::Scheduler</a> sched;</div>
+<div class="line"><span class="keywordtype">void</span> appLoop();</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> someTask() {</div>
+<div class="line">    <span class="comment">// This is called every 50ms (50000us)</span></div>
+<div class="line">    <span class="comment">// Do things here</span></div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> setup() {</div>
+<div class="line">    <span class="comment">// Create a task for the main application loop code:</span></div>
+<div class="line">    <span class="keywordtype">int</span> tID = sched.<a class="code" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(appLoop, <span class="stringliteral">&quot;main&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create a second task that is called every 50ms</span></div>
+<div class="line">    sched.<a class="code" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(someTask, <span class="stringliteral">&quot;someTask&quot;</span>, 50000L);</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> appLoop() {</div>
+<div class="line">    <span class="comment">// your code you would normally put into Arduino&#39;s loop goes here.</span></div>
+<div class="line">    <span class="comment">// use async programming to prevent locking the cooperative scheduler.</span></div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Never add code to this loop, use appLoop() instead.</span></div>
+<div class="line"><span class="keywordtype">void</span> <a class="code" href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">loop</a>() {</div>
+<div class="line">    sched.<a class="code" href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">loop</a>();</div>
+<div class="line">}</div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:246</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_a23ee4eba2bc076d8cd69328225d16eea"><div class="ttname"><a href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">ustd::Scheduler::add</a></div><div class="ttdeci">int add(T_TASK task, String name, unsigned long minMicroSecs=100000L, T_PRIO prio=PRIO_NORMAL)</div><div class="ttdef"><b>Definition:</b> scheduler.h:510</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_ad4bc560843bbf84408eca8ad194c6e6a"><div class="ttname"><a href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">ustd::Scheduler::loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition:</b> scheduler.h:657</div></div>
+</div><!-- fragment --><h2>Pub/Sub communication between tasks</h2>
+<div class="fragment"><div class="line"><span class="preprocessor">#define __ESP__ 1   </span><span class="comment">// Platform defines required, see doc, mainpage.</span></div>
+<div class="line"><span class="preprocessor">#include &quot;scheduler.h&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><a class="code" href="classustd_1_1Scheduler.html">ustd::Scheduler</a> sched;</div>
+<div class="line"><span class="keywordtype">void</span> appLoop();</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> subMsg(String topic, String msg, String originator) {</div>
+<div class="line">    <span class="keywordflow">if</span> (msg == <span class="stringliteral">&quot;on&quot;</span>)</div>
+<div class="line">        digitalWrite(LED_BUILTIN, LOW);  <span class="comment">// Turn the LED on</span></div>
+<div class="line">    <span class="keywordflow">if</span> (msg == <span class="stringliteral">&quot;off&quot;</span>)</div>
+<div class="line">        digitalWrite(LED_BUILTIN, HIGH);  <span class="comment">// Turn the LED off</span></div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> pubTask() {</div>
+<div class="line">    <span class="comment">// Publish a &quot;led&quot; &quot;on/off&quot; message every 500ms</span></div>
+<div class="line">    <span class="keyword">static</span> <span class="keywordtype">int</span> s1 = 0;</div>
+<div class="line">    <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> t1;</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="namespaceustd.html#abfacaaf7557db523f979164738216df1">ustd::timeDiff</a>(t1, millis()) &gt; 500L) {</div>
+<div class="line">        <span class="keywordflow">if</span> (s1 == 0) {</div>
+<div class="line">            s1 = 1;</div>
+<div class="line">            sched.<a class="code" href="classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39">publish</a>(<span class="stringliteral">&quot;led&quot;</span>, <span class="stringliteral">&quot;on&quot;</span>);</div>
+<div class="line">        } <span class="keywordflow">else</span> {</div>
+<div class="line">            s1 = 0;</div>
+<div class="line">            sched.<a class="code" href="classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39">publish</a>(<span class="stringliteral">&quot;led&quot;</span>, <span class="stringliteral">&quot;off&quot;</span>);</div>
+<div class="line">        }</div>
+<div class="line">        t1 = millis();</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">if</span> (t1 == 0)</div>
+<div class="line">        t1 = millis();</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> setup() {</div>
+<div class="line">    pinMode(LED_BUILTIN, OUTPUT);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create a task for general use:</span></div>
+<div class="line">    <span class="keywordtype">int</span> tID = sched.<a class="code" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(appLoop, <span class="stringliteral">&quot;main&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Subscribe to &quot;led&quot; messages. subMsg will be called on receive of &quot;led&quot;</span></div>
+<div class="line">    <span class="comment">// dmessages.</span></div>
+<div class="line">    sched.<a class="code" href="classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe">subscribe</a>(tID, <span class="stringliteral">&quot;led&quot;</span>, subMsg);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create a task that will publish &quot;led&quot; messages</span></div>
+<div class="line">    sched.<a class="code" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(pubTask, <span class="stringliteral">&quot;pubTask&quot;</span>, 50000L);</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> appLoop() {</div>
+<div class="line">    <span class="comment">// your code goes here.</span></div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Never add code to this loop, use appLoop() instead.</span></div>
+<div class="line"><span class="keywordtype">void</span> <a class="code" href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">loop</a>() {</div>
+<div class="line">    sched.<a class="code" href="classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a">loop</a>();</div>
+<div class="line">}</div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_a4c1a991b2a80657192534733ae1d7f39"><div class="ttname"><a href="classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39">ustd::Scheduler::publish</a></div><div class="ttdeci">bool publish(String topic, String msg=&quot;&quot;, String originator=&quot;&quot;)</div><div class="ttdef"><b>Definition:</b> scheduler.h:408</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html_a56e51944c02ba44cb0132e8959fe9fbe"><div class="ttname"><a href="classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe">ustd::Scheduler::subscribe</a></div><div class="ttdeci">int subscribe(int taskID, String topic, T_SUBS subs, String originator=&quot;&quot;)</div><div class="ttdef"><b>Definition:</b> scheduler.h:432</div></div>
+<div class="ttc" id="anamespaceustd_html_abfacaaf7557db523f979164738216df1"><div class="ttname"><a href="namespaceustd.html#abfacaaf7557db523f979164738216df1">ustd::timeDiff</a></div><div class="ttdeci">unsigned long timeDiff(unsigned long first, unsigned long second)</div><div class="ttdef"><b>Definition:</b> scheduler.h:119</div></div>
+</div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a08fb718f763d4db0bc3f4fd58a8dfbde"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a08fb718f763d4db0bc3f4fd58a8dfbde">&#9670;&nbsp;</a></span>Scheduler()</h2>
 
@@ -147,31 +240,6 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p>Instantiate a cooperative scheduler</p>
 <p>All list sizes are optional, they will be dynamically incremented, if necessary.</p>
-
-</div>
-</div>
-<a id="a1bb307893c1dd83bc0ca1e646dbf7df8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bb307893c1dd83bc0ca1e646dbf7df8">&#9670;&nbsp;</a></span>~Scheduler()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual ustd::Scheduler::~Scheduler </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
 
 </div>
 </div>
@@ -261,8 +329,8 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a id="a77d69676b5ab5fc4de09ccc2133725e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a77d69676b5ab5fc4de09ccc2133725e9">&#9670;&nbsp;</a></span>mqttmatch()</h2>
+<a id="a38d3c7d07aa6cf4ec48baa1f4d74698b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38d3c7d07aa6cf4ec48baa1f4d74698b">&#9670;&nbsp;</a></span>mqttmatch()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -271,7 +339,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool ustd::Scheduler::mqttmatch </td>
+          <td class="memname">static bool ustd::Scheduler::mqttmatch </td>
           <td>(</td>
           <td class="paramtype">const String&#160;</td>
           <td class="paramname"><em>pubstr</em>, </td>
@@ -290,7 +358,7 @@ Friends</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -515,29 +583,6 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true on successful unsubscription, false if no corresponding subscription is found.</dd></dl>
-
-</div>
-</div>
-<h2 class="groupheader">Friends And Related Function Documentation</h2>
-<a id="aaa98810874c67664127370c7d8dc2ece"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa98810874c67664127370c7d8dc2ece">&#9670;&nbsp;</a></span>Console</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">friend class <a class="el" href="classustd_1_1Console.html">Console</a></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
 
 </div>
 </div>
