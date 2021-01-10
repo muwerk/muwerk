@@ -7,7 +7,19 @@
 #include "scheduler.h"
 
 namespace ustd {
-/*! \brief Miwerk Console Class
+
+/*! \brief Serial Console Extension Function
+
+Extension function that implements a new command for a Serial Console.
+ */
+
+#if defined(__ESP__) || defined(__UNIXOID__)
+typedef std::function<void(String command, String args)> T_COMMANDFN;
+#else
+typedef ustd::function<void(String command, String args)> T_COMMANDFN;
+#endif
+
+/*! \brief muwerk Serial Console Class
 
 The console class implements a simple but effective serial console shell that
 allows to communicate to the device via the serial interface. The simple
@@ -56,12 +68,6 @@ void loop() {
 
 */
 
-#if defined(__ESP__) || defined(__UNIXOID__)
-typedef std::function<void(String command, String args)> T_COMMANDFN;
-#else
-typedef ustd::function<void(String command, String args)> T_COMMANDFN;
-#endif
-
 class Console {
   protected:
     typedef struct {
@@ -99,7 +105,7 @@ class Console {
         /*! Starts the console
          *
          * @param _pSched Pointer to the muwerk scheduler.
-         * @param initialCmd (optional, default none) Initial command to execute.
+         * @param initialArgs (optional, default none) Initial command to execute.
          * @param baudrate (optional, default 115200) The baud rate of the serial interface
          */
         pSched = _pSched;
@@ -117,7 +123,6 @@ class Console {
         /*! Extend the console with a custom command
          *
          * @param command The name of the command
-         * wildcards '#' and '*'. (A subscription to '#' receives all pubs)
          * @param handler Callback of type void myCallback(String command, String
          * args) that is called, if a matching command is entered.
          * @return commandHandle on success (needed for unextend), or -1
@@ -247,7 +252,7 @@ class Console {
         Serial.print(buffer);
     }
 
-    virtual void commandparser() {
+    void commandparser() {
         String cmd = pullArg();
         if (cmd == "help") {
             cmd_help();

@@ -2,7 +2,7 @@
 
 #pragma once
 
-/*! \mainpage Muwerk a cooperative scheduler wit MQTT-like communication queues
+/*! \mainpage muwerk a cooperative scheduler wit MQTT-like communication queues
 \section Introduction
 
 muwerk implements the classes:
@@ -46,19 +46,25 @@ used by:
 #include <functional>
 #endif
 
+//! \brief The muwerk namespace
 namespace ustd {
 
 #define SCHEDULER_MAIN 0
 
+/*! \brief Scheduler Task Priority
+
+__WARNING__: Task Priorities are currently not supported by the scheduler.
+*/
 enum T_PRIO {
-    PRIO_SYSTEMCRITICAL = 0,
-    PRIO_TIMECRITICAL = 1,
-    PRIO_HIGH = 2,
-    PRIO_NORMAL = 3,
-    PRIO_LOW = 4,
-    PRIO_LOWEST = 5
+    PRIO_SYSTEMCRITICAL = 0,  /// System critical priority
+    PRIO_TIMECRITICAL = 1,    /// Time critical priority
+    PRIO_HIGH = 2,            /// High Priority
+    PRIO_NORMAL = 3,          /// Standard Priority (default for all tasks)
+    PRIO_LOW = 4,             /// Low priority
+    PRIO_LOWEST = 5           /// Lowest Priority
 };
 
+//! \brief Scheduler Message Type
 enum T_MSGTYPE {
     MSG_NONE = 0,
     MSG_DIRECT = 1,
@@ -68,6 +74,7 @@ enum T_MSGTYPE {
     MSG_PUBLISHRAW = 5
 };
 
+//! \brief Scheduler Task Function
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void()> T_TASK;
 #else
@@ -81,6 +88,7 @@ typedef struct {
     char *msg;
 } T_MSG;
 
+//! \brief Scheduler Subscription Function
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
 #else
@@ -109,12 +117,27 @@ typedef struct {
 } T_TASKENTRY;
 
 unsigned long timeDiff(unsigned long first, unsigned long second) {
+    /*! Calculate time difference between two time values
+     *
+     * This function calculates the difference between two time values honouring
+     * overflow conditions. This always works under the assumption that:
+     * 1. the first value represents an earlier time as the second value
+     * 2. the difference between the first and second value is lesser that the
+     *    maximum value that ùnsigned long` can hold.
+     *
+     * @param first first time value
+     * @param second second time value
+     * @return the time difference between the two values
+     */
     if (second >= first)
         return second - first;
     return (unsigned long)-1 - first + second + 1;
 }
 
-/*! \brief Muwerk Scheduler class
+// forward declaration
+class Console;
+
+/*! \brief muwerk Scheduler Class
 
 Implements a cooperative task scheduler. Tasks are defined as `void
 myTask()` type functions and can be added to the scheduler for execution
@@ -220,8 +243,6 @@ void loop() {
 ~~~
  */
 
-class Console;
-
 class Scheduler {
   private:
     friend class Console;
@@ -275,7 +296,7 @@ class Scheduler {
     }
 #endif
 
-    bool mqttmatch(const String pubstr, const String substr) {
+    static bool mqttmatch(const String pubstr, const String substr) {
         /*! compare publish and subscribe topics.
          *
          * subscriptions can contain the MQTT wildcards '#' and '+'.
