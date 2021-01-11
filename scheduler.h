@@ -7,8 +7,9 @@
 
 muwerk implements the classes:
 
-* * \ref ustd::Scheduler cooperative scheduler and MQTT-like queues
-* * \ref ustd::sensorprocessor Exponential sensor value filter
+* * \ref ustd::Scheduler A cooperative scheduler and MQTT-like queues
+* * \ref ustd::sensorprocessor An exponential sensor value filter
+* * \ref ustd::JsonFile A class for easily managing data stored in JSON files
 * * \ref ustd::Console A serial debug console for the scheduler
 
 libraries are header-only and should work with any c++11 compiler
