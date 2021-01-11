@@ -54,8 +54,8 @@ If a file system is available (usually when compiling for ESP8266 or ESP32)
 there are additional builtin commands available:
 
 * ls: display directory contents
-* rm: removes the specified files
 * cat: outputs the specified files
+* rm: removes the specified files
 * jf: read, write or delete values in json files
 
 The commandline parser can be extended (see example below)
@@ -139,6 +139,8 @@ class Console {
 #endif
         tID = pSched->add([this]() { this->loop(); }, "console", 250000);
         args = initialArgs;
+        Serial.println("");
+        prompt();
         if (args.length()) {
             commandparser();
         }

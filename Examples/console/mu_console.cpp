@@ -45,7 +45,7 @@ void task1() {  // scheduled every 50ms
 
 void command0(String cmd, String args) {
     // extract first argument
-    String arg1 = Console::shift(args);
+    String arg1 = ustd::Console::shift(args);
     arg1.toLowerCase();
 
     if (arg1 == "on" || arg1 == "off") {
@@ -72,6 +72,7 @@ void command0(String cmd, String args) {
 }
 
 void setup() {
+    DBG_INIT(115200);
     pinMode(LED_BUILTIN, OUTPUT);
 
     console.extend("led", command0);
