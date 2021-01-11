@@ -81,7 +81,8 @@ Both tasks were always executed as schedules (negligable late-times `cn`).
 See `Examples\mac-linux`. (Not available on ATTINY platforms, only ATMEGA
 and better).
 
-For systems that are connected to an MQTT-server (via [`munet`](https://github.com/muwerk/munet/blob/master/README.md)), a python example script [mutop](https://github.com/muwerk/muwerk/tree/master/Examples/mutop) shows
+For systems that are connected to an MQTT-server (via [`munet`](https://github.com/muwerk/munet/blob/master/README.md)), 
+a python example script [mutop](https://github.com/muwerk/muwerk/tree/master/Examples/mutop) shows
 how to parse the statistical information.
 
 MQTT-like communcations and architecture overview
@@ -130,7 +131,7 @@ Debugging and Troubleshooting
 
 <img align="right" width="480" src="https://github.com/muwerk/muwerk/blob/master/Resources/console.jpg">
 The `Console` class allows to bind a serial console to muwerk that allows to inspect message passing,
-file system (if available) and statistical information. See the [`console`](https://github.com/muwerk/muwerk/tree/master/Examples/console) example
+file system (if available) and statistical information. See the [console](https://github.com/muwerk/muwerk/blob/master/Examples/console/mu_console.cpp) example
 for more information.
 
 Documentation
