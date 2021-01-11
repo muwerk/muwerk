@@ -129,7 +129,7 @@ for more samples on muwerk's task scheduler and pub/sub intertask communication.
 Debugging and Troubleshooting
 -----------------------------
 
-<img align="right" width="480" src="https://github.com/muwerk/muwerk/blob/master/Resources/console.jpg">
+<img align="right" width="480" src="https://github.com/muwerk/muwerk/blob/master/Resources/console.jpg?raw=true">
 
 The [`Console`](https://muwerk.github.io/muwerk/docs/classustd_1_1Console.html) class allows to bind a serial console to muwerk that allows to inspect message passing,
 file system (if available) and statistical information. See the
