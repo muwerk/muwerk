@@ -514,23 +514,56 @@ class Console {
         String arg = pullArg();
         arg.toLowerCase();
         if (arg == "-h") {
-            Serial.println("usage: time [YYYY-MM-DD [hh:mm:ss]]");
+            Serial.println("usage: date [[YYYY-MM-DD] hh:mm:ss]");
+            return;
+        }
+        time_t t = time(nullptr);
+        struct tm *lt = localtime(&t);
+        if (!lt) {
+            Serial.println("error: current time cannot be determined");
             return;
         }
         if (arg == "") {
-            time_t t = time(nullptr);
-            struct tm *lt = localtime(&t);
-            if (lt) {
 #ifdef __ESP__
-                Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n", lt->tm_year + 1900,
-                              lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
+            Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n", lt->tm_year + 1900,
+                          lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, t);
 #else
-                char buffer[32];
-                sprintf(buffer, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n", lt->tm_year + 1900,
-                        lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
-                Serial.print(buffer);
+            char buffer[48];
+            sprintf(buffer, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n", lt->tm_year + 1900,
+                    lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, t);
+            Serial.print(buffer);
 #endif
+        } else {
+            if (args.length()) {
+                // we have 2 arguments - the first is a date
+                int i = sscanf(arg.c_str(), "%4i-%2i-%2i", &lt->tm_year, &lt->tm_mon, &lt->tm_mday);
+                if (i != 3 || lt->tm_year < 1970 || lt->tm_year > 2038 || lt->tm_mon < 1 ||
+                    lt->tm_mon > 11 || lt->tm_mday < 1 || lt->tm_mday > 31) {
+                    Serial.println("error: " + arg + " is not a date");
+                    return;
+                }
+                lt->tm_year -= 1900;
+                lt->tm_mon -= 1;
+                // fetch next
+                arg = pullArg();
             }
+            int i = sscanf(arg.c_str(), "%2i:%2i:%2i", &lt->tm_hour, &lt->tm_min, &lt->tm_sec);
+            if (i != 3 || lt->tm_hour < 0 || lt->tm_hour > 23 || lt->tm_min < 0 ||
+                lt->tm_min > 59 || lt->tm_sec < 0 || lt->tm_sec > 59) {
+                Serial.println("error: " + arg + " is not a time");
+                return;
+            }
+            time_t newt = mktime(lt);
+#ifdef __ESP__
+            DBGF("Setting date to: %4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n",
+                 lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min,
+                 lt->tm_sec, newt);
+#endif
+            time(&newt);
+            // invoke myself to display resulting date
+            args = "";
+            Serial.print("Date set to: ");
+            cmd_date();
         }
     }
 
