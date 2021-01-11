@@ -228,6 +228,8 @@ class Console {
                 if (pcur > buffer) {
                     --pcur;
                     *pcur = 0;
+                } else if (args.length()) {
+                    args.remove(args.length() - 1, 1);
                 }
                 changed = true;
                 break;
