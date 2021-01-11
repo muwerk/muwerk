@@ -6,6 +6,10 @@
 #include "array.h"
 #include "scheduler.h"
 
+#ifdef __ATMEGA__
+#include <time.h>
+#endif
+
 #ifdef __ESP__
 #include "filesystem.h"
 #include "jsonfile.h"
@@ -126,7 +130,7 @@ class Console {
         commands.erase();
     }
 
-    void begin(Scheduler *_pSched, String initialArgs = "", unsigned int baudrate = 115200) {
+    void begin(Scheduler *_pSched, String initialArgs = "", unsigned long baudrate = 115200) {
         /*! Starts the console
          *
          * @param _pSched Pointer to the muwerk scheduler.
@@ -285,16 +289,14 @@ class Console {
         String cmd = pullArg();
         if (cmd == "help") {
             cmd_help();
+#ifdef __ESP__
         } else if (cmd == "reboot") {
             cmd_reboot();
-        } else if (cmd == "spy") {
-            cmd_spy();
-        } else if (cmd == "pub") {
-            cmd_pub();
         } else if (cmd == "debug") {
             cmd_debug();
         } else if (cmd == "wifi") {
             cmd_wifi();
+#endif
         } else if (cmd == "info") {
             cmd_info();
         } else if (cmd == "uname") {
@@ -303,6 +305,10 @@ class Console {
             cmd_ps();
         } else if (cmd == "date") {
             cmd_date();
+        } else if (cmd == "spy") {
+            cmd_spy();
+        } else if (cmd == "pub") {
+            cmd_pub();
 #ifdef __ESP__
         } else if (cmd == "ls") {
             cmd_ls();
@@ -323,18 +329,13 @@ class Console {
         String help =
             "\rcommands: help, reboot, spy, pub, debug, wifi, info, uname, ps, date, ls, cat, jf";
 #else
-        String help = "\rcommands: help, reboot, spy, pub, debug, wifi, info, uname, ps, date";
+        String help = "\rcommands: help, reboot, spy, pub, info, uname, ps, date";
 #endif
         for (unsigned int i = 0; i < commands.length(); i++) {
             help += ", ";
             help += commands[i].command;
         }
         Serial.println(help);
-    }
-
-    void cmd_reboot() {
-        Serial.println("Rebooting...");
-        ESP.restart();
     }
 
     void cmd_spy() {
@@ -382,6 +383,12 @@ class Console {
         pSched->publish(topic, args, "console");
     }
 
+#ifdef __ESP__
+    void cmd_reboot() {
+        Serial.println("Restarting...");
+        ESP.restart();
+    }
+
     void cmd_debug() {
         Serial.print("\rWiFi debug output ");
         if (debug) {
@@ -395,6 +402,12 @@ class Console {
         }
     }
 
+    void cmd_wifi() {
+        Serial.println("\nWiFi Information:\n-----------------");
+        WiFi.printDiag(Serial);
+        Serial.println("");
+    }
+#endif
     void cmd_ps() {
         Serial.println("\nScheduler Information:\n----------------------");
         Serial.println("System Time: " + String(pSched->systemTime));
@@ -423,16 +436,6 @@ class Console {
 #endif
         }
         Serial.println("");
-    }
-
-    void cmd_wifi() {
-#ifdef __ESP__
-        Serial.println("\nWiFi Information:\n-----------------");
-        WiFi.printDiag(Serial);
-        Serial.println("");
-#else
-        Serial.println("No WiFi diagnosis data.");
-#endif
     }
 
     void cmd_info() {
