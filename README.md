@@ -125,6 +125,13 @@ for more samples on muwerk's task scheduler and pub/sub intertask communication.
 +------------+ +------------+ +----------------+
 ```
 
+Debugging and Troubleshooting
+-----------------------------
+
+The [`Console`]() class allows to bind a serial console to muwerk that allows to inspect message passing,
+file system (if available) and statistical information. See the [`console`](https://github.com/muwerk/muwerk/tree/master/Examples/console) example
+for more information.
+
 Documentation
 -------------
 
