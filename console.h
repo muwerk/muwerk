@@ -569,9 +569,6 @@ class Console {
 
 #ifdef __ESP__
     void cmd_ls() {
-#ifdef __USE_SPIFFS_FS__
-        Serial.println("The SPIFFS filesystem does not support enumerating directories");
-#else
         ustd::array<String> paths;
         bool extended = false;
 
@@ -590,6 +587,24 @@ class Console {
             String root = "/";
             paths.add(root);
         }
+
+#ifdef __USE_SPIFFS_FS__
+        fs::File root = SPIFFS.open("/");
+        fs::File file = root.openNextFile();
+        while (file) {
+            if (extended) {
+                Serial.printf("%crw-rw-rw-  %10u  ", (file.isDirectory() ? 'd' : '-'), file.size());
+                time_t tt = file.getLastWrite();
+                struct tm *lt = localtime(&tt);
+                if (lt) {
+                    Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i  ", lt->tm_year + 1900,
+                                  lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
+                }
+            }
+            Serial.println(file.name() + 1);
+            file = root.openNextFile();
+        }
+#else
 
         for (unsigned int i = 0; i < paths.length(); i++) {
             fs::Dir dir = fsOpenDir(paths[i]);
