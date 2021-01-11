@@ -15,6 +15,12 @@ bool fsInited = false;
 #endif
 
 bool fsBegin() {
+    /*! This function initializes the choosen file system. The
+    Usually it is not needed to call this function explicitely since
+    all file system abstration functions check that the file system
+    has been initialized and in case invoke it.
+    @return true on success
+    */
     if (!fsInited) {
 #ifdef __USE_SPIFFS_FS__
         fsInited = SPIFFS.begin(false);
@@ -35,7 +41,11 @@ void fsEnd() {
     }
 }
 
-bool fsdelete(String filename) {
+bool fsDelete(String filename) {
+    /*! This function deletes the spcified file from the filesystem.
+    @param filename Absolute filename of the file to be deleted
+    @return true on sucess
+    */
 #ifdef __USE_SPIFFS_FS__
     bool ret = fsBegin() && SPIFFS.remove(filename);
 #else
@@ -48,6 +58,12 @@ bool fsdelete(String filename) {
 }
 
 fs::File fsOpen(String filename, String mode) {
+    /*! This function opens the specified file and returns a file object.
+    @param filename Absolute filename of the file to be opened
+    @param mode File access mode (r, r+, w, w+, a, a+)
+    @return File object of the speicified file. To check whether the file
+            was opened successfully, use the boolean operator.
+    */
     if (!fsBegin()) {
         return (fs::File)0;
     }
@@ -63,6 +79,10 @@ fs::File fsOpen(String filename, String mode) {
 }
 
 fs::Dir fsOpenDir(String path) {
+    /*! This function opens a directory given its absolute path.
+    @param path Absolute path to open
+    @return Dir object of the specified directory.
+    */
     if (!fsBegin()) {
         return (fs::Dir)0;
     }
