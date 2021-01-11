@@ -36,7 +36,11 @@ bool fsBegin() {
 
 void fsEnd() {
     if (fsInited) {
+#ifdef __USE_SPIFFS_FS__
+        SPIFFS.end();
+#else
         LittleFS.end();
+#endif
         fsInited = false;
     }
 }
@@ -78,6 +82,7 @@ fs::File fsOpen(String filename, String mode) {
     return f;
 }
 
+#ifndef __USE_SPIFFS_FS__
 fs::Dir fsOpenDir(String path) {
     /*! This function opens a directory given its absolute path.
     @param path Absolute path to open
@@ -86,11 +91,8 @@ fs::Dir fsOpenDir(String path) {
     if (!fsBegin()) {
         return (fs::Dir)0;
     }
-#ifdef __USE_SPIFFS_FS__
-    return SPIFFS.openDir(path.c_str());
-#else
     return LittleFS.openDir(path.c_str());
-#endif
 }
+#endif
 
 }  // namespace ustd

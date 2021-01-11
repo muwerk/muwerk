@@ -497,7 +497,7 @@ class Console {
         if (arg == "-a") {
 #ifdef __ESP__
 #ifdef __ESP32__
-            Serial.print("  " + WiFi.getHostname() + " Arduino ESP32 Version " +
+            Serial.print("  " + String(WiFi.getHostname()) + " Arduino ESP32 Version " +
                          ESP.getSdkVersion());
 #else
             Serial.print("  " + WiFi.hostname() + " Arduino ESP Version " + ESP.getSdkVersion());
@@ -569,6 +569,9 @@ class Console {
 
 #ifdef __ESP__
     void cmd_ls() {
+#ifdef __USE_SPIFFS_FS__
+        Serial.println("The SPIFFS filesystem does not support enumerating directories");
+#else
         ustd::array<String> paths;
         bool extended = false;
 
@@ -605,6 +608,7 @@ class Console {
                 Serial.println(dir.fileName());
             }
         }
+#endif
     }
 
     void cmd_rm() {
