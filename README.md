@@ -81,6 +81,9 @@ Both tasks were always executed as schedules (negligable late-times `cn`).
 See `Examples\mac-linux`. (Not available on ATTINY platforms, only ATMEGA
 and better).
 
+For systems that are connected to an MQTT-server (via [`munet`](https://github.com/muwerk/munet/blob/master/README.md)), a python example script [mutop](https://github.com/muwerk/muwerk/tree/master/Examples/mutop) shows
+how to parse the statistical information.
+
 MQTT-like communcations and architecture overview
 -------------------------------------------------
 
@@ -140,6 +143,7 @@ Related projects:
 History
 -------
 
+* 0.4.0 (2021-01-11) Optional serial console for muwerk, file system support for ESP8266 and ESP32.
 * 0.3.2 (2020-12-25) Small platform updates, no functional change.
 * 0.3.1 (2019-11-29) Compile problem with attiny: resetStats() referenced for attiny.
 * 0.3.0 (2019-11-28) Statistical information is no longer flooding serial port, but is published (on demand) to topic `$SYS/stat`. Use publish to `$SYS/stat/get`, message body `number` (as string encoded) to receive stat information every `number` milliseconds.
