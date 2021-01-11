@@ -286,7 +286,7 @@ class Console {
         if (cmd == "help") {
             cmd_help();
         } else if (cmd == "reboot") {
-            ESP.restart();
+            cmd_reboot();
         } else if (cmd == "spy") {
             cmd_spy();
         } else if (cmd == "pub") {
@@ -297,8 +297,12 @@ class Console {
             cmd_wifi();
         } else if (cmd == "info") {
             cmd_info();
+        } else if (cmd == "uname") {
+            cmd_uname();
         } else if (cmd == "ps") {
             cmd_ps();
+        } else if (cmd == "date") {
+            cmd_date();
 #ifdef __ESP__
         } else if (cmd == "ls") {
             cmd_ls();
@@ -316,15 +320,21 @@ class Console {
 
     void cmd_help() {
 #ifdef __ESP__
-        String help = "\rcommands: help, reboot, spy, pub, debug, wifi, info, ps, ls, cat, jf";
+        String help =
+            "\rcommands: help, reboot, spy, pub, debug, wifi, info, uname, ps, date, ls, cat, jf";
 #else
-        String help = "\rcommands: help, reboot, spy, pub, debug, wifi, info, ps";
+        String help = "\rcommands: help, reboot, spy, pub, debug, wifi, info, uname, ps, date";
 #endif
         for (unsigned int i = 0; i < commands.length(); i++) {
             help += ", ";
             help += commands[i].command;
         }
         Serial.println(help);
+    }
+
+    void cmd_reboot() {
+        Serial.println("Rebooting...");
+        ESP.restart();
     }
 
     void cmd_spy() {
@@ -471,6 +481,54 @@ class Console {
 #else
         Serial.println("\nNo information available");
 #endif
+    }
+
+    void cmd_uname() {
+        String arg = pullArg();
+        arg.toLowerCase();
+        if (arg == "-h") {
+            Serial.println("usage: uname [-a]");
+            return;
+        }
+        Serial.print("muwerk");
+        if (arg == "-a") {
+#ifdef __ESP__
+#ifdef __ESP32__
+            Serial.print("  " + WiFi.getHostname() + " Arduino ESP32 Version " +
+                         ESP.getSdkVersion());
+#else
+            Serial.print("  " + WiFi.hostname() + " Arduino ESP Version " + ESP.getSdkVersion());
+#endif
+#else
+            Serial.print("  localhost Arduino ");
+#endif
+            Serial.print(": " __DATE__ " " __TIME__);
+        }
+        Serial.println("");
+    }
+
+    void cmd_date() {
+        String arg = pullArg();
+        arg.toLowerCase();
+        if (arg == "-h") {
+            Serial.println("usage: time [YYYY-MM-DD [hh:mm:ss]]");
+            return;
+        }
+        if (arg == "") {
+            time_t t = time(nullptr);
+            struct tm *lt = localtime(&t);
+            if (lt) {
+#ifdef __ESP__
+                Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n", lt->tm_year + 1900,
+                              lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
+#else
+                char buffer[32];
+                sprintf(buffer, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n", lt->tm_year + 1900,
+                        lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
+                Serial.print(buffer);
+#endif
+            }
+        }
     }
 
 #ifdef __ESP__
