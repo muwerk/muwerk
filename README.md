@@ -131,7 +131,7 @@ Debugging and Troubleshooting
 
 <img align="right" width="480" src="https://github.com/muwerk/muwerk/blob/master/Resources/console.jpg">
 
-The `Console` class allows to bind a serial console to muwerk that allows to inspect message passing,
+The [`Console`](https://muwerk.github.io/muwerk/docs/classustd_1_1Console.html) class allows to bind a serial console to muwerk that allows to inspect message passing,
 file system (if available) and statistical information. See the
 [`mu_console`](https://github.com/muwerk/muwerk/blob/master/Examples/console/mu_console.cpp) example
 for more information.
