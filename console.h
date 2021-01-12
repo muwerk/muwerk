@@ -79,10 +79,10 @@ void apploop() {}
 void setup() {
     // extend console
     con.extend( "hurz", []( String cmd, String args ) {
-        Serial.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
+        Output.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
             String arg = Console::shift( args );
-            Serial.println( arg + "   HURZ!" );
+            Output.println( arg + "   HURZ!" );
         }
     } );
 
@@ -782,10 +782,10 @@ void apploop() {}
 void setup() {
     // extend console
     con.extend( "hurz", []( String cmd, String args ) {
-        Serial.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
+        Output.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
             String arg = Console::shift( args );
-            Serial.println( arg + "   HURZ!" );
+            Output.println( arg + "   HURZ!" );
         }
     } );
 
