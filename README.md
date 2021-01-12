@@ -60,22 +60,24 @@ Sample stat json (single output-line from `Examples/mac-linux`):
 
 ```json
 {
-    "dt" : 500001, "syt" : 57340, "apt" : 347452, "mat" : 10, "tsks" : 2,
-        "tdt" : [["task1", 10, 99240, 7], ["task2", 7, 34937, 0]]}
+    "dt" : 500001, "syt" : 57340, "apt" : 347452, "mat" : 10, "upt":2, "mem":2147483647, "tsks" : 2,
+        "tdt" : [["task1", 1, 50000, 10, 99240, 7], ["task2", 2, 75000, 7, 34937, 0]]}
 ```
 
-| Field | Explanation                         |
-| ----- | ----------------------------------- |
-| dt    | µsec since last stat sample         |
-| syt   | time in usec used by OS             |
-| apt   | time in usec used by mwerk tasks    |
-| mat   | time in usec for housekeeping       |
-| tsks  | number of muwerk tasks `tn`         |
-| tdt   | array of `tn` entries for each task, containing: task-name `tname` , number of times task was executed during sample time `cn`, usecs used by this task during this sample `sct`, accumulated usecs task execution was later than scheduled `slt` |
+| Field | Explanation                            |
+| ----- | -------------------------------------- |
+| dt    | µsec since last stat sample            |
+| syt   | time in usec used by OS                |
+| apt   | time in usec used by mwerk tasks       |
+| mat   | time in usec for housekeeping          |
+| upt   | uptime of system in seconds            |
+| mem   | free memory, max. INT_MAX for unixoids |
+| tsks  | number of muwerk tasks `tn`            |
+| tdt   | array of `tn` entries for each task, containing: task-name `tname` , `tid` taskID of process, `sched_time` scheduling time, number of times task was executed during sample time `cn`, usecs used by this task during this sample `sct`, accumulated usecs task execution was later than scheduled `slt` |
 
-This example shows a `dt=500ms` sample, it has two tasks, `task1` was called
-10 times and used average 9.9240ms per call (task-code has approx. 10ms sleep),
-and `task2` was called 7 times and used average 4.991ms (5ms sleep in code).
+This example shows a `dt=500ms` sample, it has two tasks, `task1`, `id=1` was called
+10 times, every 50ms, and used average 9.9240ms per call (task-code has approx. 10ms sleep),
+and `task2`, `id=2` was called 7 times, every 75ms, and used average 4.991ms (5ms sleep in code).
 Both tasks were always executed as schedules (negligable late-times `cn`).
 
 See `Examples\mac-linux`. (Not available on ATTINY platforms, only ATMEGA
@@ -154,6 +156,7 @@ Related projects:
 History
 -------
 
+* 0.4.x (not published) `$SYS/STAT` format expanded to contain uptime, free memory, and per-task infos task-id and schedule-time.
 * 0.4.0 (2021-01-11) Optional serial console for muwerk, file system support for ESP8266 and ESP32.
 * 0.3.2 (2020-12-25) Small platform updates, no functional change.
 * 0.3.1 (2019-11-29) Compile problem with attiny: resetStats() referenced for attiny.

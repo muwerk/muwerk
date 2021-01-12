@@ -263,6 +263,8 @@ class Scheduler {
     unsigned long appTimer;
     unsigned long appTime = 0;
     unsigned long mainTime = 0;  // Time spent with SCHEDULER_MAIN id.
+    unsigned long upTime = 0;    // Seconds system is running
+    unsigned long upTimeTicker = 0;
 
   public:
     Scheduler(int nTaskListSize = 2, int queueSize = 2, int nSubscriptionListSize = 2)
@@ -274,6 +276,8 @@ class Scheduler {
          */
         subscriptionHandle = 0;
         taskID = 0;  // 0 is SCHEDULER_MAIN
+        upTime = 0;
+        upTimeTicker = micros();
 #ifndef __ATTINY__
         resetStats(true);
 #endif
@@ -560,6 +564,33 @@ class Scheduler {
         return false;
     }
 
+    bool reschedule(int taskID, unsigned long minMicroSecs = 100000L, T_PRIO prio = PRIO_NORMAL) {
+        /*! Reschedule an existing task
+         *
+         * @param taskID Task ID to be rescheduled
+         * @param minMicroSecs New schedule: task function is called every minMicroSecs.
+         * If minMicrosSecs is set to zero, the task's process-function is not called any more.
+         * Note: this is not guaranteed, because it's a cooperative scheduler.
+         * @param prio Not yet supported.
+         * @return true, if task was found and rescheduled, false on error
+         */
+        for (unsigned int i = 0; i < taskList.length(); i++) {
+            if (taskList[i].taskID == taskID) {
+                taskList[i].minMicros = minMicroSecs;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    unsigned long getUptime() {
+        /*! Get uptime in seconds
+        *
+        $ @return Returns the number of seconds passed since system start.
+        */
+        return upTime;
+    }
+
     void singleTaskMode(int _singleTaskID) {
         /*! Instruct scheduler to go into single-task mode
          *
@@ -580,7 +611,7 @@ class Scheduler {
     void runTask(T_TASKENTRY *pTaskEnt) {
         unsigned long startTime = micros();
         unsigned long tDelta = timeDiff(pTaskEnt->lastCall, startTime);
-        if (tDelta >= pTaskEnt->minMicros) {
+        if (tDelta >= pTaskEnt->minMicros && pTaskEnt->minMicros) {
             pTaskEnt->task();
             pTaskEnt->lastCall = startTime;
             pTaskEnt->lateTime += tDelta - pTaskEnt->minMicros;
@@ -609,14 +640,16 @@ class Scheduler {
             return;
         unsigned long now = micros();
         unsigned long tDelta = timeDiff(statTimer, now);
+        unsigned long mem = (unsigned long)freeMemory();
         if (tDelta > statIntervallMs * 1000) {
             const char *null_name = "<null>";
-            const char *skeleton_head = "{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,"
-                                        "\"mat\":%ld,\"tsks\":%ld,\"tdt\":[";
+            const char *skeleton_head =
+                "{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,"
+                "\"mat\":%ld,\"upt\":%ld,\"mem\":%ld,\"tsks\":%ld,\"tdt\":[";
             const char *skeleton_tail = "]}";
-            const char *bone = "[\"%s\",%ld,%ld,%ld],";
+            const char *bone = "[\"%s\",%ld,%ld,%ld,%ld,%ld],";
             unsigned long memreq =
-                strlen(skeleton_head) + 7 * 5 + (strlen(bone) + 7 * 3) * taskList.length();
+                strlen(skeleton_head) + 7 * 7 + (strlen(bone) + 7 * 5) * taskList.length();
             for (unsigned int i = 0; i < taskList.length(); i++) {
                 if (taskList[i].szName == nullptr)
                     memreq += strlen(null_name);
@@ -627,16 +660,17 @@ class Scheduler {
             char *jsonstr = (char *)malloc(memreq);
             if (jsonstr != nullptr) {
                 memset(jsonstr, 0, memreq);
-                sprintf(jsonstr, skeleton_head, tDelta, systemTime, appTime, mainTime,
+                sprintf(jsonstr, skeleton_head, tDelta, systemTime, appTime, mainTime, upTime, mem,
                         taskList.length());
                 for (unsigned int i = 0; i < taskList.length(); i++) {
                     char *p = &jsonstr[strlen(jsonstr)];
                     if (taskList[i].szName == nullptr) {
-                        sprintf(p, bone, null_name, taskList[i].callCount, taskList[i].cpuTime,
-                                taskList[i].lateTime);
+                        sprintf(p, bone, null_name, (long)taskList[i].taskID, taskList[i].minMicros,
+                                taskList[i].callCount, taskList[i].cpuTime, taskList[i].lateTime);
                     } else {
-                        sprintf(p, bone, taskList[i].szName, taskList[i].callCount,
-                                taskList[i].cpuTime, taskList[i].lateTime);
+                        sprintf(p, bone, taskList[i].szName, (long)taskList[i].taskID,
+                                taskList[i].minMicros, taskList[i].callCount, taskList[i].cpuTime,
+                                taskList[i].lateTime);
                     }
                 }
                 char *p = &jsonstr[strlen(jsonstr)];
@@ -644,8 +678,16 @@ class Scheduler {
                     --p;  // no final ','
                 strcpy(p, skeleton_tail);
 
-                // Serial.print(memreq); Serial.print(" ");
-                // Serial.println(strlen(jsonstr)); Serial.println(jsonstr);
+                //#ifdef USE_SERIAL_DBG
+                // Serial.print(memreq);
+                // Serial.print(" ");
+                // Serial.println(strlen(jsonstr));
+                // Serial.println(jsonstr);
+                // char brz[50];
+                // sprintf(brz, "%ld,%ld", memreq, strlen(jsonstr));
+                // String msg = "JSONMEM: " + String(brz);
+                // publish("$SYS/stat", msg, "scheduler-dbg");
+                //#endif
                 publish("$SYS/stat", jsonstr, "scheduler");
                 free(jsonstr);
             }
@@ -660,8 +702,13 @@ class Scheduler {
          * This loop() function should be called in Arduino's loop() function.
          * Preferably no other code should be in Arduino's loop().
          */
-        systemTime += timeDiff(systemTimer, micros());
-        appTimer = micros();
+        unsigned long current = micros();
+        if (timeDiff(upTimeTicker, current) > 1000000L) {
+            upTime += 1;
+            upTimeTicker += 1000000;
+        }
+        systemTime += timeDiff(systemTimer, current);
+        appTimer = current;
         if (!bSingleTaskMode) {
 #ifndef __ATTINY__
             checkStats();
