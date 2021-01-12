@@ -254,12 +254,16 @@ class Console {
             cmd_uname();
         } else if (cmd == "info") {
             cmd_info();
+#ifndef __UNO__
         } else if (cmd == "mem") {
             cmd_mem();
+#endif
         } else if (cmd == "ps") {
             cmd_ps();
+#ifndef __UNO__
         } else if (cmd == "date") {
             cmd_date();
+#endif
         } else if (cmd == "sub") {
             cmd_sub();
         } else if (cmd == "pub") {
@@ -280,7 +284,10 @@ class Console {
     }
 
     void cmd_help() {
-        String help = "commands: help, sub, pub, mem, info, uname, ps, date";
+        String help = "commands: help, sub, pub, info, uname, ps";
+#ifndef __UNO__
+        help += ", date, mem";
+#endif
 #ifdef __SUPPORT_FS__
         help += ", ls, rm, cat, jf";
 #endif
@@ -382,6 +389,7 @@ class Console {
         Serial.println();
     }
 
+#ifndef __UNO__
     void cmd_mem() {
         Output.println();
 #ifdef __ESP__
@@ -412,10 +420,17 @@ class Console {
         Output.println();
 #endif
 #else
+#ifdef __ARDUINO__
+        Output.print("memfree: ");
+        Output.print(freeMemory());
+        Output.println(" bytes.");
+#else
         Output.println("No information available");
         Output.println();
 #endif
+#endif
     }
+#endif  // __UNO__
 
     void cmd_info() {
         Output.println();
@@ -446,11 +461,19 @@ class Console {
         outputf("Flash Chip Speed: %u hz\r\n", (unsigned int)ESP.getFlashChipSpeed());
         outputf("Last Reset Reason: %s\r\n", ESP.getResetReason().c_str());
         Output.println();
-#endif
+#endif  // __ESP32__
+#else
+#ifdef __ARDUINO__
+        Output.print("memfree: ");
+        Output.print(freeMemory());
+        Output.print(" bytes, ");
+        Output.print(F_CPU);
+        Output.println("Hz.");
 #else
         Output.println("No information available");
         Output.println();
-#endif
+#endif  // __ARDUINO__
+#endif  // __ESP__
     }
 
     void cmd_uname() {
@@ -483,6 +506,7 @@ class Console {
         Output.println();
     }
 
+#ifndef __UNO__
     void cmd_date() {
         String arg = pullArg();
         arg.toLowerCase();
@@ -539,6 +563,7 @@ class Console {
 #endif
         }
     }
+#endif  // __UNO__
 
 #ifdef __SUPPORT_FS__
     void cmd_ls() {
@@ -726,12 +751,14 @@ class Console {
         }
         int iSubId =
             pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
+#ifndef __UNO__
                 if (originator.length() == 0) {
                     originator = "unknown";
                 }
                 Output.print("\rfrom: ");
                 Output.print(originator);
                 Output.print(": ");
+#endif
                 Output.print(topic);
                 Output.print(" ");
                 Output.println(msg);
@@ -798,9 +825,15 @@ void loop() {
 
 */
 
+#ifdef __ARDUINO__
+#define MU_SERIAL_BUF_SIZE 2
+#else
+#define MU_SERIAL_BUF_SIZE 16
+#endif
+
 class SerialConsole : public Console {
   protected:
-    char buffer[16];
+    char buffer[MU_SERIAL_BUF_SIZE];
     char *pcur;
 
   public:
@@ -821,7 +854,7 @@ class SerialConsole : public Console {
 #endif
         Output = Serial;
         pSched = _pSched;
-        tID = pSched->add([this]() { this->loop(); }, name, 250000);
+        tID = pSched->add([this]() { this->loop(); }, name, 60000);  // 60ms
         Serial.println();
         prompt();
         execute(initialCommand);
@@ -839,7 +872,7 @@ class SerialConsole : public Console {
         bool changed = false;
         int count = 0;
 
-        while ((incomingByte = Serial.read()) != -1 && count < 16) {
+        while ((incomingByte = Serial.read()) != -1 && count < MU_SERIAL_BUF_SIZE) {
             ++count;  // limit reads per cycle
             switch (incomingByte) {
             case 0:   // ignore
