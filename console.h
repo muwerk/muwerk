@@ -8,14 +8,22 @@
 
 #ifdef __ATMEGA__
 #include <time.h>
+#define __SUPPORT_EXTEND__ 1
 #endif
 
 #ifdef __ESP__
-#include "filesystem.h"
-#include "jsonfile.h"
 #define __SUPPORT_FS__ 1
 #define __SUPPORT_EXTEND__ 1
 // #define __SUPPORT_SETDATE__ 1
+#endif
+
+#ifdef __UNO__
+#include <time.h>
+#endif
+
+#ifdef __SUPPORT_FS__
+#include "filesystem.h"
+#include "jsonfile.h"
 #endif
 
 namespace ustd {
