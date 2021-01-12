@@ -48,7 +48,7 @@ The simple interpreter has the follwing builtin commands:
 
 * help: displays a list of supported commands
 * reboot: restarts the device
-* spy: add or remove message spies
+* sub: add or remove message subscriptions shown on console
 * pub: allows to publish a message
 * debug: enable or disable wifi diagnostics (if available)
 * wifi: show wifi status (if available)
@@ -112,8 +112,8 @@ class Console {
     int tID;
     String name;
     String args = "";
-    ustd::array<int> spysub;
-    bool spyall = false;
+    ustd::array<int> subsub;
+    bool suball = false;
     bool debug = false;
 
   public:
@@ -260,8 +260,8 @@ class Console {
             cmd_ps();
         } else if (cmd == "date") {
             cmd_date();
-        } else if (cmd == "spy") {
-            cmd_spy();
+        } else if (cmd == "sub") {
+            cmd_sub();
         } else if (cmd == "pub") {
             cmd_pub();
 #ifdef __SUPPORT_FS__
@@ -280,7 +280,7 @@ class Console {
     }
 
     void cmd_help() {
-        String help = "commands: help, spy, pub, mem, info, uname, ps, date";
+        String help = "commands: help, sub, pub, mem, info, uname, ps, date";
 #ifdef __SUPPORT_FS__
         help += ", ls, rm, cat, jf";
 #endif
@@ -296,35 +296,33 @@ class Console {
         Output.println(help);
     }
 
-    void cmd_spy() {
+    void cmd_sub() {
         String arg = pullArg();
-        if (arg == "-h" || arg == "-H" || arg == "") {
-            Output.println("usage: spy on | all |off");
-            Output.println("usage: spy topic [topic [..]]");
+        if (arg == "-h" || arg == "-H") {
+            Output.println("usage: sub [all | none]");
+            Output.println("usage: sub topic [topic [..]]");
             return;
-        } else if (arg == "off") {
-            clearSpy();
-        } else if (arg == "on" || arg == "all") {
-            addSpy("#");
-        } else {
+        } else if (arg == "none") {
+            clearsub();
+        } else if (arg == "all") {
+            addsub("#");
+        } else if (arg.length()) {
             do {
-                if (addSpy(arg)) {
+                if (addsub(arg)) {
                     arg = pullArg();
                 } else {
                     arg = "";
                 }
             } while (arg.length());
         }
-        Output.print("Message spy is ");
-        if (spysub.length()) {
-            Output.print("on.");
-            if (spyall) {
-                Output.println();
+        if (subsub.length()) {
+            if (suball) {
+                Output.println("All topics subscribed");
             } else {
-                outputf(" (%i subs)\r\n", spysub.length());
+                outputf("%i subscriptions\r\n", subsub.length());
             }
         } else {
-            Output.println("off.");
+            Output.println("No subscriptions");
         }
     }
 
@@ -733,11 +731,11 @@ class Console {
         return false;
     }
 
-    bool addSpy(String topic) {
-        if (spyall) {
+    bool addsub(String topic) {
+        if (suball) {
             return false;
-        } else if (topic == "#" && spysub.length()) {
-            clearSpy();
+        } else if (topic == "#" && subsub.length()) {
+            clearsub();
         }
         int iSubId =
             pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
@@ -752,21 +750,21 @@ class Console {
                 Output.println(msg);
                 prompt();
             });
-        spysub.add(iSubId);
+        subsub.add(iSubId);
         if (topic == "#") {
-            spyall = true;
+            suball = true;
         }
         return true;
     }
 
-    void clearSpy() {
-        if (spysub.length()) {
-            for (unsigned int i = 0; i < spysub.length(); i++) {
-                pSched->unsubscribe(spysub[i]);
+    void clearsub() {
+        if (subsub.length()) {
+            for (unsigned int i = 0; i < subsub.length(); i++) {
+                pSched->unsubscribe(subsub[i]);
             }
         }
-        spysub.erase();
-        spyall = false;
+        subsub.erase();
+        suball = false;
     }
 
     String pullArg(String defValue = "") {
