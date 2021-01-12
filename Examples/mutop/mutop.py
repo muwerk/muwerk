@@ -78,7 +78,7 @@ class MuwerkTop:
 
             if cnt > 0:
                 print(
-                    f"{tid:2} {name[:12]:12} {sched:8} {cnt:5} {per:6.3f}% {bls:10} {cpu_call:9.2f}µs {late_call:9.2f}µs")
+                    f"{tid:2} {name[:12]:12}{sched:7}µs {cnt:5} {per:6.3f}% {bls:10} {cpu_call:9.2f}µs {late_call:9.2f}µs")
             else:
                 print(f"{tid:2} {name[:12]:12} {sched:8} {cnt:5} ")
             up += 1
