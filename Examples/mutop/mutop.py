@@ -54,7 +54,15 @@ class MuwerkTop:
             tsk = stat['tdt'][i]
             name = tsk[0]
             tid = int(tsk[1])
-            sched = int(tsk[2])
+            sched = f"{(int(tsk[2]))}"
+            if sched[-6:] == "000000":
+                sched = sched[:-6]+" s"
+            else:
+                if sched[-3:] == "000":
+                    sched = sched[:-3]+"ms"
+                else:
+                    sched += "µs"
+
             cnt = int(tsk[3])
             cpu = int(tsk[4])
             late = int(tsk[5])
@@ -78,9 +86,9 @@ class MuwerkTop:
 
             if cnt > 0:
                 print(
-                    f"{tid:2} {name[:12]:12}{sched:7}µs {cnt:5} {per:6.3f}% {bls:10} {cpu_call:9.2f}µs {late_call:9.2f}µs")
+                    f"{tid:2} {name[:12]:12} {sched:>8} {cnt:5} {per:6.3f}% {bls:10} {cpu_call:9.2f}µs {late_call:9.2f}µs")
             else:
-                print(f"{tid:2} {name[:12]:12} {sched:8} {cnt:5} ")
+                print(f"{tid:2} {name[:12]:12} {sched:>8} {cnt:5} ")
             up += 1
         print("-------------------------------------------------------------------------")
         upt = stat['upt']
