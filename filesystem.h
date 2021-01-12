@@ -13,7 +13,6 @@ class Dir {
     Dir(int _) {
     }
     Dir(File fd) : fd(fd) {
-        pfxlen = fd.name() ? strlen(fd.name()) : 0;
     }
 
     File openFile(const char *mode) {
@@ -21,7 +20,7 @@ class Dir {
     }
 
     String fileName() {
-        return String(ff.name()).substring(pfxlen);
+        return ff.name();
     }
     size_t fileSize() {
         return ff.size();
@@ -51,7 +50,6 @@ class Dir {
   protected:
     File fd;
     File ff;
-    int pfxlen;
 };
 }  // namespace fs
 #endif

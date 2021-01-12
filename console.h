@@ -13,13 +13,16 @@
 #ifdef __ESP__
 #include "filesystem.h"
 #include "jsonfile.h"
+#define __SUPPORT_FS__ 1
+#define __SUPPORT_EXTEND__ 1
+// #define __SUPPORT_SETDATE__ 1
 #endif
 
 namespace ustd {
 
-/*! \brief Serial Console Extension Function
+/*! \brief Console Extension Function
 
-Extension function that implements a new command for a Serial Console.
+Extension function that implements a new command for a Console.
  */
 
 #if defined(__ESP__) || defined(__UNIXOID__)
@@ -28,30 +31,19 @@ typedef std::function<void(String command, String args)> T_COMMANDFN;
 typedef ustd::function<void(String command, String args)> T_COMMANDFN;
 #endif
 
-#ifdef USE_SERIAL_DBG
-#define NDBG_ONLY(f)
-#define NDBG(f)
-#define NDBGP(f)
-#define NDBGF(...)
-#else
-#define NDBG_ONLY(f) f
-#define NDBG(f) Serial.println(f)
-#define NDBGP(f) Serial.print(f)
-#define NDBGF(...) Serial.printf(__VA_ARGS__)
-#endif
+/*! \brief muwerk Console Class
 
-/*! \brief muwerk Serial Console Class
-
-The console class implements a simple but effective serial console shell that
-allows to communicate to the device via the serial interface. The simple
-interpreter has the follwing builtin commands:
+The console class implements a simple but effective console shell that
+is the base for \ref SerialConsole and can also be used for implementing
+shells over other transport mechanisms.
+The simple interpreter has the follwing builtin commands:
 
 * help: displays a list of supported commands
 * reboot: restarts the device
 * spy: add or remove message spies
 * pub: allows to publish a message
-* debug: enable or disable wifi diagnostics
-* wifi: show wifi status
+* debug: enable or disable wifi diagnostics (if available)
+* wifi: show wifi status (if available)
 * info: show system status
 
 If a file system is available (usually when compiling for ESP8266 or ESP32)
@@ -64,7 +56,7 @@ there are additional builtin commands available:
 
 The commandline parser can be extended (see example below)
 
-## Sample of console with extension
+## Sample of a serial console with extension
 
 ~~~{.cpp}
 
@@ -72,7 +64,7 @@ The commandline parser can be extended (see example below)
 #include "console.h"
 
 ustd::Scheduler sched( 10, 16, 32 );
-ustd::Console con;
+ustd::SerialConsole con;
 
 void apploop() {}
 
@@ -96,60 +88,44 @@ void loop() {
 ~~~
 
 */
-
 class Console {
   protected:
+#if (__SUPPORT_EXTEND__)
     typedef struct {
         int id;
         char *command;
         T_COMMANDFN fn;
     } T_COMMAND;
-
+    ustd::array<T_COMMAND> commands;
+    int commandHandle = 0;
+#endif
+    Print &Output;
     Scheduler *pSched;
     int tID;
+    String name;
     String args = "";
-    char buffer[16];
-    char *pcur;
-    int commandHandle = 0;
-    ustd::array<T_COMMAND> commands;
     ustd::array<int> spysub;
     bool spyall = false;
     bool debug = false;
 
   public:
-    Console() {
-        pcur = buffer;
-        memset(pcur, 0, sizeof(buffer) / sizeof(char));
-        commandHandle = 0;
+    Console(String name) : Output(Serial), name(name) {
     }
-
     ~Console() {
+#if (__SUPPORT_EXTEND__)
         for (unsigned int i = 0; i < commands.length(); i++) {
             free(commands[i].command);
         }
         commands.erase();
-    }
-
-    void begin(Scheduler *_pSched, String initialArgs = "", unsigned long baudrate = 115200) {
-        /*! Starts the console
-         *
-         * @param _pSched Pointer to the muwerk scheduler.
-         * @param initialArgs (optional, default none) Initial command to execute.
-         * @param baudrate (optional, default 115200) The baud rate of the serial interface
-         */
-        pSched = _pSched;
-#ifndef USE_SERIAL_DBG
-        Serial.begin(baudrate);
 #endif
-        tID = pSched->add([this]() { this->loop(); }, "console", 250000);
-        args = initialArgs;
-        Serial.println("");
-        prompt();
-        if (args.length()) {
-            commandparser();
-        }
     }
 
+    void execute(String command) {
+        args = command;
+        execute();
+    }
+
+#if (__SUPPORT_EXTEND__)
     int extend(String command, T_COMMANDFN handler) {
         /*! Extend the console with a custom command
          *
@@ -193,7 +169,7 @@ class Console {
         }
         return false;
     }
-
+#endif
     static String shift(String &args, String defValue = "") {
         /*! Extract the first arg from the supplied args
          * @param args The string object from which to shift out an argument
@@ -217,6 +193,641 @@ class Console {
     }
 
   protected:
+    virtual void prompt() {
+        Output.print("\rmuwerk> ");
+        Output.print(args);
+    }
+
+    size_t outputf(const char *format, ...) {
+        va_list arg;
+        va_start(arg, format);
+        char temp[64];
+        char *buffer = temp;
+        size_t len = vsnprintf(temp, sizeof(temp), format, arg);
+        va_end(arg);
+        if (len > sizeof(temp) - 1) {
+            buffer = new char[len + 1];
+            if (!buffer) {
+                return 0;
+            }
+            va_start(arg, format);
+            vsnprintf(buffer, len + 1, format, arg);
+            va_end(arg);
+        }
+        len = Output.write((const uint8_t *)buffer, len);
+        if (buffer != temp) {
+            delete[] buffer;
+        }
+        return len;
+    }
+
+    void execute() {
+        args.trim();
+        if (args.length()) {
+            Output.println();
+            commandparser();
+            args = "";
+        }
+    }
+
+    void commandparser() {
+        String cmd = pullArg();
+        if (cmd == "help") {
+            cmd_help();
+#ifdef __ESP__
+        } else if (cmd == "reboot") {
+            cmd_reboot();
+        } else if (cmd == "debug") {
+            cmd_debug();
+        } else if (cmd == "wifi") {
+            cmd_wifi();
+#endif
+        } else if (cmd == "uname") {
+            cmd_uname();
+        } else if (cmd == "info") {
+            cmd_info();
+        } else if (cmd == "mem") {
+            cmd_mem();
+        } else if (cmd == "ps") {
+            cmd_ps();
+        } else if (cmd == "date") {
+            cmd_date();
+        } else if (cmd == "spy") {
+            cmd_spy();
+        } else if (cmd == "pub") {
+            cmd_pub();
+#ifdef __SUPPORT_FS__
+        } else if (cmd == "ls") {
+            cmd_ls();
+        } else if (cmd == "rm") {
+            cmd_rm();
+        } else if (cmd == "cat") {
+            cmd_cat();
+        } else if (cmd == "jf") {
+            cmd_jf();
+#endif
+        } else if (!cmd_custom(cmd)) {
+            Serial.println("Unknown command " + cmd);
+        }
+    }
+
+    void cmd_help() {
+        String help = "commands: help, spy, pub, mem, info, uname, ps, date";
+#ifdef __SUPPORT_FS__
+        help += ", ls, rm, cat, jf";
+#endif
+#ifdef __ESP__
+        help += ", debug, wifi, reboot";
+#endif
+#ifdef __SUPPORT_EXTEND__
+        for (unsigned int i = 0; i < commands.length(); i++) {
+            help += ", ";
+            help += commands[i].command;
+        }
+#endif
+        Output.println(help);
+    }
+
+    void cmd_spy() {
+        String arg = pullArg();
+        if (arg == "-h" || arg == "-H" || arg == "") {
+            Output.println("usage: spy on | all |off");
+            Output.println("usage: spy topic [topic [..]]");
+            return;
+        } else if (arg == "off") {
+            clearSpy();
+        } else if (arg == "on" || arg == "all") {
+            addSpy("#");
+        } else {
+            do {
+                if (addSpy(arg)) {
+                    arg = pullArg();
+                } else {
+                    arg = "";
+                }
+            } while (arg.length());
+        }
+        Output.print("Message spy is ");
+        if (spysub.length()) {
+            Output.print("on.");
+            if (spyall) {
+                Output.println();
+            } else {
+                outputf(" (%i subs)\r\n", spysub.length());
+            }
+        } else {
+            Output.println("off.");
+        }
+    }
+
+    void cmd_pub() {
+        String arg = pullArg();
+        if (arg == "-h" || arg == "-H" || arg == "") {
+            Output.println("usage: pub <topic> <message>");
+            return;
+        }
+        pSched->publish(arg, args, name);
+    }
+
+#ifdef __ESP__
+    void cmd_reboot() {
+        Output.println("Restarting...");
+        ESP.restart();
+    }
+
+    void cmd_debug() {
+        Output.print("WiFi debug output ");
+        if (debug) {
+            Serial.setDebugOutput(false);
+            debug = false;
+            Output.println("disabled.");
+        } else {
+            Serial.setDebugOutput(true);
+            debug = true;
+            Output.println("enabled.");
+        }
+    }
+
+    void cmd_wifi() {
+        Output.println("WiFi Information:");
+        Output.println("-----------------");
+        WiFi.printDiag(Serial);
+        Output.println();
+    }
+#endif
+    void cmd_ps() {
+        Output.println();
+        Output.println("Scheduler Information:");
+        Output.println("----------------------");
+        Output.println("System Time: " + String(pSched->systemTime));
+        Output.println("App Time: " + String(pSched->appTime));
+        Output.println("Running Tasks: " + String(pSched->taskList.length()));
+        if (pSched->taskList.length()) {
+            Output.println();
+            Output.println("  TID    Interval       Count    CPU Time   Late Time  Name");
+            Output.println("----------------------------------------------------------------");
+        }
+        for (unsigned int i = 0; i < pSched->taskList.length(); i++) {
+            outputf("%5i  %10lu  %10lu  %10lu  %10lu  ", pSched->taskList[i].taskID,
+                    pSched->taskList[i].minMicros, pSched->taskList[i].callCount,
+                    pSched->taskList[i].cpuTime, pSched->taskList[i].lateTime);
+            Output.println(pSched->taskList[i].szName);
+        }
+        Serial.println();
+    }
+
+    void cmd_mem() {
+        Output.println();
+#ifdef __ESP__
+#ifdef __ESP32__
+        Output.println("Internal Ram:");
+        Output.println("-------------");
+        outputf("Size: %u\r\n", (unsigned int)ESP.getHeapSize());
+        outputf("Free: %u\r\n", (unsigned int)ESP.getFreeHeap());
+        outputf("Used: %u\r\n", (unsigned int)ESP.getHeapSize() - ESP.getFreeHeap());
+        outputf("Peak: %u\r\n", (unsigned int)ESP.getHeapSize() - ESP.getMinFreeHeap());
+        outputf("MaxB: %u\r\n", (unsigned int)ESP.getMaxAllocHeap());
+        Output.println();
+
+        Output.println("SPI Ram:");
+        Output.println("--------");
+        outputf("Size: %u\r\n", (unsigned int)ESP.getPsramSize());
+        outputf("Free: %u\r\n", (unsigned int)ESP.getFreePsram());
+        outputf("Used: %u\r\n", (unsigned int)ESP.getPsramSize() - ESP.getFreePsram());
+        outputf("Peak: %u\r\n", (unsigned int)ESP.getPsramSize() - ESP.getMinFreePsram());
+        outputf("MaxB: %u\r\n", (unsigned int)ESP.getMaxAllocPsram());
+        Output.println();
+#else
+        Output.println("Internal Ram:");
+        Output.println("-------------");
+        outputf("Free: %u\r\n", (unsigned int)ESP.getFreeHeap());
+        outputf("Fragmentation: %u%%\r\n", (unsigned int)ESP.getHeapFragmentation());
+        outputf("Largest Free Block: %u\r\n", (unsigned int)ESP.getMaxFreeBlockSize());
+        Output.println();
+#endif
+#else
+        Output.println("No information available");
+        Output.println();
+#endif
+    }
+
+    void cmd_info() {
+        Output.println();
+#ifdef __ESP__
+#ifdef __ESP32__
+        Output.println("ESP32 Information:");
+        Output.println("------------------");
+        outputf("Chip Verion: %u\r\n", (unsigned int)ESP.getChipRevision());
+        outputf("CPU Frequency: %u MHz\r\n", (unsigned int)ESP.getCpuFreqMHz());
+        outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
+        outputf("Program Size: %u\r\n", (unsigned int)ESP.getSketchSize());
+        outputf("Program Free: %u\r\n", (unsigned int)ESP.getFreeSketchSpace());
+        outputf("Flash Chip Size: %u\r\n", (unsigned int)ESP.getFlashChipSize());
+        outputf("Flash Chip Speed: %u hz\r\n", (unsigned int)ESP.getFlashChipSpeed());
+        Output.println();
+#else
+        Serial.println("ESP Information:");
+        Serial.println("----------------");
+        outputf("Chip ID: %u\r\n", (unsigned int)ESP.getChipId());
+        outputf("Chip Version: %s\r\n", ESP.getCoreVersion().c_str());
+        outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
+        outputf("CPU Frequency: %u MHz\r\n", (unsigned int)ESP.getCpuFreqMHz());
+        outputf("Program Size: %u\r\n", (unsigned int)ESP.getSketchSize());
+        outputf("Program Free: %u\r\n", (unsigned int)ESP.getFreeSketchSpace());
+        outputf("Flash Chip ID: %u\r\n", (unsigned int)ESP.getFlashChipId());
+        outputf("Flash Chip Size: %u\r\n", (unsigned int)ESP.getFlashChipSize());
+        outputf("Flash Chip Real Size: %u\r\n", (unsigned int)ESP.getFlashChipRealSize());
+        outputf("Flash Chip Speed: %u hz\r\n", (unsigned int)ESP.getFlashChipSpeed());
+        outputf("Last Reset Reason: %s\r\n", ESP.getResetReason().c_str());
+        Output.println();
+#endif
+#else
+        Output.println("No information available");
+        Output.println();
+#endif
+    }
+
+    void cmd_uname() {
+        String arg = pullArg();
+        arg.toLowerCase();
+        if (arg == "-h") {
+            Output.println("usage: uname [-a]");
+            return;
+        }
+        Output.print("munix");
+        if (arg == "-a") {
+#ifdef __ESP__
+#ifdef __ESP32__
+            Output.print(" " + String(WiFi.getHostname()) + " Arduino ESP32 Version " +
+                         ESP.getSdkVersion());
+#else
+            Output.print(" " + WiFi.hostname() + " Arduino ESP Version " + ESP.getSdkVersion());
+#endif
+#else
+            Output.print(" localhost Arduino");
+#endif
+            Output.print(": " __DATE__ " " __TIME__);
+#ifdef PLATFORMIO
+            Output.print("; PlatformIO " + String(PLATFORMIO));
+#ifdef ARDUINO_VARIANT
+            Output.print(", " ARDUINO_VARIANT);
+#endif
+#endif
+        }
+        Output.println();
+    }
+
+    void cmd_date() {
+        String arg = pullArg();
+        arg.toLowerCase();
+        if (arg == "-h") {
+#ifdef __SUPPORT_SETDATE__
+            Output.println("usage: date [[YYYY-MM-DD] hh:mm:ss]");
+#else
+            Output.println("usage: date");
+#endif
+            return;
+        }
+        time_t t = time(nullptr);
+        struct tm *lt = localtime(&t);
+        if (!lt) {
+            Output.println("error: current time cannot be determined");
+            return;
+        }
+        if (arg == "") {
+            outputf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\r\n", (int)lt->tm_year + 1900,
+                    (int)lt->tm_mon + 1, (int)lt->tm_mday, (int)lt->tm_hour, (int)lt->tm_min,
+                    (int)lt->tm_sec, t);
+        } else {
+#ifdef __SUPPORT_SETDATE__
+            if (args.length()) {
+                // we have 2 arguments - the first is a date
+                int i = sscanf(arg.c_str(), "%4i-%2i-%2i", &lt->tm_year, &lt->tm_mon, &lt->tm_mday);
+                if (i != 3 || lt->tm_year < 1970 || lt->tm_year > 2038 || lt->tm_mon < 1 ||
+                    lt->tm_mon > 11 || lt->tm_mday < 1 || lt->tm_mday > 31) {
+                    Output.println("error: " + arg + " is not a date");
+                    return;
+                }
+                lt->tm_year -= 1900;
+                lt->tm_mon -= 1;
+                // fetch next
+                arg = pullArg();
+            }
+            int i = sscanf(arg.c_str(), "%2i:%2i:%2i", &lt->tm_hour, &lt->tm_min, &lt->tm_sec);
+            if (i != 3 || lt->tm_hour < 0 || lt->tm_hour > 23 || lt->tm_min < 0 ||
+                lt->tm_min > 59 || lt->tm_sec < 0 || lt->tm_sec > 59) {
+                Output.println("error: " + arg + " is not a time");
+                return;
+            }
+            time_t newt = mktime(lt);
+#ifdef __ESP__
+            DBGF("Setting date to: %4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n",
+                 lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min,
+                 lt->tm_sec, newt);
+#endif
+            time(&newt);
+            // invoke myself to display resulting date
+            args = "";
+            Output.print("Date set to: ");
+            cmd_date();
+#endif
+        }
+    }
+
+#ifdef __SUPPORT_FS__
+    void cmd_ls() {
+        ustd::array<String> paths;
+        bool extended = false;
+
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (arg == "-h" || arg == "-H") {
+                Output.println("\rusage: ls [-l] <path> [<path> [...]]");
+                return;
+            } else if (arg == "-l" || arg == "-L" || arg == "-la") {
+                extended = true;
+            } else {
+                paths.add(arg);
+            }
+        }
+
+        if (paths.length() == 0) {
+            String root = "/";
+            paths.add(root);
+        }
+
+        for (unsigned int i = 0; i < paths.length(); i++) {
+            fs::Dir dir = fsOpenDir(paths[i]);
+            while (dir.next()) {
+                if (extended) {
+                    outputf("%crw-rw-rw-  root  root  %10u  ", (dir.isDirectory() ? 'd' : '-'),
+                            dir.fileSize());
+                    time_t tt = dir.fileTime();
+                    struct tm *lt = localtime(&tt);
+                    if (lt) {
+                        outputf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i  ", lt->tm_year + 1900,
+                                lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
+                    }
+                }
+                Output.println(dir.fileName());
+            }
+        }
+    }
+
+    void cmd_rm() {
+        String arg = pullArg();
+        if (arg == "-h" || arg == "-H") {
+            Output.println("usage: rm <filename>");
+            return;
+        }
+        if (!fsDelete(arg)) {
+#ifndef USE_SERIAL_DBG
+            Output.println("error: File " + arg + " can't be deleted.");
+#endif
+        }
+    }
+
+    void cmd_cat() {
+        String arg = pullArg();
+        if (arg == "-h" || arg == "-H") {
+            Output.println("usage: cat <filename>");
+            return;
+        }
+
+        fs::File f = fsOpen(arg, "r");
+        if (!f) {
+#ifndef USE_SERIAL_DBG
+            Output.println("error: File " + arg + " can't be opened.");
+#endif
+            return;
+        }
+        if (!f.available()) {
+            f.close();
+            return;
+        }
+        while (f.available()) {
+            // Lets read line by line from the file
+            Output.println(f.readStringUntil('\n'));
+        }
+        f.close();
+    }
+
+    void cmd_jf() {
+        String arg = pullArg();
+        arg.toLowerCase();
+
+        if (arg == "-h" || arg == "") {
+            cmd_jf_help();
+        } else if (arg == "get") {
+            cmd_jf_get();
+        } else if (arg == "set") {
+            cmd_jf_set();
+        } else if (arg == "del") {
+            cmd_jf_del();
+        } else {
+            Output.println("error: bad command " + arg + "specified.");
+            cmd_jf_help();
+        }
+    }
+
+    void cmd_jf_help() {
+        Output.println("usage: jf get <jsonpath>");
+        Output.println("usage: jf set <jsonpath> <jsonvalue>");
+        Output.println("usage: jf del <jsonpath>");
+    }
+
+    void cmd_jf_get() {
+        String arg = pullArg();
+
+        if (arg == "-h" || arg == "-H" || arg == "") {
+            cmd_jf_help();
+            return;
+        }
+
+        JsonFile jf;
+        JSONVar value;
+
+        if (!jf.readJsonVar(arg, value)) {
+#ifndef USE_SERIAL_DBG
+            Output.println("error: Cannot read value " + arg);
+#endif
+            return;
+        }
+        Output.print(arg);
+
+        String type = JSON.typeof(value);
+        Output.print(": " + type);
+        if (type == "unknown") {
+            Output.println("");
+        } else {
+            Output.println(", " + JSON.stringify(value));
+        }
+    }
+
+    void cmd_jf_set() {
+        String arg = pullArg();
+
+        if (arg == "-h" || arg == "-H" || arg == "" || args == "") {
+            cmd_jf_help();
+            return;
+        }
+
+        JsonFile jf;
+        JSONVar value = JSON.parse(args);
+        if (JSON.typeof(value) == "undefined") {
+            Output.println("error: Cannot parse value " + args);
+            return;
+        }
+        if (!jf.writeJsonVar(arg, value)) {
+#ifndef USE_SERIAL_DBG
+            Output.println("error: Failed to write value " + arg);
+#endif
+        }
+    }
+
+    void cmd_jf_del() {
+        String arg = pullArg();
+
+        if (arg == "-h" || arg == "-H" || arg == "") {
+            cmd_jf_help();
+            return;
+        }
+
+        JsonFile jf;
+        if (!jf.remove(arg)) {
+#ifndef USE_SERIAL_DBG
+            Output.println("error: Failed to delete value " + arg);
+#endif
+        }
+    }
+#endif
+    bool cmd_custom(String &cmd) {
+#ifdef __SUPPORT_EXTEND__
+        for (unsigned int i = 0; i < commands.length(); i++) {
+            if (cmd == commands[i].command) {
+                commands[i].fn(cmd, args);
+                return true;
+            }
+        }
+#endif
+        return false;
+    }
+
+    bool addSpy(String topic) {
+        if (spyall) {
+            return false;
+        } else if (topic == "#" && spysub.length()) {
+            clearSpy();
+        }
+        int iSubId =
+            pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
+                if (originator.length() == 0) {
+                    originator = "unknown";
+                }
+                Output.print("\rfrom: ");
+                Output.print(originator);
+                Output.print(": ");
+                Output.print(topic);
+                Output.print(" ");
+                Output.println(msg);
+                prompt();
+            });
+        spysub.add(iSubId);
+        if (topic == "#") {
+            spyall = true;
+        }
+        return true;
+    }
+
+    void clearSpy() {
+        if (spysub.length()) {
+            for (unsigned int i = 0; i < spysub.length(); i++) {
+                pSched->unsubscribe(spysub[i]);
+            }
+        }
+        spysub.erase();
+        spyall = false;
+    }
+
+    String pullArg(String defValue = "") {
+        return shift(args, defValue);
+    }
+};
+
+/*! \brief muwerk Serial Console Class
+
+The serial console class implements a simple but effective serial console shell that
+allows to communicate to the device via the serial interface. See \ref Console for a
+list of supported commands.
+
+## Sample of serial console with extension
+
+~~~{.cpp}
+
+#include "scheduler.h"
+#include "console.h"
+
+ustd::Scheduler sched( 10, 16, 32 );
+ustd::SerialConsole con;
+
+void apploop() {}
+
+void setup() {
+    // extend console
+    con.extend( "hurz", []( String cmd, String args ) {
+        Serial.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
+        while ( args.length() ) {
+            String arg = Console::shift( args );
+            Serial.println( arg + "   HURZ!" );
+        }
+    } );
+
+    con.begin( &sched );
+    int tID = sched.add( apploop, "main", 50000 );
+}
+
+void loop() {
+    sched.loop();
+}
+~~~
+
+*/
+
+class SerialConsole : public Console {
+  protected:
+    char buffer[16];
+    char *pcur;
+
+  public:
+    SerialConsole() : Console("serial") {
+        pcur = buffer;
+        memset(buffer, 0, sizeof(buffer) / sizeof(char));
+    }
+
+    void begin(Scheduler *_pSched, String initialCommand = "", unsigned long baudrate = 115200) {
+        /*! Starts the console
+         *
+         * @param _pSched Pointer to the muwerk scheduler.
+         * @param initialCommand (optional, default none) Initial command to execute.
+         * @param baudrate (optional, default 115200) The baud rate of the serial interface
+         */
+#ifndef USE_SERIAL_DBG
+        Serial.begin(baudrate);
+#endif
+        Output = Serial;
+        pSched = _pSched;
+        tID = pSched->add([this]() { this->loop(); }, name, 250000);
+        Serial.println();
+        prompt();
+        execute(initialCommand);
+    }
+
+  protected:
+    virtual void prompt() {
+        Serial.print("\rmuwerk> ");
+        Serial.print(args);
+        Serial.print(buffer);
+    }
+
     void loop() {
         int incomingByte;
         bool changed = false;
@@ -267,535 +878,7 @@ class Console {
         args += buffer;
         // rewind
         pcur = buffer;
-        memset(pcur, 0, sizeof(buffer) / sizeof(char));
-    }
-
-    void execute() {
-        args.trim();
-        if (args.length()) {
-            Serial.println();
-            commandparser();
-            args = "";
-        }
-    }
-
-    void prompt() {
-        Serial.print("\rmuwerk> ");
-        Serial.print(args);
-        Serial.print(buffer);
-    }
-
-    void commandparser() {
-        String cmd = pullArg();
-        if (cmd == "help") {
-            cmd_help();
-#ifdef __ESP__
-        } else if (cmd == "reboot") {
-            cmd_reboot();
-        } else if (cmd == "debug") {
-            cmd_debug();
-        } else if (cmd == "wifi") {
-            cmd_wifi();
-#endif
-        } else if (cmd == "info") {
-            cmd_info();
-        } else if (cmd == "uname") {
-            cmd_uname();
-        } else if (cmd == "ps") {
-            cmd_ps();
-        } else if (cmd == "date") {
-            cmd_date();
-        } else if (cmd == "spy") {
-            cmd_spy();
-        } else if (cmd == "pub") {
-            cmd_pub();
-#ifdef __ESP__
-        } else if (cmd == "ls") {
-            cmd_ls();
-        } else if (cmd == "rm") {
-            cmd_rm();
-        } else if (cmd == "cat") {
-            cmd_cat();
-        } else if (cmd == "jf") {
-            cmd_jf();
-#endif
-        } else if (!cmd_custom(cmd)) {
-            Serial.println("Unknown command " + cmd);
-        }
-    }
-
-    void cmd_help() {
-#ifdef __ESP__
-        String help =
-            "\rcommands: help, reboot, spy, pub, debug, wifi, info, uname, ps, date, ls, cat, jf";
-#else
-        String help = "\rcommands: help, reboot, spy, pub, info, uname, ps, date";
-#endif
-        for (unsigned int i = 0; i < commands.length(); i++) {
-            help += ", ";
-            help += commands[i].command;
-        }
-        Serial.println(help);
-    }
-
-    void cmd_spy() {
-        String arg = pullArg();
-        if (arg == "-h" || arg == "") {
-            Serial.println("usage: spy on | all | off | topic [topic [..]]");
-            return;
-        } else if (arg == "off") {
-            clearSpy();
-        } else if (arg == "on" || arg == "all") {
-            addSpy("#");
-        } else {
-            do {
-                if (addSpy(arg)) {
-                    arg = pullArg();
-                } else {
-                    arg = "";
-                }
-            } while (arg.length());
-        }
-
-        Serial.print("Message spy is ");
-        if (spysub.length()) {
-            Serial.print("on.");
-            if (spyall) {
-                Serial.println();
-            } else {
-#ifdef __ESP__
-                Serial.printf(" (%i subs)\n", spysub.length());
-#else
-                Serial.println(" (" + String(spysub.length()) + " subs)");
-#endif
-            }
-        } else {
-            Serial.println("off.");
-        }
-    }
-
-    void cmd_pub() {
-        String topic = pullArg();
-        if (!topic.length() || topic == "-h") {
-            Serial.println("usage: pub <topic> <message>");
-            return;
-        }
-        pSched->publish(topic, args, "console");
-    }
-
-#ifdef __ESP__
-    void cmd_reboot() {
-        Serial.println("Restarting...");
-        ESP.restart();
-    }
-
-    void cmd_debug() {
-        Serial.print("\rWiFi debug output ");
-        if (debug) {
-            Serial.setDebugOutput(false);
-            debug = false;
-            Serial.println("disabled.");
-        } else {
-            Serial.setDebugOutput(true);
-            debug = true;
-            Serial.println("enabled.");
-        }
-    }
-
-    void cmd_wifi() {
-        Serial.println("WiFi Information:");
-        Serial.println("-----------------");
-        WiFi.printDiag(Serial);
-        Serial.println("");
-    }
-#endif
-    void cmd_ps() {
-        Serial.println("\nScheduler Information:\n----------------------");
-        Serial.println("System Time: " + String(pSched->systemTime));
-        Serial.println("App Time: " + String(pSched->appTime));
-        Serial.println("Running Tasks: " + String(pSched->taskList.length()));
-        if (pSched->taskList.length()) {
-            Serial.println(
-                "\n  TID    Interval       Count    CPU Time   Late Time  "
-                "Name\n----------------------------------------------------------------");
-        }
-        for (unsigned int i = 0; i < pSched->taskList.length(); i++) {
-#ifdef __ESP__
-            Serial.printf("%5i  %10lu  %10lu  %10lu  %10lu  %s\n", pSched->taskList[i].taskID,
-                          pSched->taskList[i].minMicros, pSched->taskList[i].callCount,
-                          pSched->taskList[i].cpuTime, pSched->taskList[i].lateTime,
-                          pSched->taskList[i].szName);
-#else
-            char buffer[64];
-            snprintf(buffer, sizeof(buffer) / sizeof(char), "%5i  %10lu  %10lu  %10lu  %10lu",
-                     pSched->taskList[i].taskID, pSched->taskList[i].minMicros,
-                     pSched->taskList[i].callCount, pSched->taskList[i].cpuTime,
-                     pSched->taskList[i].lateTime);
-            buffer[(sizeof(buffer) / sizeof(char)) - 1] = 0;
-            Serial.print(buffer);
-            Serial.println(pSched->taskList[i].szName);
-#endif
-        }
-        Serial.println("");
-    }
-
-    void cmd_info() {
-        Serial.println("");
-#ifdef __ESP__
-#ifdef __ESP32__
-        Serial.println("ESP32 Information:");
-        Serial.println("------------------");
-        Serial.printf("Chip Verion: %u\n", (unsigned int)ESP.getChipRevision());
-        Serial.printf("CPU Frequency: %u MHz\n", (unsigned int)ESP.getCpuFreqMHz());
-        Serial.printf("SDK Version: %s\n", ESP.getSdkVersion());
-        Serial.printf("Program Size: %u\n", (unsigned int)ESP.getSketchSize());
-        Serial.printf("Program Free: %u\n", (unsigned int)ESP.getFreeSketchSpace());
-        Serial.printf("Flash Chip Size: %u\n", (unsigned int)ESP.getFlashChipSize());
-        Serial.printf("Flash Chip Speed: %u hz\n", (unsigned int)ESP.getFlashChipSpeed());
-        Serial.println("");
-
-        cmd_wifi();
-
-        Serial.println("Internal Ram:");
-        Serial.println("-------------");
-        Serial.printf("Size: %u\n", (unsigned int)ESP.getHeapSize());
-        Serial.printf("Free: %u\n", (unsigned int)ESP.getFreeHeap());
-        Serial.printf("Used: %u\n", (unsigned int)ESP.getHeapSize() - ESP.getFreeHeap());
-        Serial.printf("Peak: %u\n", (unsigned int)ESP.getHeapSize() - ESP.getMinFreeHeap());
-        Serial.printf("MaxB: %u\n", (unsigned int)ESP.getMaxAllocHeap());
-        Serial.println("");
-
-        Serial.println("SPI Ram:");
-        Serial.println("--------");
-        Serial.printf("Size: %u\n", (unsigned int)ESP.getPsramSize());
-        Serial.printf("Free: %u\n", (unsigned int)ESP.getFreePsram());
-        Serial.printf("Used: %u\n", (unsigned int)ESP.getPsramSize() - ESP.getFreePsram());
-        Serial.printf("Peak: %u\n", (unsigned int)ESP.getPsramSize() - ESP.getMinFreePsram());
-        Serial.printf("MaxB: %u\n", (unsigned int)ESP.getMaxAllocPsram());
-        Serial.println("");
-#else
-        Serial.println("ESP Information:");
-        Serial.println("----------------");
-        Serial.printf("Chip ID: %u\n", (unsigned int)ESP.getChipId());
-        Serial.printf("Chip Version: %s\n", ESP.getCoreVersion().c_str());
-        Serial.printf("SDK Version: %s\n", ESP.getSdkVersion());
-        Serial.printf("CPU Frequency: %u MHz\n", (unsigned int)ESP.getCpuFreqMHz());
-        Serial.printf("Program Size: %u\n", (unsigned int)ESP.getSketchSize());
-        Serial.printf("Program Free: %u\n", (unsigned int)ESP.getFreeSketchSpace());
-        Serial.printf("Flash Chip ID: %u\n", (unsigned int)ESP.getFlashChipId());
-        Serial.printf("Flash Chip Size: %u\n", (unsigned int)ESP.getFlashChipSize());
-        Serial.printf("Flash Chip Real Size: %u\n", (unsigned int)ESP.getFlashChipRealSize());
-        Serial.printf("Flash Chip Speed: %u hz\n", (unsigned int)ESP.getFlashChipSpeed());
-        Serial.printf("Last Reset Reason: %s\n", ESP.getResetReason().c_str());
-        Serial.println("");
-
-        cmd_wifi();
-
-        Serial.println("Internal Ram:");
-        Serial.println("-------------");
-        Serial.printf("Free: %u\n", (unsigned int)ESP.getFreeHeap());
-        Serial.printf("Fragmentation: %u%%\n", (unsigned int)ESP.getHeapFragmentation());
-        Serial.printf("Largest Free Block: %u\n", (unsigned int)ESP.getMaxFreeBlockSize());
-        Serial.println("");
-#endif
-#else
-        Serial.println("No information available");
-        Serial.println("");
-#endif
-    }
-
-    void cmd_uname() {
-        String arg = pullArg();
-        arg.toLowerCase();
-        if (arg == "-h") {
-            Serial.println("usage: uname [-a]");
-            return;
-        }
-        Serial.print("muwerk");
-        if (arg == "-a") {
-#ifdef __ESP__
-#ifdef __ESP32__
-            Serial.print(" " + String(WiFi.getHostname()) + " Arduino ESP32 Version " +
-                         ESP.getSdkVersion());
-#else
-            Serial.print(" " + WiFi.hostname() + " Arduino ESP Version " + ESP.getSdkVersion());
-#endif
-#else
-            Serial.print(" localhost Arduino");
-#endif
-            Serial.print(": " __DATE__ " " __TIME__);
-#ifdef PLATFORMIO
-            Serial.print("; PlatformIO " + String(PLATFORMIO));
-#ifdef ARDUINO_VARIANT
-            Serial.print(", " ARDUINO_VARIANT);
-#endif
-#endif
-        }
-        Serial.println("");
-    }
-
-    void cmd_date() {
-        String arg = pullArg();
-        arg.toLowerCase();
-        if (arg == "-h") {
-            Serial.println("usage: date [[YYYY-MM-DD] hh:mm:ss]");
-            return;
-        }
-        time_t t = time(nullptr);
-        struct tm *lt = localtime(&t);
-        if (!lt) {
-            Serial.println("error: current time cannot be determined");
-            return;
-        }
-        if (arg == "") {
-#ifdef __ESP__
-            Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n", lt->tm_year + 1900,
-                          lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, t);
-#else
-            char buffer[48];
-            sprintf(buffer, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n", lt->tm_year + 1900,
-                    lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, t);
-            Serial.print(buffer);
-#endif
-        } else {
-            if (args.length()) {
-                // we have 2 arguments - the first is a date
-                int i = sscanf(arg.c_str(), "%4i-%2i-%2i", &lt->tm_year, &lt->tm_mon, &lt->tm_mday);
-                if (i != 3 || lt->tm_year < 1970 || lt->tm_year > 2038 || lt->tm_mon < 1 ||
-                    lt->tm_mon > 11 || lt->tm_mday < 1 || lt->tm_mday > 31) {
-                    Serial.println("error: " + arg + " is not a date");
-                    return;
-                }
-                lt->tm_year -= 1900;
-                lt->tm_mon -= 1;
-                // fetch next
-                arg = pullArg();
-            }
-            int i = sscanf(arg.c_str(), "%2i:%2i:%2i", &lt->tm_hour, &lt->tm_min, &lt->tm_sec);
-            if (i != 3 || lt->tm_hour < 0 || lt->tm_hour > 23 || lt->tm_min < 0 ||
-                lt->tm_min > 59 || lt->tm_sec < 0 || lt->tm_sec > 59) {
-                Serial.println("error: " + arg + " is not a time");
-                return;
-            }
-            time_t newt = mktime(lt);
-#ifdef __ESP__
-            DBGF("Setting date to: %4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n",
-                 lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min,
-                 lt->tm_sec, newt);
-#endif
-            time(&newt);
-            // invoke myself to display resulting date
-            args = "";
-            Serial.print("Date set to: ");
-            cmd_date();
-        }
-    }
-
-#ifdef __ESP__
-    void cmd_ls() {
-        ustd::array<String> paths;
-        bool extended = false;
-
-        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
-            if (arg == "-h" || arg == "-H") {
-                Serial.println("\rusage: ls [-l] <path> [<path> [...]]");
-                return;
-            } else if (arg == "-l" || arg == "-L" || arg == "-la") {
-                extended = true;
-            } else {
-                paths.add(arg);
-            }
-        }
-
-        if (paths.length() == 0) {
-            String root = "/";
-            paths.add(root);
-        }
-
-        for (unsigned int i = 0; i < paths.length(); i++) {
-            fs::Dir dir = fsOpenDir(paths[i]);
-            while (dir.next()) {
-                if (extended) {
-                    Serial.printf("%crw-rw-rw-  root  root  %10u  ",
-                                  (dir.isDirectory() ? 'd' : '-'), dir.fileSize());
-                    time_t tt = dir.fileTime();
-                    struct tm *lt = localtime(&tt);
-                    if (lt) {
-                        Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i  ", lt->tm_year + 1900,
-                                      lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min,
-                                      lt->tm_sec);
-                    }
-                }
-                Serial.println(dir.fileName());
-            }
-        }
-    }
-
-    void cmd_rm() {
-        String arg = pullArg();
-        if (arg == "-h" || arg == "-H") {
-            Serial.println("usage: rm <filename>");
-            return;
-        }
-        if (!fsDelete(arg)) {
-            NDBG("error: File " + arg + " can't be deleted.");
-        }
-    }
-
-    void cmd_cat() {
-        String arg = pullArg();
-        if (arg == "-h" || arg == "-H") {
-            Serial.println("usage: cat <filename>");
-            return;
-        }
-
-        fs::File f = fsOpen(arg, "r");
-        if (!f) {
-            NDBG("error: File " + arg + " can't be opened.");
-            return;
-        }
-        if (!f.available()) {
-            f.close();
-            return;
-        }
-        while (f.available()) {
-            // Lets read line by line from the file
-            Serial.println(f.readStringUntil('\n'));
-        }
-        f.close();
-    }
-
-    void cmd_jf() {
-        String arg = pullArg();
-        arg.toLowerCase();
-
-        if (arg == "-h" || arg == "") {
-            cmd_jf_help();
-        } else if (arg == "get") {
-            cmd_jf_get();
-        } else if (arg == "set") {
-            cmd_jf_set();
-        } else if (arg == "del") {
-            cmd_jf_del();
-        } else {
-            Serial.println("error: bad command " + arg + "specified.");
-            cmd_jf_help();
-        }
-    }
-
-    void cmd_jf_help() {
-        Serial.println("usage: jf get <jsonpath>");
-        Serial.println("usage: jf set <jsonpath> <jsonvalue>");
-        Serial.println("usage: jf del <jsonpath>");
-    }
-
-    void cmd_jf_get() {
-        String arg = pullArg();
-
-        if (arg == "-h" || arg == "-H" || arg == "") {
-            cmd_jf_help();
-            return;
-        }
-
-        JsonFile jf;
-        JSONVar value;
-
-        if (!jf.readJsonVar(arg, value)) {
-            NDBG("Cannot read value " + arg);
-            return;
-        }
-        Serial.print(arg);
-
-        String type = JSON.typeof(value);
-        Serial.print(": " + type);
-        if (type == "unknown") {
-            Serial.println("");
-            return;
-        } else {
-            Serial.println(", " + JSON.stringify(value));
-        }
-    }
-
-    void cmd_jf_set() {
-        String arg = pullArg();
-
-        if (arg == "-h" || arg == "-H" || arg == "" || args == "") {
-            cmd_jf_help();
-            return;
-        }
-
-        JsonFile jf;
-        JSONVar value = JSON.parse(args);
-        if (JSON.typeof(value) == "undefined") {
-            Serial.println("error: Cannot parse value " + args);
-            return;
-        }
-        if (!jf.writeJsonVar(arg, value)) {
-            NDBG("error: Failed to write value " + arg);
-        }
-    }
-
-    void cmd_jf_del() {
-        String arg = pullArg();
-
-        if (arg == "-h" || arg == "-H" || arg == "") {
-            cmd_jf_help();
-            return;
-        }
-
-        JsonFile jf;
-        if (!jf.remove(arg)) {
-            NDBG("error: Failed to delete value " + arg);
-        }
-    }
-#endif
-    bool cmd_custom(String &cmd) {
-        for (unsigned int i = 0; i < commands.length(); i++) {
-            if (cmd == commands[i].command) {
-                commands[i].fn(cmd, args);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool addSpy(String topic) {
-        if (spyall) {
-            return false;
-        } else if (topic == "#" && spysub.length()) {
-            clearSpy();
-        }
-        int iSubId =
-            pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
-                if (originator.length() == 0) {
-                    originator = "unknown";
-                }
-#ifdef __ESP__
-                Serial.printf("\rfrom %s: %s %s\n", originator.c_str(), topic.c_str(), msg.c_str());
-#else
-                Serial.println( "\rfrom " + originator + ": " + topic + " " + msg );
-#endif
-                prompt();
-            });
-        spysub.add(iSubId);
-        if (topic == "#") {
-            spyall = true;
-        }
-        return true;
-    }
-
-    void clearSpy() {
-        if (spysub.length()) {
-            for (unsigned int i = 0; i < spysub.length(); i++) {
-                pSched->unsubscribe(spysub[i]);
-            }
-        }
-        spysub.erase();
-        spyall = false;
-    }
-
-    String pullArg(String defValue = "") {
-        return shift(args, defValue);
+        memset(buffer, 0, sizeof(buffer) / sizeof(char));
     }
 };  // class Console
 
