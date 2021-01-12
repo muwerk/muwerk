@@ -6,24 +6,41 @@
 #include "array.h"
 #include "scheduler.h"
 
+// project configration defines:
+//
+// __SUPPORT_FS__       - include file system functions
+// __SUPPORT_EXTEND__   - allow to extend consoles with custom commands
+// __SUPPORT_DATE__     - include `date` command
+// __SUPPORT_SETDATE__  - allow to set date and time with `date`
+// __SUPPORT_LOWMEM__   - reduce memory imprint where possible
+
 #ifdef __ATMEGA__
-#include <time.h>
-#define __SUPPORT_EXTEND__ 1
+#define __SUPPORT_EXTEND__
 #endif
 
 #ifdef __ESP__
-#define __SUPPORT_FS__ 1
-#define __SUPPORT_EXTEND__ 1
-// #define __SUPPORT_SETDATE__ 1
+#define __SUPPORT_FS__
+#define __SUPPORT_EXTEND__
+#define __SUPPORT_DATE__
 #endif
 
 #ifdef __UNO__
-#include <time.h>
+#define __SUPPORT_LOWMEM__
 #endif
 
 #ifdef __SUPPORT_FS__
 #include "filesystem.h"
 #include "jsonfile.h"
+#endif
+
+#ifdef __SUPPORT_DATE__
+#include <time.h>
+#endif
+
+#ifdef __SUPPORT_LOWMEM__
+#undef __SUPPORT_DATE__
+#undef __SUPPORT_EXTEND__
+#undef __SUPPORT_FS__
 #endif
 
 namespace ustd {
@@ -98,7 +115,7 @@ void loop() {
 */
 class Console {
   protected:
-#if (__SUPPORT_EXTEND__)
+#ifdef __SUPPORT_EXTEND__
     typedef struct {
         int id;
         char *command;
@@ -120,7 +137,7 @@ class Console {
     Console(String name) : Output(Serial), name(name) {
     }
     ~Console() {
-#if (__SUPPORT_EXTEND__)
+#ifdef __SUPPORT_EXTEND__
         for (unsigned int i = 0; i < commands.length(); i++) {
             free(commands[i].command);
         }
@@ -133,7 +150,7 @@ class Console {
         execute();
     }
 
-#if (__SUPPORT_EXTEND__)
+#ifdef __SUPPORT_EXTEND__
     int extend(String command, T_COMMANDFN handler) {
         /*! Extend the console with a custom command
          *
@@ -252,15 +269,17 @@ class Console {
 #endif
         } else if (cmd == "uname") {
             cmd_uname();
+        } else if (cmd == "uptime") {
+            cmd_uptime();
+#ifndef __SUPPORT_LOWMEM__
         } else if (cmd == "info") {
             cmd_info();
-#ifndef __UNO__
+#endif
         } else if (cmd == "mem") {
             cmd_mem();
-#endif
         } else if (cmd == "ps") {
             cmd_ps();
-#ifndef __UNO__
+#ifdef __SUPPORT_DATE__
         } else if (cmd == "date") {
             cmd_date();
 #endif
@@ -284,9 +303,12 @@ class Console {
     }
 
     void cmd_help() {
-        String help = "commands: help, sub, pub, info, uname, ps";
-#ifndef __UNO__
-        help += ", date, mem";
+        String help = "commands: help, pub, sub, uname, uptime, ps, mem";
+#ifndef __SUPPORT_LOWMEM__
+        help += ", info";
+#endif
+#ifdef __SUPPORT_DATE__
+        help += ", date";
 #endif
 #ifdef __SUPPORT_FS__
         help += ", ls, rm, cat, jf";
@@ -368,17 +390,40 @@ class Console {
         Output.println();
     }
 #endif
+    void cmd_uptime() {
+        unsigned long uptime = pSched->getUptime();
+        unsigned long days = uptime / 86400;
+        unsigned long hours = (uptime % 86400) / 3600;
+        unsigned long minutes = (uptime % 3600) / 60;
+        unsigned long seconds = uptime % 60;
+
+        Output.print("up ");
+        if (days) {
+            Output.print(days);
+            if (days > 1) {
+                Output.print(" days, ");
+            } else {
+                Output.print(" day, ");
+            }
+        }
+        outputf("%2.2lu:%2.2lu:%2.2lu\r\n", hours, minutes, seconds);
+    }
+
     void cmd_ps() {
         Output.println();
+#ifndef __SUPPORT_LOWMEM__
         Output.println("Scheduler Information:");
         Output.println("----------------------");
+#endif
         Output.println("System Time: " + String(pSched->systemTime));
         Output.println("App Time: " + String(pSched->appTime));
         Output.println("Running Tasks: " + String(pSched->taskList.length()));
         if (pSched->taskList.length()) {
             Output.println();
             Output.println("  TID    Interval       Count    CPU Time   Late Time  Name");
+#ifndef __SUPPORT_LOWMEM__
             Output.println("----------------------------------------------------------------");
+#endif
         }
         for (unsigned int i = 0; i < pSched->taskList.length(); i++) {
             outputf("%5i  %10lu  %10lu  %10lu  %10lu  ", pSched->taskList[i].taskID,
@@ -389,49 +434,53 @@ class Console {
         Serial.println();
     }
 
-#ifndef __UNO__
     void cmd_mem() {
         Output.println();
 #ifdef __ESP__
 #ifdef __ESP32__
         Output.println("Internal Ram:");
         Output.println("-------------");
-        outputf("Size: %u\r\n", (unsigned int)ESP.getHeapSize());
-        outputf("Free: %u\r\n", (unsigned int)ESP.getFreeHeap());
-        outputf("Used: %u\r\n", (unsigned int)ESP.getHeapSize() - ESP.getFreeHeap());
-        outputf("Peak: %u\r\n", (unsigned int)ESP.getHeapSize() - ESP.getMinFreeHeap());
-        outputf("MaxB: %u\r\n", (unsigned int)ESP.getMaxAllocHeap());
+        outputf("Size: %u B\r\n", (unsigned int)ESP.getHeapSize());
+        outputf("Free: %u B\r\n", (unsigned int)ESP.getFreeHeap());
+        outputf("Used: %u B\r\n", (unsigned int)ESP.getHeapSize() - ESP.getFreeHeap());
+        outputf("Peak: %u B\r\n", (unsigned int)ESP.getHeapSize() - ESP.getMinFreeHeap());
+        outputf("MaxB: %u B\r\n", (unsigned int)ESP.getMaxAllocHeap());
         Output.println();
 
         Output.println("SPI Ram:");
         Output.println("--------");
-        outputf("Size: %u\r\n", (unsigned int)ESP.getPsramSize());
-        outputf("Free: %u\r\n", (unsigned int)ESP.getFreePsram());
-        outputf("Used: %u\r\n", (unsigned int)ESP.getPsramSize() - ESP.getFreePsram());
-        outputf("Peak: %u\r\n", (unsigned int)ESP.getPsramSize() - ESP.getMinFreePsram());
-        outputf("MaxB: %u\r\n", (unsigned int)ESP.getMaxAllocPsram());
+        outputf("Size: %u B\r\n", (unsigned int)ESP.getPsramSize());
+        outputf("Free: %u B\r\n", (unsigned int)ESP.getFreePsram());
+        outputf("Used: %u B\r\n", (unsigned int)ESP.getPsramSize() - ESP.getFreePsram());
+        outputf("Peak: %u B\r\n", (unsigned int)ESP.getPsramSize() - ESP.getMinFreePsram());
+        outputf("MaxB: %u B\r\n", (unsigned int)ESP.getMaxAllocPsram());
         Output.println();
 #else
         Output.println("Internal Ram:");
         Output.println("-------------");
-        outputf("Free: %u\r\n", (unsigned int)ESP.getFreeHeap());
+        outputf("Free: %u B\r\n", (unsigned int)ESP.getFreeHeap());
         outputf("Fragmentation: %u%%\r\n", (unsigned int)ESP.getHeapFragmentation());
-        outputf("Largest Free Block: %u\r\n", (unsigned int)ESP.getMaxFreeBlockSize());
+        outputf("Largest Free Block: %u B\r\n", (unsigned int)ESP.getMaxFreeBlockSize());
         Output.println();
 #endif
 #else
 #ifdef __ARDUINO__
-        Output.print("memfree: ");
+#ifndef __SUPPORT_LOWMEM__
+        Output.println("Memory:");
+        Output.println("-------");
+#endif
+        Output.print("Free:: ");
         Output.print(freeMemory());
-        Output.println(" bytes.");
+        Output.println(" B");
+        Output.println();
 #else
         Output.println("No information available");
         Output.println();
 #endif
 #endif
     }
-#endif  // __UNO__
 
+#ifndef __SUPPORT_LOWMEM__
     void cmd_info() {
         Output.println();
 #ifdef __ESP__
@@ -441,10 +490,10 @@ class Console {
         outputf("Chip Verion: %u\r\n", (unsigned int)ESP.getChipRevision());
         outputf("CPU Frequency: %u MHz\r\n", (unsigned int)ESP.getCpuFreqMHz());
         outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
-        outputf("Program Size: %u\r\n", (unsigned int)ESP.getSketchSize());
-        outputf("Program Free: %u\r\n", (unsigned int)ESP.getFreeSketchSpace());
-        outputf("Flash Chip Size: %u\r\n", (unsigned int)ESP.getFlashChipSize());
-        outputf("Flash Chip Speed: %u hz\r\n", (unsigned int)ESP.getFlashChipSpeed());
+        outputf("Program Size: %u B\r\n", (unsigned int)ESP.getSketchSize());
+        outputf("Program Free: %u B\r\n", (unsigned int)ESP.getFreeSketchSpace());
+        outputf("Flash Chip Size: %u B\r\n", (unsigned int)ESP.getFlashChipSize());
+        outputf("Flash Chip Speed: %.2f MHz\r\n", (float)ESP.getFlashChipSpeed() / 1000000.0);
         Output.println();
 #else
         Serial.println("ESP Information:");
@@ -453,48 +502,95 @@ class Console {
         outputf("Chip Version: %s\r\n", ESP.getCoreVersion().c_str());
         outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
         outputf("CPU Frequency: %u MHz\r\n", (unsigned int)ESP.getCpuFreqMHz());
-        outputf("Program Size: %u\r\n", (unsigned int)ESP.getSketchSize());
-        outputf("Program Free: %u\r\n", (unsigned int)ESP.getFreeSketchSpace());
+        outputf("Program Size: %u B\r\n", (unsigned int)ESP.getSketchSize());
+        outputf("Program Free: %u B\r\n", (unsigned int)ESP.getFreeSketchSpace());
         outputf("Flash Chip ID: %u\r\n", (unsigned int)ESP.getFlashChipId());
-        outputf("Flash Chip Size: %u\r\n", (unsigned int)ESP.getFlashChipSize());
-        outputf("Flash Chip Real Size: %u\r\n", (unsigned int)ESP.getFlashChipRealSize());
-        outputf("Flash Chip Speed: %u hz\r\n", (unsigned int)ESP.getFlashChipSpeed());
+        outputf("Flash Chip Size: %u B\r\n", (unsigned int)ESP.getFlashChipSize());
+        outputf("Flash Chip Real Size: %u B\r\n", (unsigned int)ESP.getFlashChipRealSize());
+        outputf("Flash Chip Speed: %.2f MHz\r\n", (float)ESP.getFlashChipSpeed() / 1000000.0);
         outputf("Last Reset Reason: %s\r\n", ESP.getResetReason().c_str());
         Output.println();
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
-        Output.print("memfree: ");
-        Output.print(freeMemory());
-        Output.print(" bytes, ");
-        Output.print(F_CPU);
-        Output.println("Hz.");
+        outputf("CPU Frequency: %.2f MHz\r\n", (float)(F_CPU) / 1000000);
+        outputf("Free Memory: %u B\r\n", (unsigned int)freeMemory());
+        Output.println();
 #else
         Output.println("No information available");
         Output.println();
 #endif  // __ARDUINO__
 #endif  // __ESP__
     }
+#endif  //__SUPPORT_LOWMEM__
 
-    void cmd_uname() {
-        String arg = pullArg();
-        arg.toLowerCase();
-        if (arg == "-h") {
-            Output.println("usage: uname [-a]");
-            return;
-        }
-        Output.print("munix");
-        if (arg == "-a") {
+    void cmd_uname(char opt = '\0', bool crlf = true) {
+        String arg;
+        switch (opt) {
+        case '\0':
+            arg = pullArg();
+            switch (arg.length()) {
+            case 0:
+                break;
+            case 2:
+                if (arg[0] == '-') {
+                    cmd_uname(arg[1]);
+                    return;
+                }
+                // intended fallthrough
+            default:
+                cmd_uname('h');
+                return;
+            }
+            // intended fallthrough
+        case 's':
+            Output.print("munix");
+            break;
+        case 'a':
+            // all
+            cmd_uname('s', false);
+            Output.print(" ");
+            cmd_uname('n', false);
+            Output.print(" ");
+            cmd_uname('v', false);
+            break;
+        case 'n':
 #ifdef __ESP__
 #ifdef __ESP32__
-            Output.print(" " + String(WiFi.getHostname()) + " Arduino ESP32 Version " +
-                         ESP.getSdkVersion());
+            Output.print(WiFi.getHostname());
 #else
-            Output.print(" " + WiFi.hostname() + " Arduino ESP Version " + ESP.getSdkVersion());
+            Output.print(WiFi.hostname());
 #endif
 #else
-            Output.print(" localhost Arduino");
+            Output.print("localhost");
 #endif
+            break;
+        case 'r':
+#ifdef __ESP__
+            Output.print(ESP.getSdkVersion());
+#else
+            Output.print("unknown");
+#endif
+            break;
+        case 'p':
+#ifdef __ESP__
+#ifdef __ESP32__
+            Output.print("ESP32");
+#else
+            Output.print("ESP");
+#endif
+#else
+#ifdef __ARDUINO__
+            Output.print("Arduino");
+#else
+            Output.print("Unknown");
+#endif
+#endif
+            break;
+        case 'v':
+            cmd_uname('p', false);
+            Output.print(" Version ");
+            cmd_uname('r', false);
             Output.print(": " __DATE__ " " __TIME__);
 #ifdef PLATFORMIO
             Output.print("; PlatformIO " + String(PLATFORMIO));
@@ -502,11 +598,18 @@ class Console {
             Output.print(", " ARDUINO_VARIANT);
 #endif
 #endif
+            break;
+        case 'h':
+        default:
+            Output.println("usage: uname [-amnprsv]");
+            return;
         }
-        Output.println();
+        if (crlf) {
+            Output.println();
+        }
     }
 
-#ifndef __UNO__
+#ifdef __SUPPORT_DATE__
     void cmd_date() {
         String arg = pullArg();
         arg.toLowerCase();
@@ -560,10 +663,10 @@ class Console {
             args = "";
             Output.print("Date set to: ");
             cmd_date();
-#endif
+#endif  // __ESP__
         }
     }
-#endif  // __UNO__
+#endif  // __SUPPORT_DATE__
 
 #ifdef __SUPPORT_FS__
     void cmd_ls() {
@@ -731,6 +834,7 @@ class Console {
         }
     }
 #endif
+
     bool cmd_custom(String &cmd) {
 #ifdef __SUPPORT_EXTEND__
         for (unsigned int i = 0; i < commands.length(); i++) {
@@ -751,13 +855,15 @@ class Console {
         }
         int iSubId =
             pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
-#ifndef __UNO__
+#ifndef __SUPPORT_LOWMEM__
                 if (originator.length() == 0) {
                     originator = "unknown";
                 }
                 Output.print("\rfrom: ");
                 Output.print(originator);
                 Output.print(": ");
+#else
+                Output.print("\r");
 #endif
                 Output.print(topic);
                 Output.print(" ");
@@ -825,21 +931,34 @@ void loop() {
 
 */
 
+#ifdef __SUPPORT_LOWMEM__
+#define MU_SERIAL_BUF_SIZE 0
+#else
 #ifdef __ARDUINO__
 #define MU_SERIAL_BUF_SIZE 2
-#else
+#endif
+#endif
+
+#ifndef MU_SERIAL_BUF_SIZE
 #define MU_SERIAL_BUF_SIZE 16
+#endif
+#ifndef MU_SERIAL_CHUNK_SIZE
+#define MU_SERIAL_CHUNK_SIZE 32
 #endif
 
 class SerialConsole : public Console {
   protected:
+#if MU_SERIAL_BUF_SIZE > 0
     char buffer[MU_SERIAL_BUF_SIZE];
     char *pcur;
+#endif
 
   public:
     SerialConsole() : Console("serial") {
+#if MU_SERIAL_BUF_SIZE > 0
         pcur = buffer;
         memset(buffer, 0, sizeof(buffer) / sizeof(char));
+#endif
     }
 
     void begin(Scheduler *_pSched, String initialCommand = "", unsigned long baudrate = 115200) {
@@ -861,34 +980,43 @@ class SerialConsole : public Console {
     }
 
   protected:
+#if MU_SERIAL_BUF_SIZE > 0
     virtual void prompt() {
-        Serial.print("\rmuwerk> ");
-        Serial.print(args);
+        Console::prompt();
         Serial.print(buffer);
     }
+#endif
 
     void loop() {
         int incomingByte;
         bool changed = false;
         int count = 0;
 
-        while ((incomingByte = Serial.read()) != -1 && count < MU_SERIAL_BUF_SIZE) {
+        while ((incomingByte = Serial.read()) != -1 && count < MU_SERIAL_CHUNK_SIZE) {
             ++count;  // limit reads per cycle
             switch (incomingByte) {
             case 0:   // ignore
             case 10:  // ignore
                 break;
             case 8:  // backspace
+#if MU_SERIAL_BUF_SIZE > 0
                 if (pcur > buffer) {
                     --pcur;
                     *pcur = 0;
                 } else if (args.length()) {
                     args.remove(args.length() - 1, 1);
                 }
+#else
+                if (args.length()) {
+                    args.remove(args.length() - 1, 1);
+                }
+#endif
                 changed = true;
                 break;
             case 13:  // enter
+#if MU_SERIAL_BUF_SIZE > 0
                 flush();
+#endif
                 execute();
                 changed = true;
                 break;
@@ -896,12 +1024,16 @@ class SerialConsole : public Console {
                 incomingByte = 32;
                 // treat like space
             default:
+#if MU_SERIAL_BUF_SIZE > 0
                 *pcur = (char)incomingByte;
                 ++pcur;
                 if (pcur == buffer + (sizeof(buffer) / sizeof(char)) - 1) {
                     // buffer full - flush it to args
                     flush();
                 }
+#else
+                args += (char)incomingByte;
+#endif
                 changed = true;
                 break;
             }
@@ -912,6 +1044,7 @@ class SerialConsole : public Console {
         }
     }
 
+#if MU_SERIAL_BUF_SIZE > 0
     void flush() {
         *pcur = 0;
         args += buffer;
@@ -919,6 +1052,7 @@ class SerialConsole : public Console {
         pcur = buffer;
         memset(buffer, 0, sizeof(buffer) / sizeof(char));
     }
+#endif
 };  // class Console
 
 }  // namespace ustd
