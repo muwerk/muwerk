@@ -414,8 +414,14 @@ class Console {
         Output.println();
 #endif
 #else
+#ifdef __ARDUINO__
+        Output.print("memfree: ");
+        Output.print(freeMemory());
+        Output.println(" bytes.");
+#else
         Output.println("No information available");
         Output.println();
+#endif
 #endif
     }
 
@@ -450,8 +456,15 @@ class Console {
         Output.println();
 #endif
 #else
+#ifdef __ARDUINO__
+        Output.print("memfree: ");
+        Output.print(freeMemory());
+        Output.print(" bytes, ");
+        Output.print()
+#else
         Output.println("No information available");
         Output.println();
+#endif
 #endif
     }
 
