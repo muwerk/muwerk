@@ -403,7 +403,8 @@ class Console {
     }
 
     void cmd_wifi() {
-        Serial.println("\nWiFi Information:\n-----------------");
+        Serial.println("WiFi Information:");
+        Serial.println("-----------------");
         WiFi.printDiag(Serial);
         Serial.println("");
     }
@@ -439,9 +440,11 @@ class Console {
     }
 
     void cmd_info() {
+        Serial.println("");
 #ifdef __ESP__
 #ifdef __ESP32__
-        Serial.println("\nESP32 Information:\n-------------");
+        Serial.println("ESP32 Information:");
+        Serial.println("------------------");
         Serial.printf("Chip Verion: %u\n", (unsigned int)ESP.getChipRevision());
         Serial.printf("CPU Frequency: %u MHz\n", (unsigned int)ESP.getCpuFreqMHz());
         Serial.printf("SDK Version: %s\n", ESP.getSdkVersion());
@@ -449,24 +452,30 @@ class Console {
         Serial.printf("Program Free: %u\n", (unsigned int)ESP.getFreeSketchSpace());
         Serial.printf("Flash Chip Size: %u\n", (unsigned int)ESP.getFlashChipSize());
         Serial.printf("Flash Chip Speed: %u hz\n", (unsigned int)ESP.getFlashChipSpeed());
+        Serial.println("");
 
         cmd_wifi();
 
-        Serial.println("Internal Ram:\n-------------");
+        Serial.println("Internal Ram:");
+        Serial.println("-------------");
         Serial.printf("Size: %u\n", (unsigned int)ESP.getHeapSize());
         Serial.printf("Free: %u\n", (unsigned int)ESP.getFreeHeap());
         Serial.printf("Used: %u\n", (unsigned int)ESP.getHeapSize() - ESP.getFreeHeap());
         Serial.printf("Peak: %u\n", (unsigned int)ESP.getHeapSize() - ESP.getMinFreeHeap());
         Serial.printf("MaxB: %u\n", (unsigned int)ESP.getMaxAllocHeap());
+        Serial.println("");
 
-        Serial.println("\nSPI Ram:\n--------");
+        Serial.println("SPI Ram:");
+        Serial.println("--------");
         Serial.printf("Size: %u\n", (unsigned int)ESP.getPsramSize());
         Serial.printf("Free: %u\n", (unsigned int)ESP.getFreePsram());
         Serial.printf("Used: %u\n", (unsigned int)ESP.getPsramSize() - ESP.getFreePsram());
         Serial.printf("Peak: %u\n", (unsigned int)ESP.getPsramSize() - ESP.getMinFreePsram());
-        Serial.printf("MaxB: %u\n\n", (unsigned int)ESP.getMaxAllocPsram());
+        Serial.printf("MaxB: %u\n", (unsigned int)ESP.getMaxAllocPsram());
+        Serial.println("");
 #else
-        Serial.println("\nESP Information:\n-------------");
+        Serial.println("ESP Information:");
+        Serial.println("----------------");
         Serial.printf("Chip ID: %u\n", (unsigned int)ESP.getChipId());
         Serial.printf("Chip Version: %s\n", ESP.getCoreVersion().c_str());
         Serial.printf("SDK Version: %s\n", ESP.getSdkVersion());
@@ -478,11 +487,20 @@ class Console {
         Serial.printf("Flash Chip Real Size: %u\n", (unsigned int)ESP.getFlashChipRealSize());
         Serial.printf("Flash Chip Speed: %u hz\n", (unsigned int)ESP.getFlashChipSpeed());
         Serial.printf("Last Reset Reason: %s\n", ESP.getResetReason().c_str());
+        Serial.println("");
 
         cmd_wifi();
+
+        Serial.println("Internal Ram:");
+        Serial.println("-------------");
+        Serial.printf("Free: %u\n", (unsigned int)ESP.getFreeHeap());
+        Serial.printf("Fragmentation: %u%%\n", (unsigned int)ESP.getHeapFragmentation());
+        Serial.printf("Largest Free Block: %u\n", (unsigned int)ESP.getMaxFreeBlockSize());
+        Serial.println("");
 #endif
 #else
-        Serial.println("\nNo information available");
+        Serial.println("No information available");
+        Serial.println("");
 #endif
     }
 
@@ -497,15 +515,21 @@ class Console {
         if (arg == "-a") {
 #ifdef __ESP__
 #ifdef __ESP32__
-            Serial.print("  " + String(WiFi.getHostname()) + " Arduino ESP32 Version " +
+            Serial.print(" " + String(WiFi.getHostname()) + " Arduino ESP32 Version " +
                          ESP.getSdkVersion());
 #else
-            Serial.print("  " + WiFi.hostname() + " Arduino ESP Version " + ESP.getSdkVersion());
+            Serial.print(" " + WiFi.hostname() + " Arduino ESP Version " + ESP.getSdkVersion());
 #endif
 #else
-            Serial.print("  localhost Arduino ");
+            Serial.print(" localhost Arduino");
 #endif
             Serial.print(": " __DATE__ " " __TIME__);
+#ifdef PLATFORMIO
+            Serial.print("; PlatformIO " + String(PLATFORMIO));
+#ifdef ARDUINO_VARIANT
+            Serial.print(", " ARDUINO_VARIANT);
+#endif
+#endif
         }
         Serial.println("");
     }
@@ -588,30 +612,12 @@ class Console {
             paths.add(root);
         }
 
-#ifdef __USE_SPIFFS_FS__
-        fs::File root = SPIFFS.open("/");
-        fs::File file = root.openNextFile();
-        while (file) {
-            if (extended) {
-                Serial.printf("%crw-rw-rw-  %10u  ", (file.isDirectory() ? 'd' : '-'), file.size());
-                time_t tt = file.getLastWrite();
-                struct tm *lt = localtime(&tt);
-                if (lt) {
-                    Serial.printf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i  ", lt->tm_year + 1900,
-                                  lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
-                }
-            }
-            Serial.println(file.name() + 1);
-            file = root.openNextFile();
-        }
-#else
-
         for (unsigned int i = 0; i < paths.length(); i++) {
             fs::Dir dir = fsOpenDir(paths[i]);
             while (dir.next()) {
                 if (extended) {
-                    Serial.printf("%crw-rw-rw-  %10u  ", (dir.isDirectory() ? 'd' : '-'),
-                                  dir.fileSize());
+                    Serial.printf("%crw-rw-rw-  root  root  %10u  ",
+                                  (dir.isDirectory() ? 'd' : '-'), dir.fileSize());
                     time_t tt = dir.fileTime();
                     struct tm *lt = localtime(&tt);
                     if (lt) {
@@ -623,7 +629,6 @@ class Console {
                 Serial.println(dir.fileName());
             }
         }
-#endif
     }
 
     void cmd_rm() {
