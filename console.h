@@ -223,8 +223,8 @@ class Console {
 
     void execute() {
         args.trim();
+        Output.println();
         if (args.length()) {
-            Output.println();
             commandparser();
             args = "";
         }
