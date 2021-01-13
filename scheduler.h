@@ -265,6 +265,7 @@ class Scheduler {
     unsigned long mainTime = 0;  // Time spent with SCHEDULER_MAIN id.
     unsigned long upTime = 0;    // Seconds system is running
     unsigned long upTimeTicker = 0;
+    int currentTaskID = -2;  // TaskID that is currently been executed
 
   public:
     Scheduler(int nTaskListSize = 2, int queueSize = 2, int nSubscriptionListSize = 2)
@@ -551,8 +552,14 @@ class Scheduler {
         /*! Remove an existing task
          *
          * @param taskID Remove the corresponding task from scheduler
+         * 
+         * Note: a task can't delete itself while being executed.
+         * 
          * @return true, if task was found and removed, false on error
          */
+        if (currentTaskID == taskID) {
+            return false;  // A task can't delete itself.
+        }
         for (unsigned int i = 0; i < taskList.length(); i++) {
             if (taskList[i].taskID == taskID) {
                 if (taskList[i].szName != nullptr)
@@ -609,10 +616,13 @@ class Scheduler {
 
   private:
     void runTask(T_TASKENTRY *pTaskEnt) {
+        int deleteId = -2;
         unsigned long startTime = micros();
         unsigned long tDelta = timeDiff(pTaskEnt->lastCall, startTime);
         if (tDelta >= pTaskEnt->minMicros && pTaskEnt->minMicros) {
+            currentTaskId = pTaskEnt->taskID; // prevent task() to delete itself.
             pTaskEnt->task();
+            currentTaskId = -2;
             pTaskEnt->lastCall = startTime;
             pTaskEnt->lateTime += tDelta - pTaskEnt->minMicros;
             pTaskEnt->cpuTime += timeDiff(startTime, micros());
