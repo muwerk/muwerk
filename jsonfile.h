@@ -68,10 +68,20 @@ class JsonFile {
     String filename = "";
     JSONVar obj;
     bool loaded = false;
+    bool forcenew = false;
     bool autocommit;
 
   public:
-    JsonFile(bool autocommit = true) : autocommit(autocommit) {
+    JsonFile(bool autocommit = true, bool forcenew = false)
+        : forcenew(forcenew), autocommit(autocommit) {
+        /*! Creates a new JSON file manager
+        @param autocommit (optional, default is `true`) If set to `false`, all
+                          write operations will be postponed until calling the
+                          method \ref commit
+        @param forcenew (optional, default is `false`) If set to `true`, a new
+                        file will be created instead of changing the existing
+                        one.
+        */
     }
 
     void flush() {
@@ -102,6 +112,7 @@ class JsonFile {
         } else {
             f.print(jsonString.c_str());
             f.close();
+            forcenew = false;
             return true;
         }
     }
@@ -655,6 +666,33 @@ class JsonFile {
         return jf.writeString(key, value);
     }
 
+    bool writeStringArray(String key, ustd::array<String> &values) {
+        /*! Write an array of Strings to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = (const char *)values[i].c_str();
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteStringArray(String key, ustd::array<String> &values) {
+        /*! Write an array of Strings to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JsonFile jf;
+        return jf.writeStringArray(key, values);
+    }
+
     bool writeBool(String key, bool value) {
         /*! Write a boolean value to a JSON-file.
         @param key Combined filename and json-object-path. (maxdepth is limited to 9)
@@ -679,6 +717,33 @@ class JsonFile {
         return jf.writeBool(key, value);
     }
 
+    bool writeBoolArray(String key, ustd::array<bool> &values) {
+        /*! Write an array of boolean values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = values[i];
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteBoolArray(String key, ustd::array<bool> &values) {
+        /*! Write an array of boolean values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JsonFile jf;
+        return jf.writeBoolArray(key, values);
+    }
+
     bool writeDouble(String key, double value) {
         /*! Write a numerical value to a JSON-file.
         @param key Combined filename and json-object-path. (maxdepth is limited to 9)
@@ -693,14 +758,41 @@ class JsonFile {
         return autocommit ? commit() : true;
     }
 
-    static bool atomicWriteDouble(String key, long value) {
-        /*! Write a long integer value to a JSON-file.
+    static bool atomicWriteDouble(String key, double value) {
+        /*! Write a numerical value to a JSON-file.
         @param key Combined filename and json-object-path. (maxdepth is limited to 9)
         @param value Value to be written.
         @return `true` on success.
         */
         JsonFile jf;
         return jf.writeDouble(key, value);
+    }
+
+    bool writeDoubleArray(String key, ustd::array<double> &values) {
+        /*! Write an array of numerical values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = values[i];
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteDoubleArray(String key, ustd::array<double> &values) {
+        /*! Write an array of numerical values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JsonFile jf;
+        return jf.writeDoubleArray(key, values);
     }
 
     bool writeLong(String key, long value) {
@@ -727,13 +819,40 @@ class JsonFile {
         return jf.writeLong(key, value);
     }
 
+    bool writeLongArray(String key, ustd::array<long> &values) {
+        /*! Write an array of long integer values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = values[i];
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteLongArray(String key, ustd::array<long> &values) {
+        /*! Write an array of long integer values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param value Array of values to be written.
+        @return `true` on success.
+        */
+        JsonFile jf;
+        return jf.writeLongArray(key, values);
+    }
+
   private:
     bool load(String fn) {
         if (fn != filename) {
             filename = fn;
             loaded = false;
         }
-        if (loaded) {
+        if (loaded || forcenew) {
             return true;
         }
         filename = fn;
@@ -881,6 +1000,6 @@ class JsonFile {
             }
         }
     }
-};
+};  // class JsonFile
 
 }  // namespace ustd
