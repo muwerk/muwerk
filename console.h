@@ -281,12 +281,12 @@ class Console {
             cmd_uname();
         } else if (cmd == "uptime") {
             cmd_uptime();
-#ifndef __SUPPORT_LOWMEM__
         } else if (cmd == "info") {
             cmd_info();
-#endif
+#ifndef __SUPPORT_LOWMEM__
         } else if (cmd == "mem") {
             cmd_mem();
+#endif
         } else if (cmd == "ps") {
             cmd_ps();
 #ifdef __SUPPORT_DATE__
@@ -313,9 +313,9 @@ class Console {
     }
 
     void cmd_help() {
-        String help = "commands: help, pub, sub, uname, uptime, ps, mem";
+        String help = "commands: help, pub, sub, uname, uptime, ps, info";
 #ifndef __SUPPORT_LOWMEM__
-        help += ", info";
+        help += ", mem";
 #endif
 #ifdef __SUPPORT_DATE__
         help += ", date";
@@ -444,6 +444,7 @@ class Console {
         Serial.println();
     }
 
+#ifndef __SUPPORT_LOWMEM__
     void cmd_mem() {
         Output.println();
 #ifdef __ESP__
@@ -472,25 +473,23 @@ class Console {
         outputf("Fragmentation: %u%%\r\n", (unsigned int)ESP.getHeapFragmentation());
         outputf("Largest Free Block: %u B\r\n", (unsigned int)ESP.getMaxFreeBlockSize());
         Output.println();
-#endif
+#endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
-#ifndef __SUPPORT_LOWMEM__
         Output.println("Memory:");
         Output.println("-------");
-#endif
-        Output.print("Free:: ");
+        Output.print("Free: ");
         Output.print(freeMemory());
         Output.println(" B");
         Output.println();
 #else
         Output.println("No information available");
         Output.println();
-#endif
-#endif
+#endif  // __ARDUINO__
+#endif  // __ESP__
     }
+#endif  // __SUPPORT_LOWMEM__
 
-#ifndef __SUPPORT_LOWMEM__
     void cmd_info() {
         Output.println();
 #ifdef __ESP__
@@ -523,8 +522,8 @@ class Console {
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
-        outputf("CPU Frequency: %.2f MHz\r\n", (float)(F_CPU) / 1000000.0);
-        outputf("Free Memory: %u B\r\n", (unsigned int)freeMemory());
+        Output.println("CPU Frequency: " + String((float)(F_CPU) / 1000000.0) + " MHz");
+        Output.println("Free Memory: " + String(freeMemory()) + " B");
         Output.println();
 #else
         Output.println("No information available");
@@ -532,7 +531,6 @@ class Console {
 #endif  // __ARDUINO__
 #endif  // __ESP__
     }
-#endif  //__SUPPORT_LOWMEM__
 
     void cmd_uname(char opt = '\0', bool crlf = true) {
         String arg;
