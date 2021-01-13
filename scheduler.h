@@ -115,6 +115,10 @@ typedef struct {
     unsigned long lateTime;
     unsigned long cpuTime;
     unsigned long callCount;
+    /*
+    unsigned long cpuPerCall;
+    unsigned long latePerCall;
+    */
 } T_TASKENTRY;
 
 unsigned long timeDiff(unsigned long first, unsigned long second) {
@@ -620,9 +624,9 @@ class Scheduler {
         unsigned long startTime = micros();
         unsigned long tDelta = timeDiff(pTaskEnt->lastCall, startTime);
         if (tDelta >= pTaskEnt->minMicros && pTaskEnt->minMicros) {
-            currentTaskId = pTaskEnt->taskID; // prevent task() to delete itself.
+            currentTaskID = pTaskEnt->taskID; // prevent task() to delete itself.
             pTaskEnt->task();
-            currentTaskId = -2;
+            currentTaskID = -2;
             pTaskEnt->lastCall = startTime;
             pTaskEnt->lateTime += tDelta - pTaskEnt->minMicros;
             pTaskEnt->cpuTime += timeDiff(startTime, micros());
@@ -652,6 +656,11 @@ class Scheduler {
         unsigned long tDelta = timeDiff(statTimer, now);
         unsigned long mem = (unsigned long)freeMemory();
         if (tDelta > statIntervallMs * 1000) {
+            // local stats
+            for (unsigned int i = 0; i < taskList.length(); i++) {
+
+            }
+            // mqtt stats
             const char *null_name = "<null>";
             const char *skeleton_head =
                 "{\"dt\":%ld,\"syt\":%ld,\"apt\":%ld,"
