@@ -134,9 +134,14 @@ class Console {
     bool debug = false;
 
   public:
-    Console(String name) : Output(Serial), name(name) {
+    Console(String name, Print &Output) : Output(Output), name(name) {
+        /*! Creates a console
+        @param name Name used for task registration and message origin
+        @param Output Reference to a printer that receives the output
+        */
     }
-    ~Console() {
+
+    virtual ~Console() {
 #ifdef __SUPPORT_EXTEND__
         for (unsigned int i = 0; i < commands.length(); i++) {
             free(commands[i].command);
@@ -145,9 +150,13 @@ class Console {
 #endif
     }
 
-    void execute(String command) {
+    bool execute(String command) {
+        /*! Executes the given command
+        @param command The command to execute
+        @return `true` if something happened (also if the commad is invalid)
+        */
         args = command;
-        execute();
+        return execute();
     }
 
 #ifdef __SUPPORT_EXTEND__
@@ -246,13 +255,14 @@ class Console {
         return len;
     }
 
-    void execute() {
+    bool execute() {
         args.trim();
-        Output.println();
         if (args.length()) {
             commandparser();
             args = "";
+            return true;
         }
+        return false;
     }
 
     void commandparser() {
@@ -298,7 +308,7 @@ class Console {
             cmd_jf();
 #endif
         } else if (!cmd_custom(cmd)) {
-            Serial.println("Unknown command " + cmd);
+            Output.println("Unknown command " + cmd);
         }
     }
 
@@ -513,7 +523,7 @@ class Console {
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
-        outputf("CPU Frequency: %.2f MHz\r\n", (float)(F_CPU) / 1000000);
+        outputf("CPU Frequency: %.2f MHz\r\n", (float)(F_CPU) / 1000000.0);
         outputf("Free Memory: %u B\r\n", (unsigned int)freeMemory());
         Output.println();
 #else
@@ -954,7 +964,7 @@ class SerialConsole : public Console {
 #endif
 
   public:
-    SerialConsole() : Console("serial") {
+    SerialConsole() : Console("serial", Serial) {
 #if MU_SERIAL_BUF_SIZE > 0
         pcur = buffer;
         memset(buffer, 0, sizeof(buffer) / sizeof(char));
@@ -971,12 +981,11 @@ class SerialConsole : public Console {
 #ifndef USE_SERIAL_DBG
         Serial.begin(baudrate);
 #endif
-        Output = Serial;
         pSched = _pSched;
         tID = pSched->add([this]() { this->loop(); }, name, 60000);  // 60ms
         Serial.println();
-        prompt();
         execute(initialCommand);
+        prompt();
     }
 
   protected:
@@ -1014,6 +1023,7 @@ class SerialConsole : public Console {
                 changed = true;
                 break;
             case 13:  // enter
+                Output.println();
 #if MU_SERIAL_BUF_SIZE > 0
                 flush();
 #endif
