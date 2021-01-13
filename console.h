@@ -522,8 +522,8 @@ class Console {
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
-        Output.println("CPU Frequency: " + String((float)(F_CPU) / 1000000.0) + " MHz");
-        Output.println("Free Memory: " + String(freeMemory()) + " B");
+        outputf("CPU Frequency: %.2u MHz\r\n", (F_CPU) / 1000000);
+        outputf("Free Memory: %u B\r\n", (unsigned int)freeMemory());
         Output.println();
 #else
         Output.println("No information available");
