@@ -523,15 +523,25 @@ class Console {
 #else
 #ifdef __ARDUINO__
 #ifdef __SUPPORT_LOWMEM__
-        outputf("Free: %u B, CPU: %u MHz\r\n", (unsigned int)freeMemory(),
-                (unsigned int)(F_CPU) / 1000000);
+        Output.print("mem ");
+        Output.print(freeMemory());
+        Output.print(", ");
+        Output.print((float)(F_CPU) / 1000000.0, 2);
+        Output.println(" MHz");
+        Output.println();
 #else
-        outputf("CPU Frequency: %.2u MHz\r\n", (F_CPU) / 1000000);
+        Output.print("CPU Frequency: ");
+        Output.print((float)(F_CPU) / 1000000.0, 2);
+        Output.println(" MHz");
         outputf("Free Memory: %u B\r\n", (unsigned int)freeMemory());
         Output.println();
 #endif  // __LOWMEM
 #else
+#ifdef __SUPPORT_LOWMEM__
+        Output.println("No info");
+#else
         Output.println("No information available");
+#endif  //__SUPPORT_LOWMEM__
         Output.println();
 #endif  // __ARDUINO__
 #endif  // __ESP__
