@@ -14,6 +14,7 @@ matrix:
       install:
         - pip3 install -U platformio
         - platformio lib -g install 5710
+        - platformio lib update
 
       script:
         - pio ci --lib="." --project-option="build_flags=-D __ESP__" --board=esp12e Examples/minimal/mu_minimal.cpp
