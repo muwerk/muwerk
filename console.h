@@ -381,7 +381,7 @@ class Console {
     }
 
     void cmd_debug() {
-        Output.print("WiFi debug output ");
+        Output.print("WiFi serial debug output ");
         if (debug) {
             Serial.setDebugOutput(false);
             debug = false;
@@ -396,7 +396,7 @@ class Console {
     void cmd_wifi() {
         Output.println("WiFi Information:");
         Output.println("-----------------");
-        WiFi.printDiag(Serial);
+        WiFi.printDiag(Output);
         Output.println();
     }
 #endif
@@ -441,7 +441,7 @@ class Console {
                     pSched->taskList[i].cpuTime, pSched->taskList[i].lateTime);
             Output.println(pSched->taskList[i].szName);
         }
-        Serial.println();
+        Output.println();
     }
 
 #ifndef __SUPPORT_LOWMEM__
@@ -505,8 +505,8 @@ class Console {
         outputf("Flash Chip Speed: %.2f MHz\r\n", (float)ESP.getFlashChipSpeed() / 1000000.0);
         Output.println();
 #else
-        Serial.println("ESP Information:");
-        Serial.println("----------------");
+        Output.println("ESP Information:");
+        Output.println("----------------");
         outputf("Chip ID: %u\r\n", (unsigned int)ESP.getChipId());
         outputf("Chip Version: %s\r\n", ESP.getCoreVersion().c_str());
         outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
@@ -522,9 +522,14 @@ class Console {
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
+#ifdef __SUPPORT_LOWMEM__
+        outputf("Free: %u B, CPU: %u MHz\r\n", (unsigned int)freeMemory(),
+                (unsigned int)(F_CPU) / 1000000);
+#else
         outputf("CPU Frequency: %.2u MHz\r\n", (F_CPU) / 1000000);
         outputf("Free Memory: %u B\r\n", (unsigned int)freeMemory());
         Output.println();
+#endif  // __LOWMEM
 #else
         Output.println("No information available");
         Output.println();
