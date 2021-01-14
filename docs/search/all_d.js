@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['writebool_65',['writeBool',['../classustd_1_1JsonFile.html#a7eca9af4061f84974965eb1748c97364',1,'ustd::JsonFile']]],
-  ['writedouble_66',['writeDouble',['../classustd_1_1JsonFile.html#a181dfc66b04ec3bc633c2d278ae28363',1,'ustd::JsonFile']]],
-  ['writejsonvar_67',['writeJsonVar',['../classustd_1_1JsonFile.html#a0e0760da048897154a59a0be85c2895f',1,'ustd::JsonFile::writeJsonVar(String key, JSONVar &amp;value)'],['../classustd_1_1JsonFile.html#a7516b0c78b71fd31116fb6f6e4526892',1,'ustd::JsonFile::writeJsonVar(String key, String value)']]],
-  ['writelong_68',['writeLong',['../classustd_1_1JsonFile.html#a58e211be3818358bcb5e5bb550d22c2f',1,'ustd::JsonFile']]],
-  ['writestring_69',['writeString',['../classustd_1_1JsonFile.html#aad704970143b090945e3677adbdee79f',1,'ustd::JsonFile']]]
+  ['scheduler_65',['Scheduler',['../classustd_1_1Scheduler.html#a08fb718f763d4db0bc3f4fd58a8dfbde',1,'ustd::Scheduler::Scheduler()'],['../classustd_1_1Scheduler.html',1,'ustd::Scheduler']]],
+  ['sensorprocessor_66',['sensorprocessor',['../classustd_1_1sensorprocessor.html#af3295232cb60ec9e9a331700875d4961',1,'ustd::sensorprocessor::sensorprocessor()'],['../classustd_1_1sensorprocessor.html',1,'ustd::sensorprocessor']]],
+  ['serialconsole_67',['SerialConsole',['../classustd_1_1SerialConsole.html',1,'ustd']]],
+  ['shift_68',['shift',['../namespaceustd.html#a9037373ddda3f705ed059adf3af5eec3',1,'ustd']]],
+  ['singletaskmode_69',['singleTaskMode',['../classustd_1_1Scheduler.html#a1916e661e513a686535e79367c16f5bd',1,'ustd::Scheduler']]],
+  ['split_70',['split',['../namespaceustd.html#a8e4d9eac46550ea82e007a16ef1c7d3d',1,'ustd']]],
+  ['subscribe_71',['subscribe',['../classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe',1,'ustd::Scheduler']]]
 ];

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['unextend_123',['unextend',['../classustd_1_1Console.html#a10f5616d880010af308a29c08a9c46ad',1,'ustd::Console::unextend(String command)'],['../classustd_1_1Console.html#a0870092447e2ed3f89707446aed5d7ff',1,'ustd::Console::unextend(int commandHandle)']]],
-  ['unsubscribe_124',['unsubscribe',['../classustd_1_1Scheduler.html#af22b2534ad447b8da9cb07afc83da261',1,'ustd::Scheduler']]]
+  ['publish_148',['publish',['../classustd_1_1Scheduler.html#a4c1a991b2a80657192534733ae1d7f39',1,'ustd::Scheduler']]]
 ];
