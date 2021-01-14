@@ -65,30 +65,92 @@ in order to speed up the operation.
 */
 class JsonFile {
   private:
-    String filename = "";
-    JSONVar obj;
     bool loaded = false;
     bool forcenew = false;
-    bool autocommit;
+    bool autocommit = true;
+    String path = "/";
+    String filename = "";
+    JSONVar obj;
 
   public:
-    JsonFile(bool autocommit = true, bool forcenew = false)
-        : forcenew(forcenew), autocommit(autocommit) {
+    JsonFile(bool auto_commit = true, bool force_new = false, String path = "/")
+        : forcenew(force_new), autocommit(auto_commit), path(path) {
         /*! Creates a new JSON file manager
-        @param autocommit (optional, default is `true`) If set to `false`, all
-                          write operations will be postponed until calling the
-                          method \ref commit
-        @param forcenew (optional, default is `false`) If set to `true`, a new
-                        file will be created instead of changing the existing
-                        one.
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @param force_new (optional, default is `false`) If set to `true`, a new file will be
+                         created instead of changing the existing one.
+        @param path (optional, default is `/`) The path under which the json file will be read
+                    or written.
         */
+        obj = JSON.parse("{}");
     }
 
-    void flush() {
-        JSONVar newObj;
-        loaded = false;
+    void clear(bool auto_commit = true, bool force_new = false) {
+        /*! Clear the JSON file manager
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @param force_new (optional, default is `false`) If set to `true`, a new file will be
+                         created instead of changing the existing one.
+        */
         filename = "";
-        obj = newObj;
+        obj = JSON.parse("{}");
+        autocommit = auto_commit;
+        forcenew = force_new;
+        loaded = false;
+    }
+
+    bool init(String basename, JSONVar &value, bool auto_commit = true) {
+        /*! Initialize The JSON file manager to a given JSON variable.
+        @param basename The basename of the configuration file in which to keep the values.
+        @param value JSONVar variable that contains the initial content.
+        @param auto_commit (optional, default is `true`) If set to `false`, all
+                           write operations will be postponed until calling the
+                           method \ref commit
+        @return `true` on success.
+        */
+        filename = basename;
+        obj = value;
+        autocommit = auto_commit;
+        forcenew = true;
+        loaded = false;
+        return autocommit ? commit() : true;
+    }
+
+    bool init(String basename, String value, bool auto_commit = true) {
+        /*! Initialize The JSON file manager to a given JSON variable.
+        @param basename The basename of the configuration file in which to keep the values.
+        @param value String containing a value in JSON format representing the initial content.
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @return `true` on success.
+        */
+        JSONVar jv = JSON.parse(value);
+        return init(basename, jv, auto_commit);
+    }
+
+    bool initFromFile(String basename, String fn, bool auto_commit = true) {
+        /*! Initialize The JSON file manager to the content on existing JSON file.
+        @param basename The basename of the configuration file in which to keep the values.
+        @param fn String containing a filename from which to take the initial content.
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @return `true` on success.
+        */
+        bool result = loadFile(basename, fn);
+        if (result) {
+            autocommit = auto_commit;
+            forcenew = true;
+            return autocommit ? commit() : true;
+        }
+        return false;
+    }
+
+    String toString() const {
+        /*! Returns the content of the JSON file manager as String in JSON format.
+        @return The content of the JSON file manager as String in JSON format.
+        */
+        return JSON.stringify(obj);
     }
 
     bool commit() {
@@ -103,11 +165,11 @@ class JsonFile {
         }
         String jsonString = JSON.stringify(obj);
 
-        DBG2("Writing file: " + filename + ", content: " + jsonString);
+        DBG2("Writing file: " + path + filename + ".json, content: " + jsonString);
 
-        fs::File f = fsOpen(filename, "w");
+        fs::File f = fsOpen(path + filename + ".json", "w");
         if (!f) {
-            DBG("File " + filename + " can't be opened for write, failure.");
+            DBG("File " + path + filename + ".json can't be opened for write, failure.");
             return false;
         } else {
             f.print(jsonString.c_str());
@@ -129,6 +191,37 @@ class JsonFile {
             return true;
         };
         return false;
+    }
+
+    static bool atomicExists(String key) {
+        /*! Test if a value exists in a JSON-file.
+        @param key Combined filename and json-object-path.
+        @return `true` on success.
+        */
+        JsonFile jf;
+        return jf.exists(key);
+    }
+
+    bool remove(String key) {
+        /*! Remove a value from a JSON-file.
+        @param key Combined filename and json-object-path.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = undefined;
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicRemove(String key) {
+        /*! Remove a value from a JSON-file.
+        @param key Combined filename and json-object-path.
+        @return `true` on success.
+        */
+        JsonFile jf;
+        return jf.remove(key);
     }
 
     bool readJsonVar(String key, JSONVar &value) {
@@ -566,28 +659,6 @@ class JsonFile {
         return jf.readLong(key, minVal, maxVal, defaultVal);
     }
 
-    bool remove(String key) {
-        /*! Remove a value from a JSON-file.
-        @param key Combined filename and json-object-path.
-        @return `true` on success.
-        */
-        JSONVar target;
-        if (!prepareWrite(key, target)) {
-            return false;
-        }
-        target = undefined;
-        return autocommit ? commit() : true;
-    }
-
-    static bool atomicRemove(String key) {
-        /*! Remove a value from a JSON-file.
-        @param key Combined filename and json-object-path.
-        @return `true` on success.
-        */
-        JsonFile jf;
-        return jf.remove(key);
-    }
-
     bool writeJsonVar(String key, JSONVar &value) {
         /*! Write a JSON value to a JSON-file.
         @param key Combined filename and json-object-path.
@@ -847,40 +918,45 @@ class JsonFile {
     }
 
   private:
-    bool load(String fn) {
-        if (fn != filename) {
-            filename = fn;
-            loaded = false;
-        }
-        if (loaded || forcenew) {
-            return true;
-        }
-        filename = fn;
-        fs::File f = fsOpen(filename, "r");
+    bool loadFile(String basename, String fn) {
+        filename = basename;
+        fs::File f = fsOpen(fn, "r");
         if (!f) {
             return false;
         }
         String jsonstr = "";
         if (!f.available()) {
-            DBG2("Opened " + filename + ", but no data in file!");
+            DBG2("Opened " + fn + ", but no data in file!");
             return false;
         }
         while (f.available()) {
             // Lets read line by line from the file
-            String lin = f.readStringUntil('\n');
-            jsonstr = jsonstr + lin;
+            String line = f.readStringUntil('\n');
+            jsonstr += line;
         }
         f.close();
-        obj = JSON.parse(jsonstr);
-        if (JSON.typeof(obj) == "undefined") {
-            DBG("Parsing input file " + filename + "failed, invalid JSON!");
+        JSONVar content = JSON.parse(jsonstr);
+        if (JSON.typeof(content) == "undefined") {
+            DBG("Parsing input file " + fn + "failed, invalid JSON!");
             DBG2("Content: " + jsonstr);
             return false;
         }
-        DBG2("Input file " + filename + " successfully parsed");
+        DBG2("Input file " + fn + " successfully parsed");
         DBG3("Content: " + jsonstr);
+        obj = content;
         loaded = true;
         return true;
+    }
+
+    bool checkLoad(String basename) {
+        if (basename != filename) {
+            filename = basename;
+            loaded = false;
+        }
+        if (loaded || forcenew) {
+            return true;
+        }
+        return loadFile(basename, path + basename + ".json");
     }
 
     bool prepareRead(String key, ustd::array<String> &keyparts, JSONVar &subobj,
@@ -891,7 +967,7 @@ class JsonFile {
             DBG("Key-path too short, minimum needed is filename/topic, got: " + key);
             return false;
         }
-        if (!load("/" + keyparts[0] + ".json")) {
+        if (!checkLoad(keyparts[0])) {
             return false;
         }
         JSONVar iterator(obj);
@@ -927,7 +1003,7 @@ class JsonFile {
             DBG("Key-path too long, maxdepth is " + String(MAX_FRICKEL_DEPTH) + ", got: " + key);
             return false;
         }
-        if (!load("/" + keyparts[0] + ".json")) {
+        if (!checkLoad(keyparts[0]) && forcenew) {
             DBG("Creating new file /" + keyparts[0] + ".json");
         }
 
@@ -1000,6 +1076,6 @@ class JsonFile {
             }
         }
     }
-};  // class JsonFile
+};  // namespace ustd
 
 }  // namespace ustd
