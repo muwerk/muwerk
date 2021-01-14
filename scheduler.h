@@ -2,22 +2,26 @@
 
 #pragma once
 
-/*! \mainpage muwerk a cooperative scheduler wit MQTT-like communication queues
+/*! \mainpage muwerk a cooperative scheduler with MQTT-like communication queues
 \section Introduction
 
-muwerk implements the classes:
+muwerk implements the following classes:
 
+* * \ref ustd::jsonfile A utility class for easily managing data stored in JSON files
+* * \ref ustd::metronome A utility class for handling periodical operations at fixed intervals
 * * \ref ustd::Scheduler A cooperative scheduler and MQTT-like queues
 * * \ref ustd::sensorprocessor An exponential sensor value filter
-* * \ref ustd::metronome A class for handling periodical operations at fixed intervals
-* * \ref ustd::JsonFile A class for easily managing data stored in JSON files
-* * \ref ustd::Console A serial debug console for the scheduler
+* * \ref ustd::SerialConsole A serial debug console for the scheduler
+* * \ref ustd::timeout and \ref ustd::utimeout Utility classes for handling timeouts
 
-libraries are header-only and should work with any c++11 compiler
-and support platforms starting with 8k attiny, avr, arduinos, up to esp8266,
-esp32.
+Some additional utility functions are avaiable in the \ref ustd namespace by including
+muwerk.h
 
-This library requires the ustd library (for timeDiff) and requires a
+Libraries are header-only and should work with any c++11 compiler
+and support platforms starting with 8k attiny, avr, arduinos, up to esp8266
+amd esp32.
+
+This library requires the ustd library (for `array`, `map` and `queue`) and requires a
 <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform
 define</a>.
 
@@ -129,7 +133,7 @@ unsigned long timeDiff(unsigned long first, unsigned long second) {
      * overflow conditions. This always works under the assumption that:
      * 1. the first value represents an earlier time as the second value
      * 2. the difference between the first and second value is lesser that the
-     *    maximum value that ùnsigned long` can hold.
+     *    maximum value that `unsigned long` can hold.
      *
      * @param first first time value
      * @param second second time value

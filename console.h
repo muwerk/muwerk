@@ -4,6 +4,7 @@
 
 #include "platform.h"
 #include "array.h"
+#include "muwerk.h"
 #include "scheduler.h"
 
 // project configration defines:
@@ -59,7 +60,7 @@ typedef ustd::function<void(String command, String args)> T_COMMANDFN;
 /*! \brief muwerk Console Class
 
 The console class implements a simple but effective console shell that
-is the base for \ref SerialConsole and can also be used for implementing
+is the base for \ref ustd::SerialConsole and can also be used for implementing
 shells over other transport mechanisms.
 The simple interpreter has the follwing builtin commands:
 
@@ -98,7 +99,7 @@ void setup() {
     con.extend( "hurz", []( String cmd, String args ) {
         Output.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
-            String arg = Console::shift( args );
+            String arg = ustd::shift( args );
             Output.println( arg + "   HURZ!" );
         }
     } );
@@ -204,27 +205,6 @@ class Console {
         return false;
     }
 #endif
-    static String shift(String &args, String defValue = "") {
-        /*! Extract the first arg from the supplied args
-         * @param args The string object from which to shift out an argument
-         * @param defValue (optional, default empty string) Default value to return if no more args
-         * @return The extracted arg
-         */
-        if (args == "") {
-            return defValue;
-        }
-        int ind = args.indexOf(' ');
-        String ret = defValue;
-        if (ind == -1) {
-            ret = args;
-            args = "";
-        } else {
-            ret = args.substring(0, ind);
-            args = args.substring(ind + 1);
-            args.trim();
-        }
-        return ret;
-    }
 
   protected:
     virtual void prompt() {
@@ -800,7 +780,7 @@ class Console {
             return;
         }
 
-        JsonFile jf;
+        ustd::jsonfile jf;
         JSONVar value;
 
         if (!jf.readJsonVar(arg, value)) {
@@ -828,7 +808,7 @@ class Console {
             return;
         }
 
-        JsonFile jf;
+        ustd::jsonfile jf;
         JSONVar value = JSON.parse(args);
         if (JSON.typeof(value) == "undefined") {
             Output.println("error: Cannot parse value " + args);
@@ -849,7 +829,7 @@ class Console {
             return;
         }
 
-        JsonFile jf;
+        ustd::jsonfile jf;
         if (!jf.remove(arg)) {
 #ifndef USE_SERIAL_DBG
             Output.println("error: Failed to delete value " + arg);
@@ -911,7 +891,7 @@ class Console {
     }
 
     String pullArg(String defValue = "") {
-        return shift(args, defValue);
+        return ustd::shift(args, ' ', defValue);
     }
 };
 
@@ -938,7 +918,7 @@ void setup() {
     con.extend( "hurz", []( String cmd, String args ) {
         Output.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
-            String arg = Console::shift( args );
+            String arg = ustd::shift( args );
             Output.println( arg + "   HURZ!" );
         }
     } );
@@ -969,6 +949,7 @@ void loop() {
 #define MU_SERIAL_CHUNK_SIZE 32
 #endif
 
+//! \brief muwerk Serial Console Class
 class SerialConsole : public Console {
   protected:
 #if MU_SERIAL_BUF_SIZE > 0

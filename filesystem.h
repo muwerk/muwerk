@@ -5,7 +5,6 @@
 #include "platform.h"
 
 #ifdef __ESP32__
-
 namespace fs {
 class Dir {
   public:
