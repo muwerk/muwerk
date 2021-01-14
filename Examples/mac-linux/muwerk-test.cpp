@@ -171,10 +171,10 @@ int main() {
     int sH = sched.subscribe(SCHEDULER_MAIN, "#", subs1);
 
     sched.publish("$SYS/stat/get", "500");  // get task statistics very 500ms
-    sched.subscribe(SCHEDULER_MAIN, "$SYS/stat", stats);
+    int sS = sched.subscribe(SCHEDULER_MAIN, "$SYS/stat", stats);
 
     unsigned long oldt = -1;
-    while (time(nullptr) - t1 < 5) {
+    while (time(nullptr) - t1 < 10) {
         if (time(nullptr) - t1 != oldt) {
             oldt = time(nullptr) - t1;
             Serial.print("========Timestamp: ");
@@ -189,6 +189,8 @@ int main() {
         sched.loop();
     }
     sched.unsubscribe(sH);
+    sched.unsubscribe(sS);
+
     cout << "Done sched test" << endl;
 
     int nerrs = testcases();

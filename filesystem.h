@@ -4,6 +4,54 @@
 
 #include "platform.h"
 
+#ifdef __ESP32__
+namespace fs {
+class Dir {
+  public:
+    Dir(int _) {
+    }
+    Dir(File fd) : fd(fd) {
+    }
+
+    File openFile(const char *mode) {
+        return (File)0;
+    }
+
+    String fileName() {
+        return ff.name();
+    }
+    size_t fileSize() {
+        return ff.size();
+    }
+    time_t fileTime() {
+        return ff.getLastWrite();
+    }
+    time_t fileCreationTime() {
+        return (size_t)0;
+    }
+    bool isFile() {
+        return ff.isDirectory() ? false : true;
+    }
+    bool isDirectory() {
+        return ff.isDirectory() ? true : false;
+    }
+
+    bool next() {
+        ff = fd.openNextFile();
+        return ff != (File)0;
+    }
+    bool rewind() {
+        fd.rewindDirectory();
+        return next();
+    }
+
+  protected:
+    File fd;
+    File ff;
+};
+}  // namespace fs
+#endif
+
 namespace ustd {
 
 bool fsInited = false;
@@ -36,7 +84,11 @@ bool fsBegin() {
 
 void fsEnd() {
     if (fsInited) {
+#ifdef __USE_SPIFFS_FS__
+        SPIFFS.end();
+#else
         LittleFS.end();
+#endif
         fsInited = false;
     }
 }
@@ -86,11 +138,21 @@ fs::Dir fsOpenDir(String path) {
     if (!fsBegin()) {
         return (fs::Dir)0;
     }
+#ifdef __ESP32__
+#ifdef __USE_SPIFFS_FS__
+    fs::File fd = SPIFFS.open(path);
+#else
+    fs::File fd = LittleFS.open(path);
+#endif
+    fs::Dir dir(fd);
+    return dir;
+#else
 #ifdef __USE_SPIFFS_FS__
     return SPIFFS.openDir(path.c_str());
 #else
     return LittleFS.openDir(path.c_str());
 #endif
+#endif  // __ESP32__
 }
 
 }  // namespace ustd

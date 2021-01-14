@@ -5,6 +5,7 @@
 #include "platform.h"
 #include "array.h"
 #include "map.h"
+#include "muwerk.h"
 #include "filesystem.h"
 
 #include <Arduino_JSON.h>  // Platformio lib no. 6249
@@ -30,14 +31,14 @@ atomic operations on JSON files.
 
 Values are referenced by a `key`. This `key` is an MQTT-topic-like path,
 structured like this: `filename/a/b/c/d`. e.G.: when reading a value by
-specifying this key, the corresponding function will read the jsonfile
+specifying this key, the corresponding function will read the JSON file
 `/filename.json` containg the  example content `{"a": {"b": {"c": {"d": false}}}}`
 and wil return the value `false`.
 
 ### Example of reading multiple values
 
 ~~~{.cpp}
-    JsonFile jf;
+    ustd::jsonfile jf;
     dhcp = jf.readBool( "net/station/dhcp", false );
     reconnectMaxRetries = jf.readLong( "net/station/maxRetries", 1, 1000000000, 40 );
     connectTimeout = jf.readLong( "net/station/connectTimeout", 3, 3600, 15 );
@@ -51,8 +52,8 @@ in order to speed up the operation.
 
 ~~~{.cpp}
     // full migration
-    JsonFile sf;    // object for original file
-    JsonFile nf( false );  // no autocommit
+    ustd::jsonfile sf; // object for original file
+    jsonfile nf( false );  // no autocommit
     nf.writeLong( "net/version", NET_CONFIG_VERSION );
     nf.writeString( "net/mode", "station" );
     nf.writeString( "net/station/SSID", sf.readString( "net/SSID" ) );
@@ -63,22 +64,94 @@ in order to speed up the operation.
     nf.commit();
 ~~~
 */
-class JsonFile {
+class jsonfile {
   private:
+    bool loaded = false;
+    bool forcenew = false;
+    bool autocommit = true;
+    String path = "/";
     String filename = "";
     JSONVar obj;
-    bool loaded = false;
-    bool autocommit;
 
   public:
-    JsonFile(bool autocommit = true) : autocommit(autocommit) {
+    jsonfile(bool auto_commit = true, bool force_new = false, String path = "/")
+        : forcenew(force_new), autocommit(auto_commit), path(path) {
+        /*! Creates a new JSON file manager
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @param force_new (optional, default is `false`) If set to `true`, a new file will be
+                         created instead of changing the existing one.
+        @param path (optional, default is `/`) The path under which the json file will be read
+                    or written.
+        */
+        obj = JSON.parse("{}");
     }
 
-    void flush() {
-        JSONVar newObj;
-        loaded = false;
+    void clear(bool auto_commit = true, bool force_new = false) {
+        /*! Clear the JSON file manager
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @param force_new (optional, default is `false`) If set to `true`, a new file will be
+                         created instead of changing the existing one.
+        */
         filename = "";
-        obj = newObj;
+        obj = JSON.parse("{}");
+        autocommit = auto_commit;
+        forcenew = force_new;
+        loaded = false;
+    }
+
+    bool init(String basename, JSONVar &value, bool auto_commit = true) {
+        /*! Initialize The JSON file manager to a given JSON variable.
+        @param basename The basename of the configuration file in which to keep the values.
+        @param value JSONVar variable that contains the initial content.
+        @param auto_commit (optional, default is `true`) If set to `false`, all
+                           write operations will be postponed until calling the
+                           method \ref commit
+        @return `true` on success.
+        */
+        filename = basename;
+        obj = value;
+        autocommit = auto_commit;
+        forcenew = true;
+        loaded = false;
+        return autocommit ? commit() : true;
+    }
+
+    bool init(String basename, String value, bool auto_commit = true) {
+        /*! Initialize The JSON file manager to a given JSON variable.
+        @param basename The basename of the configuration file in which to keep the values.
+        @param value String containing a value in JSON format representing the initial content.
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @return `true` on success.
+        */
+        JSONVar jv = JSON.parse(value);
+        return init(basename, jv, auto_commit);
+    }
+
+    bool initFromFile(String basename, String fn, bool auto_commit = true) {
+        /*! Initialize The JSON file manager to the content on existing JSON file.
+        @param basename The basename of the configuration file in which to keep the values.
+        @param fn String containing a filename from which to take the initial content.
+        @param auto_commit (optional, default is `true`) If set to `false`, all write operations
+                           will be postponed until calling the method \ref commit
+        @return `true` on success.
+        */
+        bool result = loadFile(basename, fn);
+        if (result) {
+            autocommit = auto_commit;
+            forcenew = true;
+            return autocommit ? commit() : true;
+        }
+        return false;
+    }
+
+    String toString() const {
+        /*! Returns the content of the JSON file manager as String in JSON format.
+        @return The content of the JSON file manager as String in JSON format.
+        */
+        return JSON.stringify(obj);
     }
 
     bool commit() {
@@ -93,15 +166,16 @@ class JsonFile {
         }
         String jsonString = JSON.stringify(obj);
 
-        DBG2("Writing file: " + filename + ", content: " + jsonString);
+        DBG2("Writing file: " + path + filename + ".json, content: " + jsonString);
 
-        fs::File f = fsOpen(filename, "w");
+        fs::File f = fsOpen(path + filename + ".json", "w");
         if (!f) {
-            DBG("File " + filename + " can't be opened for write, failure.");
+            DBG("File " + path + filename + ".json can't be opened for write, failure.");
             return false;
         } else {
             f.print(jsonString.c_str());
             f.close();
+            forcenew = false;
             return true;
         }
     }
@@ -118,6 +192,37 @@ class JsonFile {
             return true;
         };
         return false;
+    }
+
+    static bool atomicExists(String key) {
+        /*! Test if a value exists in a JSON-file.
+        @param key Combined filename and json-object-path.
+        @return `true` on success.
+        */
+        jsonfile jf;
+        return jf.exists(key);
+    }
+
+    bool remove(String key) {
+        /*! Remove a value from a JSON-file.
+        @param key Combined filename and json-object-path.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = undefined;
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicRemove(String key) {
+        /*! Remove a value from a JSON-file.
+        @param key Combined filename and json-object-path.
+        @return `true` on success.
+        */
+        jsonfile jf;
+        return jf.remove(key);
     }
 
     bool readJsonVar(String key, JSONVar &value) {
@@ -143,16 +248,16 @@ class JsonFile {
                      found, it may be initialized with the default value.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readJsonVar(key, value);
     }
 
     bool readJsonVarArray(String key, ustd::array<JSONVar> &values) {
         /*! Read an array of JSON values from a JSON-File.
         @param key Combined filename and json-object-path.
-        @param value Array of JSONVar that will receive the read value if found.
-                     Since the array will stay untouched if the value is not
-                     found, it may be initialized with the default value.
+        @param values Array of JSONVar that will receive the read value if found.
+                      Since the array will stay untouched if the value is not
+                      found, it may be initialized with the default value.
         @return `true` on success.
         */
         ustd::array<String> keyparts;
@@ -176,12 +281,12 @@ class JsonFile {
     static bool atomicReadJsonVarArray(String key, ustd::array<JSONVar> &values) {
         /*! Read an array of JSON values from a JSON-File.
         @param key Combined filename and json-object-path.
-        @param value Array of JSONVar that will receive the read value if found.
-                     Since the array will stay untouched if the value is not
-                     found, it may be initialized with the default value.
+        @param values Array of JSONVar that will receive the read value if found.
+                      Since the array will stay untouched if the value is not
+                      found, it may be initialized with the default value.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readJsonVarArray(key, values);
     }
 
@@ -233,7 +338,7 @@ class JsonFile {
                       if the array contains any values that are not of type `string`
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readStringArray(key, values, strict);
     }
 
@@ -284,7 +389,7 @@ class JsonFile {
                       if the array contains any values that are not of type `boolean`
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readBoolArray(key, values, strict);
     }
 
@@ -336,7 +441,7 @@ class JsonFile {
                       if the array contains any values that are not of type `number`
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readDoubleArray(key, values, strict);
     }
 
@@ -387,14 +492,14 @@ class JsonFile {
                       if the array contains any values that are not of type `number`
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readLongArray(key, values, strict);
     }
 
     bool readBool(String key, bool defaultVal) {
         /*! Read a boolean value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
         ustd::array<String> keyparts;
@@ -415,17 +520,17 @@ class JsonFile {
     static bool atomicReadBool(String key, bool defaultVal) {
         /*! Read a boolean value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readBool(key, defaultVal);
     }
 
     String readString(String key, String defaultVal = "") {
         /*! Read a string value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
         ustd::array<String> keyparts;
@@ -446,17 +551,17 @@ class JsonFile {
     static String atomicReadString(String key, String defaultVal = "") {
         /*! Read a string value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readString(key, defaultVal);
     }
 
     double readDouble(String key, double defaultVal) {
         /*! Read a number value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
         ustd::array<String> keyparts;
@@ -477,10 +582,10 @@ class JsonFile {
     static double atomicReadDouble(String key, double defaultVal) {
         /*! Read a number value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readDouble(key, defaultVal);
     }
 
@@ -489,7 +594,7 @@ class JsonFile {
         @param key Combined filename and json-object-path.
         @param minVal minimum accepatable value.
         @param maxVal maximum accepatable value.
-        @param defaultValue value returned, if key is not found or value outside specified
+        @param defaultVal value returned, if key is not found or value outside specified
         bondaries.
         @return The requested value or `defaultVal` if value not found or invalid.
         */
@@ -502,18 +607,18 @@ class JsonFile {
         @param key Combined filename and json-object-path.
         @param minVal minimum accepatable value.
         @param maxVal maximum accepatable value.
-        @param defaultValue value returned, if key is not found or value outside specified
+        @param defaultVal value returned, if key is not found or value outside specified
         bondaries.
         @return The requested value or `defaultVal` if value not found or invalid.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readDouble(key, minVal, maxVal, defaultVal);
     }
 
     long readLong(String key, long defaultVal) {
         /*! Read a long integer value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
         return (long)readDouble(key, (double)defaultVal);
@@ -522,10 +627,10 @@ class JsonFile {
     static long atomicReadLong(String key, long defaultVal) {
         /*! Read a long integer value from a JSON-file.
         @param key Combined filename and json-object-path.
-        @param defaultValue value returned, if key is not found.
+        @param defaultVal value returned, if key is not found.
         @return The requested value or `defaultVal` if value not found.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readLong(key, defaultVal);
     }
 
@@ -534,7 +639,7 @@ class JsonFile {
         @param key Combined filename and json-object-path.
         @param minVal minimum accepatable value.
         @param maxVal maximum accepatable value.
-        @param defaultValue value returned, if key is not found or value outside specified
+        @param defaultVal value returned, if key is not found or value outside specified
         bondaries.
         @return The requested value or `defaultVal` if value not found or invalid.
         */
@@ -547,34 +652,12 @@ class JsonFile {
         @param key Combined filename and json-object-path.
         @param minVal minimum accepatable value.
         @param maxVal maximum accepatable value.
-        @param defaultValue value returned, if key is not found or value outside specified
+        @param defaultVal value returned, if key is not found or value outside specified
         bondaries.
         @return The requested value or `defaultVal` if value not found or invalid.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.readLong(key, minVal, maxVal, defaultVal);
-    }
-
-    bool remove(String key) {
-        /*! Remove a value from a JSON-file.
-        @param key Combined filename and json-object-path.
-        @return `true` on success.
-        */
-        JSONVar target;
-        if (!prepareWrite(key, target)) {
-            return false;
-        }
-        target = undefined;
-        return autocommit ? commit() : true;
-    }
-
-    static bool atomicRemove(String key) {
-        /*! Remove a value from a JSON-file.
-        @param key Combined filename and json-object-path.
-        @return `true` on success.
-        */
-        JsonFile jf;
-        return jf.remove(key);
     }
 
     bool writeJsonVar(String key, JSONVar &value) {
@@ -597,7 +680,7 @@ class JsonFile {
         @param value JSONVar variable that contains the value to be saved.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.writeJsonVar(key, value);
     }
 
@@ -627,7 +710,7 @@ class JsonFile {
         @param value String containing a value in JSON format to be saved.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.writeJsonVar(key, value);
     }
 
@@ -651,8 +734,35 @@ class JsonFile {
         @param value Value to be written.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.writeString(key, value);
+    }
+
+    bool writeStringArray(String key, ustd::array<String> &values) {
+        /*! Write an array of Strings to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = (const char *)values[i].c_str();
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteStringArray(String key, ustd::array<String> &values) {
+        /*! Write an array of Strings to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        jsonfile jf;
+        return jf.writeStringArray(key, values);
     }
 
     bool writeBool(String key, bool value) {
@@ -675,8 +785,35 @@ class JsonFile {
         @param value Value to be written.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.writeBool(key, value);
+    }
+
+    bool writeBoolArray(String key, ustd::array<bool> &values) {
+        /*! Write an array of boolean values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = values[i];
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteBoolArray(String key, ustd::array<bool> &values) {
+        /*! Write an array of boolean values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        jsonfile jf;
+        return jf.writeBoolArray(key, values);
     }
 
     bool writeDouble(String key, double value) {
@@ -693,14 +830,41 @@ class JsonFile {
         return autocommit ? commit() : true;
     }
 
-    static bool atomicWriteDouble(String key, long value) {
-        /*! Write a long integer value to a JSON-file.
+    static bool atomicWriteDouble(String key, double value) {
+        /*! Write a numerical value to a JSON-file.
         @param key Combined filename and json-object-path. (maxdepth is limited to 9)
         @param value Value to be written.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.writeDouble(key, value);
+    }
+
+    bool writeDoubleArray(String key, ustd::array<double> &values) {
+        /*! Write an array of numerical values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = values[i];
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteDoubleArray(String key, ustd::array<double> &values) {
+        /*! Write an array of numerical values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        jsonfile jf;
+        return jf.writeDoubleArray(key, values);
     }
 
     bool writeLong(String key, long value) {
@@ -723,56 +887,88 @@ class JsonFile {
         @param value Value to be written.
         @return `true` on success.
         */
-        JsonFile jf;
+        jsonfile jf;
         return jf.writeLong(key, value);
     }
 
+    bool writeLongArray(String key, ustd::array<long> &values) {
+        /*! Write an array of long integer values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        JSONVar target;
+        if (!prepareWrite(key, target)) {
+            return false;
+        }
+        target = JSON.parse("[]");
+        for (unsigned int i; i < values.length(); i++) {
+            target[i] = values[i];
+        }
+        return autocommit ? commit() : true;
+    }
+
+    static bool atomicWriteLongArray(String key, ustd::array<long> &values) {
+        /*! Write an array of long integer values to a JSON-File.
+        @param key Combined filename and json-object-path.
+        @param values Array of values to be written.
+        @return `true` on success.
+        */
+        jsonfile jf;
+        return jf.writeLongArray(key, values);
+    }
+
   private:
-    bool load(String fn) {
-        if (fn != filename) {
-            filename = fn;
-            loaded = false;
-        }
-        if (loaded) {
-            return true;
-        }
-        filename = fn;
-        fs::File f = fsOpen(filename, "r");
+    bool loadFile(String basename, String fn) {
+        filename = basename;
+        fs::File f = fsOpen(fn, "r");
         if (!f) {
             return false;
         }
         String jsonstr = "";
         if (!f.available()) {
-            DBG2("Opened " + filename + ", but no data in file!");
+            DBG2("Opened " + fn + ", but no data in file!");
             return false;
         }
         while (f.available()) {
             // Lets read line by line from the file
-            String lin = f.readStringUntil('\n');
-            jsonstr = jsonstr + lin;
+            String line = f.readStringUntil('\n');
+            jsonstr += line;
         }
         f.close();
-        obj = JSON.parse(jsonstr);
-        if (JSON.typeof(obj) == "undefined") {
-            DBG("Parsing input file " + filename + "failed, invalid JSON!");
+        JSONVar content = JSON.parse(jsonstr);
+        if (JSON.typeof(content) == "undefined") {
+            DBG("Parsing input file " + fn + "failed, invalid JSON!");
             DBG2("Content: " + jsonstr);
             return false;
         }
-        DBG2("Input file " + filename + " successfully parsed");
+        DBG2("Input file " + fn + " successfully parsed");
         DBG3("Content: " + jsonstr);
+        obj = content;
         loaded = true;
         return true;
+    }
+
+    bool checkLoad(String basename) {
+        if (basename != filename) {
+            filename = basename;
+            loaded = false;
+        }
+        if (loaded || forcenew) {
+            return true;
+        }
+        return loadFile(basename, path + basename + ".json");
     }
 
     bool prepareRead(String key, ustd::array<String> &keyparts, JSONVar &subobj,
                      bool objmode = false) {
         normalize(key);
-        split(key, '/', keyparts);
+        ustd::split(key, '/', keyparts);
         if (keyparts.length() < (objmode ? 1 : 2)) {
             DBG("Key-path too short, minimum needed is filename/topic, got: " + key);
             return false;
         }
-        if (!load("/" + keyparts[0] + ".json")) {
+        if (!checkLoad(keyparts[0])) {
             return false;
         }
         JSONVar iterator(obj);
@@ -799,7 +995,7 @@ class JsonFile {
         ustd::array<String> keyparts;
 
         normalize(key);
-        split(key, '/', keyparts);
+        ustd::split(key, '/', keyparts);
         if (keyparts.length() < (objmode ? 1 : 2)) {
             DBG("Key-path too short, minimum needed is filename/topic, got: " + key);
             return false;
@@ -808,7 +1004,7 @@ class JsonFile {
             DBG("Key-path too long, maxdepth is " + String(MAX_FRICKEL_DEPTH) + ", got: " + key);
             return false;
         }
-        if (!load("/" + keyparts[0] + ".json")) {
+        if (!checkLoad(keyparts[0]) && forcenew) {
             DBG("Creating new file /" + keyparts[0] + ".json");
         }
 
@@ -856,29 +1052,6 @@ class JsonFile {
     static void normalize(String &src) {
         if (src.c_str()[0] == '/') {
             src = src.substring(1);
-        }
-    }
-
-  public:
-    static void split(String &src, char delimiter, array<String> &result) {
-        /*! Split a String into an array of segamnts using a specified delimiter.
-        @param src Source String.
-        @param delimiter Delimiter for splitting the string.
-        @param result Array if strings holding the result of the operation.
-        */
-        int ind;
-        String source = src;
-        String sb;
-        while (true) {
-            ind = source.indexOf(delimiter);
-            if (ind == -1) {
-                result.add(source);
-                return;
-            } else {
-                sb = source.substring(0, ind);
-                result.add(sb);
-                source = source.substring(ind + 1);
-            }
         }
     }
 };
