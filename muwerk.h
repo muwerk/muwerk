@@ -103,9 +103,9 @@ String shift(String &src, char delimiter = ' ', String defValue = "") {
         return defValue;
     }
 #ifdef __UNIXOID__
-    ind = (int)src.find(delimiter);
+    int ind = (int)src.find(delimiter);
 #else
-    ind = src.indexOf(delimiter);
+    int ind = src.indexOf(delimiter);
 #endif
     String ret = defValue;
     if (ind == -1) {
