@@ -102,7 +102,11 @@ String shift(String &src, char delimiter = ' ', String defValue = "") {
     if (src == "") {
         return defValue;
     }
-    int ind = src.indexOf(delimiter);
+#ifdef __UNIXOID__
+    ind = (int)src.find(delimiter);
+#else
+    ind = src.indexOf(delimiter);
+#endif
     String ret = defValue;
     if (ind == -1) {
         ret = src;
