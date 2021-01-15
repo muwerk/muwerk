@@ -1,13 +1,7 @@
 var searchData=
 [
-  ['woof_85',['woof',['../classustd_1_1metronome.html#abfa978ab2e3dd9c9f89c10464a56b7a3',1,'ustd::metronome']]],
-  ['writebool_86',['writeBool',['../classustd_1_1jsonfile.html#af9460cb26c705056052fbf7ee6283bc3',1,'ustd::jsonfile']]],
-  ['writeboolarray_87',['writeBoolArray',['../classustd_1_1jsonfile.html#a512698a8b53f45c95b21b0670e87b946',1,'ustd::jsonfile']]],
-  ['writedouble_88',['writeDouble',['../classustd_1_1jsonfile.html#a010f5f8cea7f936de6dff83b41cdbeda',1,'ustd::jsonfile']]],
-  ['writedoublearray_89',['writeDoubleArray',['../classustd_1_1jsonfile.html#a4ce8bf1adc664debef49d050e2051d9c',1,'ustd::jsonfile']]],
-  ['writejsonvar_90',['writeJsonVar',['../classustd_1_1jsonfile.html#a4cbcade1ba597986ec9543535102e6dc',1,'ustd::jsonfile::writeJsonVar(String key, JSONVar &amp;value)'],['../classustd_1_1jsonfile.html#af5c3c5a6aafc87879292578428874a8e',1,'ustd::jsonfile::writeJsonVar(String key, String value)']]],
-  ['writelong_91',['writeLong',['../classustd_1_1jsonfile.html#a732676be1a7957ecea0a1aa904d5a7bb',1,'ustd::jsonfile']]],
-  ['writelongarray_92',['writeLongArray',['../classustd_1_1jsonfile.html#a311dda1c56c67f0d8cf3bad6a46bb8e7',1,'ustd::jsonfile']]],
-  ['writestring_93',['writeString',['../classustd_1_1jsonfile.html#a4d3f101c996eed99b506200a89b6ce16',1,'ustd::jsonfile']]],
-  ['writestringarray_94',['writeStringArray',['../classustd_1_1jsonfile.html#af1f53dc5ffc207123b94d883353ddb5d',1,'ustd::jsonfile']]]
+  ['unextend_82',['unextend',['../classustd_1_1Console.html#a10f5616d880010af308a29c08a9c46ad',1,'ustd::Console::unextend(String command)'],['../classustd_1_1Console.html#a0870092447e2ed3f89707446aed5d7ff',1,'ustd::Console::unextend(int commandHandle)']]],
+  ['unsubscribe_83',['unsubscribe',['../classustd_1_1Scheduler.html#af22b2534ad447b8da9cb07afc83da261',1,'ustd::Scheduler']]],
+  ['ustd_84',['ustd',['../namespaceustd.html',1,'']]],
+  ['utimeout_85',['utimeout',['../classustd_1_1utimeout.html',1,'ustd::utimeout'],['../classustd_1_1utimeout.html#aae8ff55ed3047600eeba624fbc330179',1,'ustd::utimeout::utimeout()']]]
 ];

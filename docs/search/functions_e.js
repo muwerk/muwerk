@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['test_168',['test',['../classustd_1_1timeout.html#a4b0f69ced59e3fc738ec1384bc5387bd',1,'ustd::timeout::test()'],['../classustd_1_1utimeout.html#a460089e18402d6fda385d5acf7846a94',1,'ustd::utimeout::test()']]],
-  ['timediff_169',['timeDiff',['../namespaceustd.html#abfacaaf7557db523f979164738216df1',1,'ustd']]],
-  ['timeout_170',['timeout',['../classustd_1_1timeout.html#ad3940f1470e1f0aca384a9b6696f8519',1,'ustd::timeout']]],
-  ['tostring_171',['toString',['../classustd_1_1jsonfile.html#af21308925e2c9b84a944d74a93eddd69',1,'ustd::jsonfile']]]
+  ['scheduler_163',['Scheduler',['../classustd_1_1Scheduler.html#a08fb718f763d4db0bc3f4fd58a8dfbde',1,'ustd::Scheduler']]],
+  ['sensorprocessor_164',['sensorprocessor',['../classustd_1_1sensorprocessor.html#af3295232cb60ec9e9a331700875d4961',1,'ustd::sensorprocessor']]],
+  ['shift_165',['shift',['../namespaceustd.html#a9037373ddda3f705ed059adf3af5eec3',1,'ustd']]],
+  ['singletaskmode_166',['singleTaskMode',['../classustd_1_1Scheduler.html#a1916e661e513a686535e79367c16f5bd',1,'ustd::Scheduler']]],
+  ['split_167',['split',['../namespaceustd.html#a8e4d9eac46550ea82e007a16ef1c7d3d',1,'ustd']]],
+  ['subscribe_168',['subscribe',['../classustd_1_1Scheduler.html#a56e51944c02ba44cb0132e8959fe9fbe',1,'ustd::Scheduler']]]
 ];
