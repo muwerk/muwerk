@@ -1,13 +1,13 @@
-// metronome.h - muwerk metronome class
+// heartbeat.h - muwerk heartbeat class
 
 #pragma once
 
 #include "platform.h"
-#include "scheduler.h"  // timeDiff()
+#include "muwerk.h"
 
 namespace ustd {
 
-/*! \brief muwerk Metronome Class
+/*! \brief muwerk HeartBeat Class
 
 Implements a helper class for handling periodical operations at fixed intervals in
 scheduled tasks. The typical use case is in conjunction with a \ref ustd::Scheduler
@@ -15,10 +15,10 @@ task: let's assume you have an operation that has to be performed every 15 secon
 
 ~~~{.cpp}
 #include <scheduler.h>
-#include <metronome.h>
+#include <heartbeat.h>
 
 ustd::Scheduler sched;
-ustd::metronome periodical = 15000; // 15 seconds in millliseconds
+ustd::heartbeat periodical = 15000; // 15 seconds in millliseconds
 
 void appLoop();
 
@@ -44,20 +44,20 @@ void setup() {
 ~~~
 
 */
-class metronome {
+class heartbeat {
   private:
     unsigned long timerStart;
     unsigned long beatLength;
 
   public:
-    metronome(unsigned long length = 0) : beatLength{length} {
-        /*! Creates a metronome
+    heartbeat(unsigned long length = 0) : beatLength{length} {
+        /*! Creates a heartbeat
         @param length (optional, default 0) Cycle length in milliseconds
         */
         timerStart = millis();
     }
 
-    metronome &operator=(const unsigned long length) {
+    heartbeat &operator=(const unsigned long length) {
         /*! Assigns a new cycle length
         @param length Cycle length in milliseconds
         */
@@ -73,10 +73,10 @@ class metronome {
     }
 
     unsigned long beat() {
-        /*! Tests if a cycle has completed trying to be synchronous with the
-        beat resulting from the configured cycle length.
-        @return `0` if the current cycle is not completed or the number of
-                cycles passed since the last execution.
+        /*! Tests if a cycle has completed trying to be synchronous with the beat resulting from the
+        configured cycle length.
+        @return `0` if the current cycle is not completed or the number of full cycles passed since
+        the last execution.
         */
         unsigned long now = millis();
         unsigned long diff = ustd::timeDiff(timerStart, now);
@@ -87,13 +87,12 @@ class metronome {
         return 0;
     }
 
-    // watchdog style: the specified interval has passed
-    unsigned long woof() {
-        /*! Tests if a cycle has completed without any compensation. In
-        comparison to the function of \ref beat this method behaves more
-        like a classical watchdog.
-        @return `0` if the current cycle is not completed or the number of
-                cycles passed since the last execution.
+    unsigned long elapsed() {
+        /*! Tests if a cycle has completed without any compensation. In comparison to the function
+        of \ref beat this method behaves more like a classical watchdog. It is absolutely guaranteed
+        that the previous `elapsed()` has occurred at least one cycle length before.
+        @return `0` if the current cycle is not completed or the number of full cycles passed since
+        the last execution.
         */
         unsigned long now = millis();
         unsigned long diff = ustd::timeDiff(timerStart, now);

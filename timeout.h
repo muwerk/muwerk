@@ -3,18 +3,16 @@
 #pragma once
 
 #include "platform.h"
-#include "scheduler.h"  // timeDiff()
+#include "muwerk.h"
 
 namespace ustd {
 
 /*! \brief muwerk Timeout Class
 
-Implements a helper class for handling timeouts in milliseconds.
-See \ref ustd::utimeout for a high precision implmentation with
-microsecond resolution.
+Implements a helper class for handling timeouts in milliseconds. See \ref ustd::utimeout for a high
+precision implmentation with microsecond resolution.
 
-The following example based on a reconnection timeout illustrates
-the usage of this class:
+The following example based on a reconnection timeout illustrates the usage of this class:
 
 ~~~{.cpp}
 #include <scheduler.h>

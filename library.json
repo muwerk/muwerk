@@ -6,21 +6,24 @@
     },
     "keywords": "scheduler",
     "description": "Cooperative scheduler and mqtt-like communication queues",
-    "authors": [{
-        "name": "Dominik Schlösser",
-        "email": "dsc@dosc.net",
-        "maintainer": true
-    }, {
-        "name": "Leo Moll",
-        "email": "leo@yeasoft.com",
-        "maintainer": true
-    }],
+    "authors": [
+        {
+            "name": "Dominik Schlösser",
+            "email": "dsc@dosc.net",
+            "maintainer": true
+        },
+        {
+            "name": "Leo Moll",
+            "email": "leo@yeasoft.com",
+            "maintainer": true
+        }
+    ],
     "dependencies": {
         "name": "ustd",
-        "authors": "Dominik Schösser, Leo Moll",
+        "authors": "Dominik Schlösser, Leo Moll",
         "frameworks": "arduino"
     },
-    "version": "0.4.0",
+    "version": "0.5.0",
     "frameworks": "arduino",
     "platforms": "*"
 }

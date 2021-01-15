@@ -5,7 +5,7 @@ muwerk
 [![ESP12e build](https://travis-ci.org/muwerk/muwerk.svg?branch=master)](https://travis-ci.org/muwerk/muwerk)
 [![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://muwerk.github.io/muwerk/docs/index.html)
 
-muwerk cooperative scheduler with mqtt-like queues.
+muwerk is a cooperative scheduler with mqtt-like queues.
 
 Dependencies
 ------------
@@ -83,12 +83,12 @@ Both tasks were always executed as schedules (negligable late-times `cn`).
 See `Examples\mac-linux`. (Not available on ATTINY platforms, only ATMEGA
 and better).
 
-For systems that are connected to an MQTT-server (via [`munet`](https://github.com/muwerk/munet/blob/master/README.md)), 
+For systems that are connected to an MQTT-server (via [`munet`](https://github.com/muwerk/munet/blob/master/README.md)),
 a python example script [mutop](https://github.com/muwerk/muwerk/tree/master/Examples/mutop) shows
 how to parse the statistical information.
 
-MQTT-like communcations and architecture overview
--------------------------------------------------
+MQTT-like Communications and Architecture Overview
+--------------------------------------------------
 
 A more complete example is available at [blink](https://github.com/muwerk/muwerk/blob/master/Examples/minimal/mu_minimal.cpp)
 that shows how tasks can communicate MQTT-style with each other and -- blink a led.
@@ -133,10 +133,11 @@ Debugging and Troubleshooting
 
 <img align="right" width="480" src="https://github.com/muwerk/muwerk/blob/master/Resources/console.jpg?raw=true">
 
-The [`Console`](https://muwerk.github.io/muwerk/docs/classustd_1_1Console.html) class allows to bind a serial console to muwerk that allows to inspect message passing,
-file system (if available) and statistical information. See the
-[`mu_console`](https://github.com/muwerk/muwerk/blob/master/Examples/console/mu_console.cpp) example
-for more information.
+The [`Console`](https://muwerk.github.io/muwerk/docs/classustd_1_1Console.html) class allows
+to bind a serial console to muwerk that allows to inspect message passing, file system (if
+available) and statistical information. See the
+[`mu_console`](https://github.com/muwerk/muwerk/blob/master/Examples/console/mu_console.cpp)
+example for more information.
 
 Documentation
 -------------
@@ -148,15 +149,31 @@ Documentation
 Related projects:
 -----------------
 
-* [ustd](https://github.com/muwerk/ustd/blob/master/README.md) (micro-stdlib), a minimal implementation of array, vector and map c++ classes that work on all arduino platforms, from 8kb attiny up to ESP32 and Unixoids Mac or Linux (for testing).
-* [muwerk](https://github.com/muwerk/muwerk/blob/master/README.md) (microWerk), a cooperative scheduler and an MQTT-like communication-queue for all arduino devices (attiny up to ESP32 [and Unixoids Mac or Linux for testing])
-* [munet](https://github.com/muwerk/munet/blob/master/README.md), modules for network connectivity for ESP8266 and ESP32 devices, implements Wireless connection to access point, NTP time protocol, OTA over-the-air udpate, MQTT-stack (using [PubSubClient]).
-* [mupplets](https://github.com/muwerk/mupplets/blob/master/README.md), a number of implementations for sensors and io-devices. Mupplets implement processes for muwerk and expose muwerk's pub/sub interface to allow other mupplets or apps to access the mupplet's functionality. Mupplets can be sensor-drivers or or more specialized modules, e.g. clock functionality for a led display.
+* [ustd](https://github.com/muwerk/ustd/blob/master/README.md) (micro-stdlib), a minimal
+  implementation of array, vector and map c++ classes that work on all arduino platforms,
+  from 8kb attiny up to ESP32 and Unixoids Mac or Linux (for testing).
+* [muwerk](https://github.com/muwerk/muwerk/blob/master/README.md) (microWerk), a cooperative
+  scheduler and an MQTT-like communication-queue for all arduino devices (attiny up to ESP32
+  [and Unixoids Mac or Linux for testing])
+* [munet](https://github.com/muwerk/munet/blob/master/README.md), modules for network
+  connectivity for ESP8266 and ESP32 devices, implements Wireless connection to access point,
+  NTP time protocol, OTA over-the-air udpate, MQTT-stack (using [PubSubClient]).
+* [mupplets](https://github.com/muwerk/mupplets/blob/master/README.md), a number of
+  implementations for sensors and io-devices. Mupplets implement processes for muwerk and expose
+  muwerk's pub/sub interface to allow other mupplets or apps to access the mupplet's functionality.
+  Mupplets can be sensor-drivers or or more specialized modules, e.g. clock functionality for a
+  led display.
 
 History
 -------
 
-* 0.4.x (not published) `$SYS/STAT` format expanded to contain uptime, free memory, and per-task infos task-id and schedule-time.
+* 0.5.0 (2021-01-15) Major update including:
+  * New Serial Console class that provides a minimal interactive shell that can be extended with custom commands.
+  * New portable filesystem functions that provide abstraction between LittleFS and SPIFFS (and in future others).
+  * New class for managing JSON files with possibility to access members with an MQTT-topic-like path syntax.
+  * New utility classes `heartbeat` and `timeout`.
+  * New utility functions `shift` and `split` for string argument handling.
+  * `$SYS/STAT` format expanded to contain uptime, free memory, and per-task infos task-id and schedule-time.
 * 0.4.0 (2021-01-11) Optional serial console for muwerk, file system support for ESP8266 and ESP32.
 * 0.3.2 (2020-12-25) Small platform updates, no functional change.
 * 0.3.1 (2019-11-29) Compile problem with attiny: resetStats() referenced for attiny.
