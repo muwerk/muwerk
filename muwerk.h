@@ -68,7 +68,11 @@ void split(String &src, char delimiter, array<String> &result) {
     String source = src;
     String sb;
     while (true) {
+#ifdef __UNIXOID__
+        ind = (int)source.find(delimiter);
+#else
         ind = source.indexOf(delimiter);
+#endif
         if (ind == -1) {
             result.add(source);
             return;
