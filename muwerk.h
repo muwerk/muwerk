@@ -73,9 +73,15 @@ void split(String &src, char delimiter, array<String> &result) {
             result.add(source);
             return;
         } else {
+#ifdef __UNIXOID__
+            sb = source.substr(0, ind);
+            result.add(sb);
+            source = source.substr(ind + 1);
+#else
             sb = source.substring(0, ind);
             result.add(sb);
             source = source.substring(ind + 1);
+#endif
         }
     }
 }
@@ -98,9 +104,15 @@ String shift(String &src, char delimiter = ' ', String defValue = "") {
         ret = src;
         src = "";
     } else {
+#ifdef __UNIXOID__
+        ret = src.substr(0, ind);
+        src = src.substr(ind + 1);
+        // src.trim();
+#else
         ret = src.substring(0, ind);
         src = src.substring(ind + 1);
         src.trim();
+#endif
     }
     return ret;
 }
