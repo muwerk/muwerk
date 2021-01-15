@@ -858,15 +858,13 @@ class Console {
         }
         int iSubId =
             pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
+                Output.print("\r>> ");
 #ifndef __SUPPORT_LOWMEM__
-                if (originator.length() == 0) {
-                    originator = "unknown";
+                if (originator.length()) {
+                    Output.print("[");
+                    Output.print(originator);
+                    Output.print("] ");
                 }
-                Output.print("\rfrom: ");
-                Output.print(originator);
-                Output.print(": ");
-#else
-                Output.print("\r");
 #endif
                 Output.print(topic);
                 Output.print(" ");
