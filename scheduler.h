@@ -2,7 +2,7 @@
 
 #pragma once
 
-/*! \mainpage muwerk a cooperative scheduler with MQTT-like communication queues
+/*! \mainpage muwerk is a cooperative scheduler with MQTT-like communication queues
 \section Introduction
 
 muwerk implements the following classes:
