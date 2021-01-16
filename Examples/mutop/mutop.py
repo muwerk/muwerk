@@ -27,8 +27,12 @@ class MuwerkTop:
         # print("Connected.")
 
     def on_message(self, mqttc, obj, msg):
-        smsg = str(msg.payload.decode('utf-8'))
-        stat = json.loads(smsg)
+        try:
+            smsg = str(msg.payload.decode('utf-8'))
+            stat = json.loads(smsg)
+        except Exception as e:
+            print(f"Failed to decode message {e}")
+            return
         bars = ['█', '▉', '▊', '▋', '▌', '▍', '▎', '▏']
 
         up = 0
@@ -110,7 +114,7 @@ class MuwerkTop:
         pass
 
     def on_subscribe(self, mqttc, obj, mid, granted_qos):
-        # print("Subscribed: " + str(mid) + " " + str(granted_qos))
+        print("Subscribed: " + str(mid) + " " + str(granted_qos))
         pass
 
     def on_log(self, mqttc, obj, level, string):
