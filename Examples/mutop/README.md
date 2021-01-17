@@ -24,8 +24,9 @@ Usage
 ```
 $ python mutop.py -h
 
-usage: mutop.py [-h] [--domain DOMAIN] [--sampletime SAMPLETIME]
-                mqtt_hostname device_hostname
+usage: mutop [-h] [--domain DOMAIN] [--sampletime SAMPLETIME] [--username USERNAME]
+             [--password PASSWORD]
+             mqtt_hostname device_hostname
 
 positional arguments:
   mqtt_hostname         Hostname of mqtt server
@@ -39,4 +40,17 @@ optional arguments:
   --sampletime SAMPLETIME, -s SAMPLETIME
                         Sampling time in seconds, should be larger than the largest
                         task schedule time.
+  --username USERNAME, -u USERNAME
+                        username for authorization if the mqtt server requires one.
+  --password PASSWORD, -p PASSWORD
+                        password for authorization if the mqtt server requires one.
+```
+
+If you use mutop frequently, consider making it executable and creating a symbolic link
+in your path:
+
+```bash
+
+chmod +x mutop.py
+ln -s $(readlink -f mutop.py) /usr/local/bin/mutop
 ```

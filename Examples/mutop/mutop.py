@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import paho.mqtt.client as mqtt
 import time
 import json
@@ -6,7 +7,7 @@ import argparse
 
 
 class MuwerkTop:
-    def __init__(self, mqtt_server, muhost, sample_time, domain):
+    def __init__(self, mqtt_server, muhost, sample_time, domain, username, password):
         self.domain = domain
         self.mqtt_server = mqtt_server
         self.sample_time = f"{sample_time}"
@@ -19,6 +20,8 @@ class MuwerkTop:
         self.mqttc.on_subscribe = self.on_subscribe
         # Uncomment to enable debug messages
         # self.mqttc.on_log = self.on_log
+        if username is not None:
+            self.mqttc.username_pw_set(username, password)
         self.connection_state = False
         try:
             self.mqttc.connect(mqtt_server, 1883, 60)
@@ -153,12 +156,16 @@ if __name__ == "__main__":
                         help="outgoing domain prefix used by device, default is \"omu\", use \"\" if no outgoing domain prefix is used.")
     parser.add_argument('--sampletime', '-s', type=int, default=2,
                         help="Sampling time in seconds, should be larger than the largest task schedule time.")
+    parser.add_argument('--username', '-u', default=None,
+                        help="username for authorization if the mqtt server requires one.")
+    parser.add_argument('--password', '-p', default=None,
+                        help="password for authorization if the mqtt server requires one.")
     parser.add_argument('mqtt_hostname', help="Hostname of mqtt server")
     parser.add_argument('device_hostname', help="Hostname of muwerk-device")
     args = parser.parse_args()
 
     mt = MuwerkTop(args.mqtt_hostname, args.device_hostname,
-                   args.sampletime*1000, args.domain)
+                   args.sampletime*1000, args.domain, args.username, args.password)
     while mt.connection_state is False:
         time.sleep(0.1)
     if args.domain == "":
