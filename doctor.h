@@ -56,10 +56,6 @@ class Doctor {
     bool bActive = false;
     heartbeat memoryInterval;
 
-#ifdef __ESP__
-    HomeAssistant *pHA;
-#endif
-
     Doctor(String name) : name(name) {
     }
 
@@ -77,21 +73,6 @@ class Doctor {
         pSched->subscribe(tID, name + "/#", fnall);
         bActive = true;
     }
-
-#ifdef __ESP__
-/*
-        void registerHomeAssistant(String homeAssistantFriendlyName, String projectName = "",
-                                   String homeAssistantDiscoveryPrefix = "homeassistant") {
-            pHA = new HomeAssistant(name, tID, homeAssistantFriendlyName, projectName,
-                                    AIRQUALITY_VERSION, homeAssistantDiscoveryPrefix);
-            pHA->addSensor("temperature", "Temperature", "\\u00B0C", "temperature",
-                           "mdi:thermometer");
-            pHA->addSensor("humidity", "Humidity", "%", "humidity", "mdi:water-percent");
-            pHA->addSensor("pressure", "Pressure", "hPa", "pressure", "mdi:altimeter");
-            pHA->begin(pSched);
-        }
-        */
-#endif
 
     int hwErrs = 0;
     int i2cDevs = 0;
@@ -187,6 +168,9 @@ class Doctor {
         }
         if (topic == name + "/diagnostics/get") {
             publishDiagnostics();
+        }
+        if (topic == name + "/timeinfo/get") {
+            publishTimeinfo();
         }
     };
 };  // Doctor
