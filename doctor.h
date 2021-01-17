@@ -17,7 +17,8 @@ If the system is connected to MQTT, any MQTT client can be used to access diagno
 * publish: hostname/doctor/memory/get  -> hostname/doctor/memory, msgs=free memory
 * publish: hostname/doctor/i2cinfo/get -> hostname/doctor/i2cinfo, json list of used i2c-ports in
 the system
-* publish: hostname/doctor/
+* publish: hostname/doctor/timeinfo/get -> hostname/doctor/timeinfo, json time related information
+* publish: hostname/doctor/restart  -> restarts system.
 
 ## Sample of adding the doctor:
 
@@ -144,8 +145,8 @@ class Doctor {
     }
 
     void publishTimeinfo() {
-#ifdef __ESP__
         JSONVar timeinfo;
+#ifdef __ESP__
         time_t now = time(nullptr);
         char szTime[24];
         struct tm *plt = localtime(&now);
@@ -153,8 +154,11 @@ class Doctor {
         timeinfo["time"] = (const char *)szTime;
         strftime(szTime, 20, "%Y.%m.%d %H:%M:%S", plt);
         timeinfo["date"] = (const char *)szTime;
-        pSched->publish(name + "/timeinfo", JSON.stringify(timeinfo));
 #endif
+        timeinfo["uptime"] = (long)pSched->getUptime();
+        timeinfo["time_t"] = (long)time(nullptr);
+        timeinfo["millis"] = millis();
+        pSched->publish(name + "/timeinfo", JSON.stringify(timeinfo));
     }
 
     void loop() {
@@ -183,6 +187,11 @@ class Doctor {
         }
         if (topic == name + "/timeinfo/get") {
             publishTimeinfo();
+        }
+        if (topic == name + "/restart") {
+#ifdef __ESP__
+            ESP.restart();
+#endif
         }
     };
 };  // Doctor
