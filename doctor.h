@@ -56,7 +56,7 @@ class Doctor {
     bool bActive = false;
     heartbeat memoryInterval;
 
-    Doctor(String name) : name(name) {
+    Doctor(String name = "doctor") : name(name) {
     }
 
     ~Doctor() {
