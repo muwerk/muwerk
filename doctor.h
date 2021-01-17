@@ -1,7 +1,6 @@
 // doctor.h -- system diagnostics via messages / mqtt
 #pragma once
 
-#include <Wire.h>
 #include <Arduino_JSON.H>
 
 #include "scheduler.h"
@@ -9,23 +8,32 @@
 
 namespace ustd {
 
-/*! \brief muwerk Doctor class
+/*! \brief muwerk Doctor Class
 
-The doctor class implements a remote diagnistics interface via pub/sub messages.
-If the system is connected to MQTT, any MQTT client can be used to access diagnotics.
+The doctor class implements a remote diagnostics interface via pub/sub messages.
+If the system is connected to MQTT, any MQTT client can be used to access diagnostics.
 
-* publish: hostname/doctor/memory/get  -> hostname/doctor/memory, msgs=free memory
-* publish: hostname/doctor/i2cinfo/get -> hostname/doctor/i2cinfo, json list of used i2c-ports in
-the system
-* publish: hostname/doctor/timeinfo/get -> hostname/doctor/timeinfo, json time related information
-* publish: hostname/doctor/restart  -> restarts system.
+* publish: `hostname/doctor/memory/get`  -> `hostname/doctor/memory`, msgs=free memory.
+* publish: `hostname/doctor/i2cinfo/get` -> `hostname/doctor/i2cinfo`, json list of used i2c-ports
+in the system.
+* publish: `hostname/doctor/timeinfo/get` -> `hostname/doctor/timeinfo`, json time related
+information.
+* publish: `hostname/doctor/diagnostics/get` -> `hostname/doctor/diagnostics`, json system related
+information.
+* publish: `hostname/doctor/restart`  -> restarts system.
+
+**NOTICE** `Wire.h` **must** be included before __the Doctor__ in order to support also
+the i2cinfo functionality!
 
 ## Sample of adding the doctor:
 
 ~~~{.cpp}
 
-#include "scheduler.h"
-#include "console.h"
+#include <scheduler.h>
+
+#include <Wire.h>
+#include <doctor.h>
+#include <console.h>
 
 ustd::Scheduler sched( 10, 16, 32 );
 ustd::Doctor doc("doctor");
@@ -49,35 +57,46 @@ void loop() {
 
 */
 class Doctor {
-  public:
-    String DOCTOR_VERSION = "0.1";
+  private:
+    // muwerk task management
     Scheduler *pSched;
     int tID;
+
+    // active configuration
     String name;
+
+    // runtime control - state management
     bool bActive = false;
     heartbeat memoryInterval;
+    // runtime control - i2c scanner
+    int hwErrs = 0;
+    int i2cDevs = 0;
 
+  public:
     Doctor(String name = "doctor") : name(name) {
+        //! Instantiates a Doctor Task
     }
 
     ~Doctor() {
     }
 
     void begin(Scheduler *_pSched) {
+        /*! Starts the Doctor Task
+         *
+         * @param _pSched Pointer to the muwerk scheduler.
+         */
         pSched = _pSched;
-        auto ft = [=]() { this->loop(); };
-        tID = pSched->add(ft, name, 100000);  // every 100 ms
+        tID = pSched->add([this]() { this->loop(); }, name, 100000);  // every 100 ms
 
-        auto fnall = [=](String topic, String msg, String originator) {
+        pSched->subscribe(tID, name + "/#", [this](String topic, String msg, String originator) {
             this->subsMsg(topic, msg, originator);
-        };
-        pSched->subscribe(tID, name + "/#", fnall);
+        });
+
         bActive = true;
     }
 
-    int hwErrs = 0;
-    int i2cDevs = 0;
-
+  protected:
+#ifdef TwoWire_h
     bool i2c_checkAddress(uint8_t address) {
         Wire.beginTransmission(address);
         byte error = Wire.endTransmission();
@@ -105,6 +124,7 @@ class Doctor {
         i2cinfo["hardware_errors"] = hwErrs;
         pSched->publish(name + "/i2cinfo", JSON.stringify(i2cinfo));
     }
+#endif
 
     void publishDiagnostics() {
         JSONVar i2cinfo;
@@ -179,9 +199,11 @@ class Doctor {
             }
             publishMemory();
         }
+#ifdef TwoWire_h
         if (topic == name + "/i2cinfo/get") {
             publishI2C();
         }
+#endif
         if (topic == name + "/diagnostics/get") {
             publishDiagnostics();
         }
