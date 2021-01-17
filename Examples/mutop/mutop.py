@@ -150,7 +150,7 @@ class MuwerkTop:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--domain', '-d', default="omu",
-                        help="outgoing domain prefix used by device, default is 'omu'")
+                        help="outgoing domain prefix used by device, default is \"omu\", use \"\" if no outgoing domain prefix is used.")
     parser.add_argument('--sampletime', '-s', type=int, default=2,
                         help="Sampling time in seconds, should be larger than the largest task schedule time.")
     parser.add_argument('mqtt_hostname', help="Hostname of mqtt server")
