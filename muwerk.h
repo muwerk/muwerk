@@ -38,6 +38,7 @@ used by:
 #include "platform.h"
 #include "array.h"
 
+//! \brief The muwerk namespace
 namespace ustd {
 
 unsigned long timeDiff(unsigned long first, unsigned long second) {
