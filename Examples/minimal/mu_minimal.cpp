@@ -3,10 +3,10 @@
 // Make sure to use a platform define before following includes
 #include "platform.h"
 #include "scheduler.h"
+#include "heartbeat.h"
 
 ustd::Scheduler sched;
 
-int led;
 void appLoop();
 
 void task0(String topic, String msg, String originator) {
@@ -19,8 +19,9 @@ void task0(String topic, String msg, String originator) {
 
 void task1() {  // scheduled every 50ms
     static int s1 = 0;
-    static unsigned long t1;
-    if (ustd::timeDiff(t1, millis()) > 500L) {
+    static ustd::heartbeat intervall = 500L;  // 500 msec
+
+    if (intervall.beat()) {
         if (s1 == 0) {
             s1 = 1;
             sched.publish("led", "on");  // MQTT-style publish to topic "led"
@@ -31,10 +32,7 @@ void task1() {  // scheduled every 50ms
             s1 = 0;
             sched.publish("led", "off");
         }
-        t1 = millis();
     }
-    if (t1 == 0)
-        t1 = millis();
 }
 
 void setup() {

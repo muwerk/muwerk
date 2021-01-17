@@ -166,13 +166,17 @@ Related projects:
 
 History
 -------
-
+* 0.X.X (2021-01-XX) [not yes released]
+  * `ustd::Console` has now a better interface for using other Printer-derived stream objects, `ustd::SerialConsole` can now be used with alternative serial interfaces
+  * Improvements to stability and memory handling on `ustd::Scheduler`
+  * Additional commandline options for `mutop`
 * 0.5.0 (2021-01-15) Major update including:
   * New Serial Console class that provides a minimal interactive shell that can be extended with custom commands.
   * New portable filesystem functions that provide abstraction between LittleFS and SPIFFS (and in future others).
   * New class for managing JSON files with possibility to access members with an MQTT-topic-like path syntax.
   * New utility classes `heartbeat` and `timeout`.
   * New utility functions `shift` and `split` for string argument handling.
+  * Analysis tool `mutop` that allows to monitor tasks and resource consumption for mqtt connected systems.
   * `$SYS/STAT` format expanded to contain uptime, free memory, and per-task infos task-id and schedule-time.
 * 0.4.0 (2021-01-11) Optional serial console for muwerk, file system support for ESP8266 and ESP32.
 * 0.3.2 (2020-12-25) Small platform updates, no functional change.

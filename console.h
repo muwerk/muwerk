@@ -95,12 +95,15 @@ ustd::SerialConsole con;
 void apploop() {}
 
 void setup() {
+    // initialize the serial interface
+    Serial.begin( 115200 );
+
     // extend console
     con.extend( "hurz", []( String cmd, String args ) {
-        Output.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
+        printer->println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
             String arg = ustd::shift( args );
-            Output.println( arg + "   HURZ!" );
+            printer->println( arg + "   HURZ!" );
         }
     } );
 
@@ -125,7 +128,7 @@ class Console {
     ustd::array<T_COMMAND> commands;
     int commandHandle = 0;
 #endif
-    Print &Output;
+    Print *printer;
     Scheduler *pSched;
     int tID;
     String name;
@@ -135,10 +138,10 @@ class Console {
     bool debug = false;
 
   public:
-    Console(String name, Print &Output) : Output(Output), name(name) {
+    Console(String name, Print *printer) : printer(printer), name(name) {
         /*! Creates a console
         @param name Name used for task registration and message origin
-        @param Output Reference to a printer that receives the output
+        @param printer Pointer to a printer that receives the output
         */
     }
 
@@ -208,8 +211,8 @@ class Console {
 
   protected:
     virtual void prompt() {
-        Output.print("\rmuwerk> ");
-        Output.print(args);
+        printer->print("\rmuwerk> ");
+        printer->print(args);
     }
 
     size_t outputf(const char *format, ...) {
@@ -228,7 +231,7 @@ class Console {
             vsnprintf(buffer, len + 1, format, arg);
             va_end(arg);
         }
-        len = Output.write((const uint8_t *)buffer, len);
+        len = printer->write((const uint8_t *)buffer, len);
         if (buffer != temp) {
             delete[] buffer;
         }
@@ -252,8 +255,6 @@ class Console {
 #ifdef __ESP__
         } else if (cmd == "reboot") {
             cmd_reboot();
-        } else if (cmd == "debug") {
-            cmd_debug();
         } else if (cmd == "wifi") {
             cmd_wifi();
 #endif
@@ -288,7 +289,7 @@ class Console {
             cmd_jf();
 #endif
         } else if (!cmd_custom(cmd)) {
-            Output.println("Unknown command " + cmd);
+            printer->println("-mush: " + cmd + ": command not found");
         }
     }
 
@@ -312,14 +313,14 @@ class Console {
             help += commands[i].command;
         }
 #endif
-        Output.println(help);
+        printer->println(help);
     }
 
     void cmd_sub() {
         String arg = pullArg();
         if (arg == "-h" || arg == "-H") {
-            Output.println("usage: sub [all | none]");
-            Output.println("usage: sub topic [topic [..]]");
+            printer->println("usage: sub [all | none]");
+            printer->println("usage: sub topic [topic [..]]");
             return;
         } else if (arg == "none") {
             clearsub();
@@ -336,19 +337,19 @@ class Console {
         }
         if (subsub.length()) {
             if (suball) {
-                Output.println("All topics subscribed");
+                printer->println("All topics subscribed");
             } else {
                 outputf("%i subscriptions\r\n", subsub.length());
             }
         } else {
-            Output.println("No subscriptions");
+            printer->println("No subscriptions");
         }
     }
 
     void cmd_pub() {
         String arg = pullArg();
         if (arg == "-h" || arg == "-H" || arg == "") {
-            Output.println("usage: pub <topic> <message>");
+            printer->println("usage: pub <topic> <message>");
             return;
         }
         pSched->publish(arg, args, name);
@@ -356,28 +357,15 @@ class Console {
 
 #ifdef __ESP__
     void cmd_reboot() {
-        Output.println("Restarting...");
+        printer->println("Restarting...");
         ESP.restart();
     }
 
-    void cmd_debug() {
-        Output.print("WiFi serial debug output ");
-        if (debug) {
-            Serial.setDebugOutput(false);
-            debug = false;
-            Output.println("disabled.");
-        } else {
-            Serial.setDebugOutput(true);
-            debug = true;
-            Output.println("enabled.");
-        }
-    }
-
     void cmd_wifi() {
-        Output.println("WiFi Information:");
-        Output.println("-----------------");
-        WiFi.printDiag(Output);
-        Output.println();
+        printer->println("WiFi Information:");
+        printer->println("-----------------");
+        WiFi.printDiag(*printer);
+        printer->println();
     }
 #endif
     void cmd_uptime() {
@@ -387,95 +375,95 @@ class Console {
         unsigned long minutes = (uptime % 3600) / 60;
         unsigned long seconds = uptime % 60;
 
-        Output.print("up ");
+        printer->print("up ");
         if (days) {
-            Output.print(days);
+            printer->print(days);
             if (days > 1) {
-                Output.print(" days, ");
+                printer->print(" days, ");
             } else {
-                Output.print(" day, ");
+                printer->print(" day, ");
             }
         }
         outputf("%2.2lu:%2.2lu:%2.2lu\r\n", hours, minutes, seconds);
     }
 
     void cmd_ps() {
-        Output.println();
+        printer->println();
 #ifndef __SUPPORT_LOWMEM__
-        Output.println("Scheduler Information:");
-        Output.println("----------------------");
+        printer->println("Scheduler Information:");
+        printer->println("----------------------");
 #endif
-        Output.println("System Time: " + String(pSched->systemTime));
-        Output.println("App Time: " + String(pSched->appTime));
-        Output.println("Running Tasks: " + String(pSched->taskList.length()));
+        printer->println("System Time: " + String(pSched->systemTime));
+        printer->println("App Time: " + String(pSched->appTime));
+        printer->println("Running Tasks: " + String(pSched->taskList.length()));
         if (pSched->taskList.length()) {
-            Output.println();
-            Output.println("  TID    Interval       Count    CPU Time   Late Time  Name");
+            printer->println();
+            printer->println("  TID    Interval       Count    CPU Time   Late Time  Name");
 #ifndef __SUPPORT_LOWMEM__
-            Output.println("----------------------------------------------------------------");
+            printer->println("----------------------------------------------------------------");
 #endif
         }
         for (unsigned int i = 0; i < pSched->taskList.length(); i++) {
             outputf("%5i  %10lu  %10lu  %10lu  %10lu  ", pSched->taskList[i].taskID,
                     pSched->taskList[i].minMicros, pSched->taskList[i].callCount,
                     pSched->taskList[i].cpuTime, pSched->taskList[i].lateTime);
-            Output.println(pSched->taskList[i].szName);
+            printer->println(pSched->taskList[i].szName);
         }
-        Output.println();
+        printer->println();
     }
 
 #ifndef __SUPPORT_LOWMEM__
     void cmd_mem() {
-        Output.println();
+        printer->println();
 #ifdef __ESP__
 #ifdef __ESP32__
-        Output.println("Internal Ram:");
-        Output.println("-------------");
+        printer->println("Internal Ram:");
+        printer->println("-------------");
         outputf("Size: %u B\r\n", (unsigned int)ESP.getHeapSize());
         outputf("Free: %u B\r\n", (unsigned int)ESP.getFreeHeap());
         outputf("Used: %u B\r\n", (unsigned int)ESP.getHeapSize() - ESP.getFreeHeap());
         outputf("Peak: %u B\r\n", (unsigned int)ESP.getHeapSize() - ESP.getMinFreeHeap());
         outputf("MaxB: %u B\r\n", (unsigned int)ESP.getMaxAllocHeap());
-        Output.println();
+        printer->println();
 
-        Output.println("SPI Ram:");
-        Output.println("--------");
+        printer->println("SPI Ram:");
+        printer->println("--------");
         outputf("Size: %u B\r\n", (unsigned int)ESP.getPsramSize());
         outputf("Free: %u B\r\n", (unsigned int)ESP.getFreePsram());
         outputf("Used: %u B\r\n", (unsigned int)ESP.getPsramSize() - ESP.getFreePsram());
         outputf("Peak: %u B\r\n", (unsigned int)ESP.getPsramSize() - ESP.getMinFreePsram());
         outputf("MaxB: %u B\r\n", (unsigned int)ESP.getMaxAllocPsram());
-        Output.println();
+        printer->println();
 #else
-        Output.println("Internal Ram:");
-        Output.println("-------------");
+        printer->println("Internal Ram:");
+        printer->println("-------------");
         outputf("Free: %u B\r\n", (unsigned int)ESP.getFreeHeap());
         outputf("Fragmentation: %u%%\r\n", (unsigned int)ESP.getHeapFragmentation());
         outputf("Largest Free Block: %u B\r\n", (unsigned int)ESP.getMaxFreeBlockSize());
-        Output.println();
+        printer->println();
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
-        Output.println("Memory:");
-        Output.println("-------");
-        Output.print("Free: ");
-        Output.print(freeMemory());
-        Output.println(" B");
-        Output.println();
+        printer->println("Memory:");
+        printer->println("-------");
+        printer->print("Free: ");
+        printer->print(freeMemory());
+        printer->println(" B");
+        printer->println();
 #else
-        Output.println("No information available");
-        Output.println();
+        printer->println("No information available");
+        printer->println();
 #endif  // __ARDUINO__
 #endif  // __ESP__
     }
 #endif  // __SUPPORT_LOWMEM__
 
     void cmd_info() {
-        Output.println();
+        printer->println();
 #ifdef __ESP__
 #ifdef __ESP32__
-        Output.println("ESP32 Information:");
-        Output.println("------------------");
+        printer->println("ESP32 Information:");
+        printer->println("------------------");
         outputf("Chip Verion: %u\r\n", (unsigned int)ESP.getChipRevision());
         outputf("CPU Frequency: %u MHz\r\n", (unsigned int)ESP.getCpuFreqMHz());
         outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
@@ -483,10 +471,10 @@ class Console {
         outputf("Program Free: %u B\r\n", (unsigned int)ESP.getFreeSketchSpace());
         outputf("Flash Chip Size: %u B\r\n", (unsigned int)ESP.getFlashChipSize());
         outputf("Flash Chip Speed: %.2f MHz\r\n", (float)ESP.getFlashChipSpeed() / 1000000.0);
-        Output.println();
+        printer->println();
 #else
-        Output.println("ESP Information:");
-        Output.println("----------------");
+        printer->println("ESP Information:");
+        printer->println("----------------");
         outputf("Chip ID: %u\r\n", (unsigned int)ESP.getChipId());
         outputf("Chip Version: %s\r\n", ESP.getCoreVersion().c_str());
         outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
@@ -498,31 +486,31 @@ class Console {
         outputf("Flash Chip Real Size: %u B\r\n", (unsigned int)ESP.getFlashChipRealSize());
         outputf("Flash Chip Speed: %.2f MHz\r\n", (float)ESP.getFlashChipSpeed() / 1000000.0);
         outputf("Last Reset Reason: %s\r\n", ESP.getResetReason().c_str());
-        Output.println();
+        printer->println();
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
 #ifdef __SUPPORT_LOWMEM__
-        Output.print("mem ");
-        Output.print(freeMemory());
-        Output.print(", ");
-        Output.print((float)(F_CPU) / 1000000.0, 2);
-        Output.println(" MHz");
-        Output.println();
+        printer->print("mem ");
+        printer->print(freeMemory());
+        printer->print(", ");
+        printer->print((float)(F_CPU) / 1000000.0, 2);
+        printer->println(" MHz");
+        printer->println();
 #else
-        Output.print("CPU Frequency: ");
-        Output.print((float)(F_CPU) / 1000000.0, 2);
-        Output.println(" MHz");
+        printer->print("CPU Frequency: ");
+        printer->print((float)(F_CPU) / 1000000.0, 2);
+        printer->println(" MHz");
         outputf("Free Memory: %u B\r\n", (unsigned int)freeMemory());
-        Output.println();
+        printer->println();
 #endif  // __LOWMEM
 #else
 #ifdef __SUPPORT_LOWMEM__
-        Output.println("No info");
+        printer->println("No info");
 #else
-        Output.println("No information available");
+        printer->println("No information available");
 #endif  //__SUPPORT_LOWMEM__
-        Output.println();
+        printer->println();
 #endif  // __ARDUINO__
 #endif  // __ESP__
     }
@@ -547,68 +535,68 @@ class Console {
             }
             // intended fallthrough
         case 's':
-            Output.print("munix");
+            printer->print("munix");
             break;
         case 'a':
             // all
             cmd_uname('s', false);
-            Output.print(" ");
+            printer->print(" ");
             cmd_uname('n', false);
-            Output.print(" ");
+            printer->print(" ");
             cmd_uname('v', false);
             break;
         case 'n':
 #ifdef __ESP__
 #ifdef __ESP32__
-            Output.print(WiFi.getHostname());
+            printer->print(WiFi.getHostname());
 #else
-            Output.print(WiFi.hostname());
+            printer->print(WiFi.hostname());
 #endif
 #else
-            Output.print("localhost");
+            printer->print("localhost");
 #endif
             break;
         case 'r':
 #ifdef __ESP__
-            Output.print(ESP.getSdkVersion());
+            printer->print(ESP.getSdkVersion());
 #else
-            Output.print("unknown");
+            printer->print("unknown");
 #endif
             break;
         case 'p':
 #ifdef __ESP__
 #ifdef __ESP32__
-            Output.print("ESP32");
+            printer->print("ESP32");
 #else
-            Output.print("ESP");
+            printer->print("ESP");
 #endif
 #else
 #ifdef __ARDUINO__
-            Output.print("Arduino");
+            printer->print("Arduino");
 #else
-            Output.print("Unknown");
+            printer->print("Unknown");
 #endif
 #endif
             break;
         case 'v':
             cmd_uname('p', false);
-            Output.print(" Version ");
+            printer->print(" Version ");
             cmd_uname('r', false);
-            Output.print(": " __DATE__ " " __TIME__);
+            printer->print(": " __DATE__ " " __TIME__);
 #ifdef PLATFORMIO
-            Output.print("; PlatformIO " + String(PLATFORMIO));
+            printer->print("; PlatformIO " + String(PLATFORMIO));
 #ifdef ARDUINO_VARIANT
-            Output.print(", " ARDUINO_VARIANT);
+            printer->print(", " ARDUINO_VARIANT);
 #endif
 #endif
             break;
         case 'h':
         default:
-            Output.println("usage: uname [-amnprsv]");
+            printer->println("usage: uname [-amnprsv]");
             return;
         }
         if (crlf) {
-            Output.println();
+            printer->println();
         }
     }
 
@@ -618,16 +606,16 @@ class Console {
         arg.toLowerCase();
         if (arg == "-h") {
 #ifdef __SUPPORT_SETDATE__
-            Output.println("usage: date [[YYYY-MM-DD] hh:mm:ss]");
+            printer->println("usage: date [[YYYY-MM-DD] hh:mm:ss]");
 #else
-            Output.println("usage: date");
+            printer->println("usage: date");
 #endif
             return;
         }
         time_t t = time(nullptr);
         struct tm *lt = localtime(&t);
         if (!lt) {
-            Output.println("error: current time cannot be determined");
+            printer->println("error: current time cannot be determined");
             return;
         }
         if (arg == "") {
@@ -641,7 +629,7 @@ class Console {
                 int i = sscanf(arg.c_str(), "%4i-%2i-%2i", &lt->tm_year, &lt->tm_mon, &lt->tm_mday);
                 if (i != 3 || lt->tm_year < 1970 || lt->tm_year > 2038 || lt->tm_mon < 1 ||
                     lt->tm_mon > 11 || lt->tm_mday < 1 || lt->tm_mday > 31) {
-                    Output.println("error: " + arg + " is not a date");
+                    printer->println("error: " + arg + " is not a date");
                     return;
                 }
                 lt->tm_year -= 1900;
@@ -652,7 +640,7 @@ class Console {
             int i = sscanf(arg.c_str(), "%2i:%2i:%2i", &lt->tm_hour, &lt->tm_min, &lt->tm_sec);
             if (i != 3 || lt->tm_hour < 0 || lt->tm_hour > 23 || lt->tm_min < 0 ||
                 lt->tm_min > 59 || lt->tm_sec < 0 || lt->tm_sec > 59) {
-                Output.println("error: " + arg + " is not a time");
+                printer->println("error: " + arg + " is not a time");
                 return;
             }
             time_t newt = mktime(lt);
@@ -664,7 +652,7 @@ class Console {
             time(&newt);
             // invoke myself to display resulting date
             args = "";
-            Output.print("Date set to: ");
+            printer->print("Date set to: ");
             cmd_date();
 #endif  // __ESP__
         }
@@ -678,7 +666,7 @@ class Console {
 
         for (String arg = pullArg(); arg.length(); arg = pullArg()) {
             if (arg == "-h" || arg == "-H") {
-                Output.println("\rusage: ls [-l] <path> [<path> [...]]");
+                printer->println("\rusage: ls [-l] <path> [<path> [...]]");
                 return;
             } else if (arg == "-l" || arg == "-L" || arg == "-la") {
                 extended = true;
@@ -705,7 +693,7 @@ class Console {
                                 lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
                     }
                 }
-                Output.println(dir.fileName());
+                printer->println(dir.fileName());
             }
         }
     }
@@ -713,12 +701,12 @@ class Console {
     void cmd_rm() {
         String arg = pullArg();
         if (arg == "-h" || arg == "-H") {
-            Output.println("usage: rm <filename>");
+            printer->println("usage: rm <filename>");
             return;
         }
         if (!fsDelete(arg)) {
 #ifndef USE_SERIAL_DBG
-            Output.println("error: File " + arg + " can't be deleted.");
+            printer->println("error: File " + arg + " can't be deleted.");
 #endif
         }
     }
@@ -726,14 +714,14 @@ class Console {
     void cmd_cat() {
         String arg = pullArg();
         if (arg == "-h" || arg == "-H") {
-            Output.println("usage: cat <filename>");
+            printer->println("usage: cat <filename>");
             return;
         }
 
         fs::File f = fsOpen(arg, "r");
         if (!f) {
 #ifndef USE_SERIAL_DBG
-            Output.println("error: File " + arg + " can't be opened.");
+            printer->println("error: File " + arg + " can't be opened.");
 #endif
             return;
         }
@@ -743,7 +731,7 @@ class Console {
         }
         while (f.available()) {
             // Lets read line by line from the file
-            Output.println(f.readStringUntil('\n'));
+            printer->println(f.readStringUntil('\n'));
         }
         f.close();
     }
@@ -761,15 +749,15 @@ class Console {
         } else if (arg == "del") {
             cmd_jf_del();
         } else {
-            Output.println("error: bad command " + arg + "specified.");
+            printer->println("error: bad command " + arg + "specified.");
             cmd_jf_help();
         }
     }
 
     void cmd_jf_help() {
-        Output.println("usage: jf get <jsonpath>");
-        Output.println("usage: jf set <jsonpath> <jsonvalue>");
-        Output.println("usage: jf del <jsonpath>");
+        printer->println("usage: jf get <jsonpath>");
+        printer->println("usage: jf set <jsonpath> <jsonvalue>");
+        printer->println("usage: jf del <jsonpath>");
     }
 
     void cmd_jf_get() {
@@ -785,18 +773,18 @@ class Console {
 
         if (!jf.readJsonVar(arg, value)) {
 #ifndef USE_SERIAL_DBG
-            Output.println("error: Cannot read value " + arg);
+            printer->println("error: Cannot read value " + arg);
 #endif
             return;
         }
-        Output.print(arg);
+        printer->print(arg);
 
         String type = JSON.typeof(value);
-        Output.print(": " + type);
+        printer->print(": " + type);
         if (type == "unknown") {
-            Output.println("");
+            printer->println("");
         } else {
-            Output.println(", " + JSON.stringify(value));
+            printer->println(", " + JSON.stringify(value));
         }
     }
 
@@ -811,12 +799,12 @@ class Console {
         ustd::jsonfile jf;
         JSONVar value = JSON.parse(args);
         if (JSON.typeof(value) == "undefined") {
-            Output.println("error: Cannot parse value " + args);
+            printer->println("error: Cannot parse value " + args);
             return;
         }
         if (!jf.writeJsonVar(arg, value)) {
 #ifndef USE_SERIAL_DBG
-            Output.println("error: Failed to write value " + arg);
+            printer->println("error: Failed to write value " + arg);
 #endif
         }
     }
@@ -832,7 +820,7 @@ class Console {
         ustd::jsonfile jf;
         if (!jf.remove(arg)) {
 #ifndef USE_SERIAL_DBG
-            Output.println("error: Failed to delete value " + arg);
+            printer->println("error: Failed to delete value " + arg);
 #endif
         }
     }
@@ -858,17 +846,17 @@ class Console {
         }
         int iSubId =
             pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
-                Output.print("\r>> ");
+                printer->print("\r>> ");
 #ifndef __SUPPORT_LOWMEM__
                 if (originator.length()) {
-                    Output.print("[");
-                    Output.print(originator);
-                    Output.print("] ");
+                    printer->print("[");
+                    printer->print(originator);
+                    printer->print("] ");
                 }
 #endif
-                Output.print(topic);
-                Output.print(" ");
-                Output.println(msg);
+                printer->print(topic);
+                printer->print(" ");
+                printer->println(msg);
                 prompt();
             });
         subsub.add(iSubId);
@@ -912,12 +900,15 @@ ustd::SerialConsole con;
 void apploop() {}
 
 void setup() {
+    // initialize the serial interface
+    Serial.begin( 115200 );
+
     // extend console
     con.extend( "hurz", []( String cmd, String args ) {
-        Output.println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
+        printer->println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
             String arg = ustd::shift( args );
-            Output.println( arg + "   HURZ!" );
+            printer->println( arg + "   HURZ!" );
         }
     } );
 
@@ -956,26 +947,53 @@ class SerialConsole : public Console {
 #endif
 
   public:
-    SerialConsole() : Console("serial", Serial) {
+    SerialConsole() : Console("serial", &Serial) {
+        /*! Instantiate a Serial Console
+         */
 #if MU_SERIAL_BUF_SIZE > 0
         pcur = buffer;
         memset(buffer, 0, sizeof(buffer) / sizeof(char));
 #endif
     }
 
-    void begin(Scheduler *_pSched, String initialCommand = "", unsigned long baudrate = 115200) {
-        /*! Starts the console
+    void begin(Scheduler *_pSched, String initialCommand = "", unsigned long pollRate = 60) {
+        /*! Starts the console on the default serial interface
+         *
+         * The serial interface `Serial` must be intiialized and configured (baudrate, etc.) before
+         * starting the serial console.
          *
          * @param _pSched Pointer to the muwerk scheduler.
          * @param initialCommand (optional, default none) Initial command to execute.
-         * @param baudrate (optional, default 115200) The baud rate of the serial interface
+         * @param pollRate (optional, default 60 msec) Pollrate in milliseconds of the serial
+         * interface
          */
-#ifndef USE_SERIAL_DBG
-        Serial.begin(baudrate);
-#endif
+        begin(_pSched, &Serial, initialCommand, pollRate);
+    }
+
+    void begin(Scheduler *_pSched, Stream *pSerial, String initialCommand = "",
+               unsigned long pollRate = 60) {
+        /*! Starts the console using the specified serial interface
+         *
+         * The specified serial interface must be intiialized and configured (baudrate, etc.) before
+         * starting the serial console.
+         *
+         * @param _pSched Pointer to the muwerk scheduler.
+         * @param pSerial Pointer to the serial interface to use
+         * @param initialCommand (optional, default none) Initial command to execute.
+         * @param pollRate (optional, default 60 msec) Pollrate in milliseconds of the serial
+         * interface
+         */
+        if (pollRate < 60) {
+            pollRate = 60000L;
+        } else if (pollRate > 1000) {
+            pollRate = 1000000L;
+        } else {
+            pollRate *= 1000;
+        }
         pSched = _pSched;
+        printer = pSerial;
         tID = pSched->add([this]() { this->loop(); }, name, 60000);  // 60ms
-        Serial.println();
+        printer->println();
         execute(initialCommand);
         prompt();
     }
@@ -984,7 +1002,7 @@ class SerialConsole : public Console {
 #if MU_SERIAL_BUF_SIZE > 0
     virtual void prompt() {
         Console::prompt();
-        Serial.print(buffer);
+        printer->print(buffer);
     }
 #endif
 
@@ -993,7 +1011,7 @@ class SerialConsole : public Console {
         bool changed = false;
         int count = 0;
 
-        while ((incomingByte = Serial.read()) != -1 && count < MU_SERIAL_CHUNK_SIZE) {
+        while ((incomingByte = ((Stream *)printer)->read()) != -1 && count < MU_SERIAL_CHUNK_SIZE) {
             ++count;  // limit reads per cycle
             switch (incomingByte) {
             case 0:   // ignore
@@ -1015,7 +1033,7 @@ class SerialConsole : public Console {
                 changed = true;
                 break;
             case 13:  // enter
-                Output.println();
+                printer->println();
 #if MU_SERIAL_BUF_SIZE > 0
                 flush();
 #endif
