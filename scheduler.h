@@ -20,7 +20,6 @@
 #include <functional>
 #endif
 
-//! \brief The muwerk namespace
 namespace ustd {
 
 #define SCHEDULER_MAIN 0
