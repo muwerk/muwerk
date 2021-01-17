@@ -34,7 +34,8 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --domain DOMAIN, -d DOMAIN
-                        outgoing domain prefix used by device, default is 'omu'
+                        outgoing domain prefix used by device, default is "omu", use
+                        "" if no outgoing domain prefix is used.
   --sampletime SAMPLETIME, -s SAMPLETIME
                         Sampling time in seconds, should be larger than the largest
                         task schedule time.
