@@ -558,6 +558,28 @@ class jsonfile {
         return jf.readString(key, defaultVal);
     }
 
+    String readString(String key, unsigned int minLength, String defaultVal = "") {
+        /*! Read a string value from a JSON-file.
+        @param key Combined filename and json-object-path.
+        @param minLength Minimum acceptable string length.
+        @param defaultVal value returned, if key is not found.
+        @return The requested value or `defaultVal` if value not found or invalid.
+        */
+        String val = readString(key, defaultVal);
+        return val.length() < minLength ? defaultVal : val;
+    }
+
+    static String atomicReadString(String key, unsigned int minLength, String defaultVal = "") {
+        /*! Read a string value from a JSON-file.
+        @param key Combined filename and json-object-path.
+        @param minLength Minimum acceptable string length.
+        @param defaultVal value returned, if key is not found.
+        @return The requested value or `defaultVal` if value not found or invalid.
+        */
+        jsonfile jf;
+        return jf.readString(key, minLength, defaultVal);
+    }
+
     double readDouble(String key, double defaultVal) {
         /*! Read a number value from a JSON-file.
         @param key Combined filename and json-object-path.
