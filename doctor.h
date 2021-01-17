@@ -139,10 +139,22 @@ class Doctor {
     }
 
     void publishMemory() {
-        if (bActive) {
-            int mem = freeMemory();
-            pSched->publish(name + "/memory", String(mem));
-        }
+        int mem = freeMemory();
+        pSched->publish(name + "/memory", String(mem));
+    }
+
+    void publishTimeinfo() {
+#ifdef __ESP__
+        JSONVar timeinfo;
+        time_t now = time(nullptr);
+        char szTime[24];
+        struct tm *plt = localtime(&now);
+        strftime(szTime, 9, "%T", plt);
+        timeinfo["time"] = (const char *)szTime;
+        strftime(szTime, 20, "%Y.%m.%d %H:%M:%S", plt);
+        timeinfo["date"] = (const char *)szTime;
+        pSched->publish(name + "/timeinfo", JSON.stringify(timeinfo));
+#endif
     }
 
     void loop() {
