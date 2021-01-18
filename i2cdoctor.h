@@ -135,6 +135,6 @@ class I2CDoctor {
             publishI2C();
         }
     };
-};  // Doctor
+};  // I2CDoctor
 
 }  // namespace ustd
