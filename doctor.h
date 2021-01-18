@@ -2,7 +2,11 @@
 #pragma once
 
 #include <Arduino_JSON.H>
+#ifndef tiny_twi_h
 #include <Wire.h>
+#else
+typedef TinyWire TwoWire;
+#endif
 
 #include "scheduler.h"
 #include "heartbeat.h"
