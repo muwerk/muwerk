@@ -2,11 +2,6 @@
 #pragma once
 
 #include <Arduino_JSON.H>
-#ifndef tiny_twi_h
-#include <Wire.h>
-#else
-typedef TinyWire TwoWire;
-#endif
 
 #include "scheduler.h"
 #include "heartbeat.h"
@@ -19,8 +14,6 @@ The doctor class implements a remote diagnostics interface via pub/sub messages.
 If the system is connected to MQTT, any MQTT client can be used to access diagnostics.
 
 * publish: `hostname/doctor/memory/get`  -> `hostname/doctor/memory`, msgs=free memory.
-* publish: `hostname/doctor/i2cinfo/get` -> `hostname/doctor/i2cinfo`, json list of used i2c-ports
-in the system.
 * publish: `hostname/doctor/timeinfo/get` -> `hostname/doctor/timeinfo`, json time related
 information.
 * publish: `hostname/doctor/diagnostics/get` -> `hostname/doctor/diagnostics`, json system related
@@ -62,7 +55,6 @@ class Doctor {
     // muwerk task management
     Scheduler *pSched;
     int tID;
-    TwoWire *pWire;
 
     // active configuration
     String name;
@@ -70,9 +62,6 @@ class Doctor {
     // runtime control - state management
     bool bActive = false;
     heartbeat memoryInterval;
-    // runtime control - i2c scanner
-    int hwErrs = 0;
-    int i2cDevs = 0;
 
   public:
     Doctor(String name = "doctor") : name(name) {
@@ -82,17 +71,12 @@ class Doctor {
     ~Doctor() {
     }
 
-    void begin(Scheduler *_pSched, TwoWire *_pWire = nullptr) {
+    void begin(Scheduler *_pSched) {
         /*! Starts the Doctor Task
          *
          * @param _pSched Pointer to the muwerk scheduler.
-         * @param _pWire Optional pointer to Wire-instance
          */
         pSched = _pSched;
-        if (_pWire != nullptr)
-            pWire = &Wire;
-        else
-            pWire = _pWire;
 
         tID = pSched->add([this]() { this->loop(); }, name, 100000);  // every 100 ms
 
@@ -104,34 +88,6 @@ class Doctor {
     }
 
   protected:
-    bool i2c_checkAddress(uint8_t address) {
-        pWire->beginTransmission(address);
-        byte error = pWire->endTransmission();
-        if (error == 0) {
-            return true;
-        } else if (error == 4) {
-            ++hwErrs;
-        }
-        return false;
-    }
-
-    void publishI2C() {
-        i2cDevs = 0;
-        hwErrs = 0;
-        JSONVar i2cinfo;
-        for (uint8_t address = 1; address < 127; address++) {
-            if (i2c_checkAddress(address)) {
-                char msg[32];
-                sprintf(msg, "0x%02x", address);
-                i2cinfo["addresses"][i2cDevs] = (const char *)msg;
-                ++i2cDevs;
-            }
-        }
-        i2cinfo["device_count"] = i2cDevs;
-        i2cinfo["hardware_errors"] = hwErrs;
-        pSched->publish(name + "/i2cinfo", JSON.stringify(i2cinfo));
-    }
-
     void publishDiagnostics() {
         JSONVar i2cinfo;
         i2cinfo["free_memory"] = freeMemory();
@@ -204,9 +160,6 @@ class Doctor {
                 memoryInterval = 0;
             }
             publishMemory();
-        }
-        if (topic == name + "/i2cinfo/get") {
-            publishI2C();
         }
         if (topic == name + "/diagnostics/get") {
             publishDiagnostics();
