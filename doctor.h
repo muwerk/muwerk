@@ -2,6 +2,7 @@
 #pragma once
 
 #include <Arduino_JSON.H>
+#include <Wire.h>
 
 #include "scheduler.h"
 #include "heartbeat.h"
@@ -22,16 +23,12 @@ information.
 information.
 * publish: `hostname/doctor/restart`  -> restarts system.
 
-**NOTICE** `Wire.h` **must** be included before __the Doctor__ in order to support also
-the i2cinfo functionality!
-
 ## Sample of adding the doctor:
 
 ~~~{.cpp}
 
 #include <scheduler.h>
 
-#include <Wire.h>
 #include <doctor.h>
 #include <console.h>
 
@@ -61,6 +58,7 @@ class Doctor {
     // muwerk task management
     Scheduler *pSched;
     int tID;
+    TwoWire *pWire;
 
     // active configuration
     String name;
@@ -80,12 +78,18 @@ class Doctor {
     ~Doctor() {
     }
 
-    void begin(Scheduler *_pSched) {
+    void begin(Scheduler *_pSched, TwoWire *_pWire = nullptr) {
         /*! Starts the Doctor Task
          *
          * @param _pSched Pointer to the muwerk scheduler.
+         * @param _pWire Optional pointer to Wire-instance
          */
         pSched = _pSched;
+        if (_pWire != nullptr)
+            pWire = &Wire;
+        else
+            pWire = _pWire;
+
         tID = pSched->add([this]() { this->loop(); }, name, 100000);  // every 100 ms
 
         pSched->subscribe(tID, name + "/#", [this](String topic, String msg, String originator) {
@@ -96,10 +100,9 @@ class Doctor {
     }
 
   protected:
-#ifdef TwoWire_h
     bool i2c_checkAddress(uint8_t address) {
-        Wire.beginTransmission(address);
-        byte error = Wire.endTransmission();
+        pWire->beginTransmission(address);
+        byte error = pWire->endTransmission();
         if (error == 0) {
             return true;
         } else if (error == 4) {
@@ -124,7 +127,6 @@ class Doctor {
         i2cinfo["hardware_errors"] = hwErrs;
         pSched->publish(name + "/i2cinfo", JSON.stringify(i2cinfo));
     }
-#endif
 
     void publishDiagnostics() {
         JSONVar i2cinfo;
@@ -199,11 +201,9 @@ class Doctor {
             }
             publishMemory();
         }
-#ifdef TwoWire_h
         if (topic == name + "/i2cinfo/get") {
             publishI2C();
         }
-#endif
         if (topic == name + "/diagnostics/get") {
             publishDiagnostics();
         }
