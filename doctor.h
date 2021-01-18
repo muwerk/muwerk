@@ -132,7 +132,7 @@ class Doctor {
 #ifdef __ESP__
         i2cinfo["sdk_version"] = (const char *)ESP.getSdkVersion();
         i2cinfo["cpu_frequency"] = (int)ESP.getCpuFreqMHz();
-        i2cinfo["free_scetch_space"] = (int)ESP.getFreeSketchSpace();
+        i2cinfo["free_sketch_space"] = (int)ESP.getFreeSketchSpace();
         i2cinfo["flash_size"] = (int)ESP.getFlashChipSize();
         i2cinfo["flash_speed_mhz"] = (float)((float)ESP.getFlashChipSpeed() / 1000000.0f);
         i2cinfo["program_size"] = (int)ESP.getSketchSize();
