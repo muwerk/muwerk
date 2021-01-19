@@ -1,0 +1,178 @@
+// doctor.h -- system diagnostics via messages / mqtt
+#pragma once
+
+#include <Arduino_JSON.H>
+
+#include "scheduler.h"
+#include "heartbeat.h"
+
+namespace ustd {
+
+/*! \brief muwerk Doctor Class
+
+The doctor class implements a remote diagnostics interface via pub/sub messages.
+If the system is connected to MQTT, any MQTT client can be used to access diagnostics.
+
+* publish: `hostname/doctor/memory/get`  -> `hostname/doctor/memory`, msgs=free memory.
+* publish: `hostname/doctor/timeinfo/get` -> `hostname/doctor/timeinfo`, json time related
+information.
+* publish: `hostname/doctor/diagnostics/get` -> `hostname/doctor/diagnostics`, json system related
+information.
+* publish: `hostname/doctor/restart`  -> restarts system.
+
+## Sample of adding the doctor:
+
+~~~{.cpp}
+
+#include <scheduler.h>
+
+#include <doctor.h>
+#include <console.h>
+
+ustd::Scheduler sched( 10, 16, 32 );
+ustd::Doctor doc("doctor");
+ustd::Net net(LED_BUILTIN);
+ustd::Mqtt mqtt;
+
+void apploop() {}
+
+void setup() {
+    net.begin(&sched);
+    mqtt.begin(&sched);
+
+    doc.begin(&sched);
+    int tID = sched.add( apploop, "main", 50000 );
+}
+
+void loop() {
+    sched.loop();
+}
+~~~
+
+*/
+class Doctor {
+  private:
+    // muwerk task management
+    Scheduler *pSched;
+    int tID;
+
+    // active configuration
+    String name;
+
+    // runtime control - state management
+    bool bActive = false;
+    heartbeat memoryInterval;
+
+  public:
+    Doctor(String name = "doctor") : name(name) {
+        //! Instantiates a Doctor Task
+    }
+
+    ~Doctor() {
+    }
+
+    void begin(Scheduler *_pSched) {
+        /*! Starts the Doctor Task
+         *
+         * @param _pSched Pointer to the muwerk scheduler.
+         */
+        pSched = _pSched;
+
+        tID = pSched->add([this]() { this->loop(); }, name, 100000);  // every 100 ms
+
+        pSched->subscribe(tID, name + "/#", [this](String topic, String msg, String originator) {
+            this->subsMsg(topic, msg, originator);
+        });
+
+        bActive = true;
+    }
+
+  protected:
+    void publishDiagnostics() {
+        JSONVar i2cinfo;
+        i2cinfo["free_memory"] = freeMemory();
+#ifdef __ESP__
+        i2cinfo["sdk_version"] = (const char *)ESP.getSdkVersion();
+        i2cinfo["cpu_frequency"] = (int)ESP.getCpuFreqMHz();
+        i2cinfo["free_sketch_space"] = (int)ESP.getFreeSketchSpace();
+        i2cinfo["flash_size"] = (int)ESP.getFlashChipSize();
+        i2cinfo["flash_speed_mhz"] = (float)((float)ESP.getFlashChipSpeed() / 1000000.0f);
+        i2cinfo["program_size"] = (int)ESP.getSketchSize();
+#ifdef __ESP32__
+        ic2info["hardware"] = (const char *)"ESP32";
+        i2cinfo["chip_revision"] = (int)ESP.getChipRevision();
+#else
+        i2cinfo["hardware"] = (const char *)"ESP8266";
+        i2cinfo["chip_id"] = (int)ESP.getChipId();
+        i2cinfo["core_version"] = (const char *)(ESP.getCoreVersion().c_str());
+        i2cinfo["flash_chip_id"] = (int)ESP.getFlashChipId();
+        i2cinfo["real_flash_size"] = (int)ESP.getFlashChipRealSize();
+        i2cinfo["last_reset_reason"] = (const char *)(ESP.getResetReason().c_str());
+#endif  // __ESP32__
+#elif defined(__ARDUINO__)
+#ifdef __ATMEGA__
+        ic2info["hardware"] = (const char *)"Arduino MEGA";
+#elif defined(__UNO__)
+        ic2info["hardware"] = (const char *)"Arduino UNO";
+#else
+        ic2info["hardware"] = (const char *)"Arduino unknown";
+#endif  // __ARDUINO__
+#endif  // __ESP__
+        pSched->publish(name + "/diagnostics", JSON.stringify(i2cinfo));
+    }
+
+    void publishMemory() {
+        int mem = freeMemory();
+        pSched->publish(name + "/memory", String(mem));
+    }
+
+    void publishTimeinfo() {
+        JSONVar timeinfo;
+#ifdef __ESP__
+        time_t now = time(nullptr);
+        char szTime[24];
+        struct tm *plt = localtime(&now);
+        strftime(szTime, 9, "%T", plt);
+        timeinfo["time"] = (const char *)szTime;
+        strftime(szTime, 20, "%Y.%m.%d %H:%M:%S", plt);
+        timeinfo["date"] = (const char *)szTime;
+#endif
+        timeinfo["uptime"] = (long)pSched->getUptime();
+        timeinfo["time_t"] = (long)time(nullptr);
+        timeinfo["millis"] = millis();
+        pSched->publish(name + "/timeinfo", JSON.stringify(timeinfo));
+    }
+
+    void loop() {
+        if (bActive) {
+            if (memoryInterval.beat()) {
+                publishMemory();
+            }
+        }
+    }
+
+    void subsMsg(String topic, String msg, String originator) {
+        if (topic == name + "/memory/get") {
+            if (msg != "") {
+                int period = msg.toInt();
+                memoryInterval = period * 1000;
+            } else {
+                memoryInterval = 0;
+            }
+            publishMemory();
+        }
+        if (topic == name + "/diagnostics/get") {
+            publishDiagnostics();
+        }
+        if (topic == name + "/timeinfo/get") {
+            publishTimeinfo();
+        }
+        if (topic == name + "/restart") {
+#ifdef __ESP__
+            ESP.restart();
+#endif
+        }
+    };
+};  // Doctor
+
+}  // namespace ustd

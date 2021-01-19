@@ -1,11 +1,14 @@
+#!/usr/bin/env python3
 import paho.mqtt.client as mqtt
 import time
 import json
 import sys
+import argparse
 
 
 class MuwerkTop:
-    def __init__(self, mqtt_server, muhost, sample_time):
+    def __init__(self, mqtt_server, muhost, sample_time, domain, username, password):
+        self.domain = domain
         self.mqtt_server = mqtt_server
         self.sample_time = f"{sample_time}"
         self.muhost = muhost
@@ -17,8 +20,14 @@ class MuwerkTop:
         self.mqttc.on_subscribe = self.on_subscribe
         # Uncomment to enable debug messages
         # self.mqttc.on_log = self.on_log
+        if username is not None:
+            self.mqttc.username_pw_set(username, password)
         self.connection_state = False
-        self.mqttc.connect(mqtt_server, 1883, 60)
+        try:
+            self.mqttc.connect(mqtt_server, 1883, 60)
+        except Exception as e:
+            print(f"Connection to mqtt-server {mqtt_server} failed: {e}")
+            exit(-1)
         self.mqttc.loop_start()
 
     def on_connect(self, mqttc, obj, flags, rc):
@@ -27,8 +36,12 @@ class MuwerkTop:
         # print("Connected.")
 
     def on_message(self, mqttc, obj, msg):
-        smsg = str(msg.payload.decode('utf-8'))
-        stat = json.loads(smsg)
+        try:
+            smsg = str(msg.payload.decode('utf-8'))
+            stat = json.loads(smsg)
+        except Exception as e:
+            print(f"Failed to decode message {e}")
+            return
         bars = ['█', '▉', '▊', '▋', '▌', '▍', '▎', '▏']
 
         up = 0
@@ -118,10 +131,13 @@ class MuwerkTop:
         pass
 
     def start(self):
-        self.mqttc.publish(f"{self.muhost}/$SYS/stat/get", sample_time, qos=0)
+        id = self.mqttc.publish(
+            f"{self.muhost}/$SYS/stat/get", self.sample_time, qos=0)
+        id.wait_for_publish()
 
     def stop(self):
-        self.mqttc.publish(f"{self.muhost}/$SYS/stat/get", "", qos=0)
+        id = self.mqttc.publish(f"{self.muhost}/$SYS/stat/get", "", qos=0)
+        id.wait_for_publish()
 
     # If you want to use a specific client id, use
     # mqttc = mqtt.Client("client-id")
@@ -135,30 +151,38 @@ class MuwerkTop:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: mutop <mqtt-server> <muwerk-host> [sample-secs=1]")
-        exit(-1)
-    mqtt_server = sys.argv[1]
-    muhost = sys.argv[2]
-    if len(sys.argv) > 3:
-        sample_time = int(sys.argv[3])*1000
-    else:
-        sample_time = 1000
-    mt = MuwerkTop(mqtt_server, muhost, sample_time)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--domain', '-d', default="omu",
+                        help="outgoing domain prefix used by device, default is \"omu\", use \"\" if no outgoing domain prefix is used.")
+    parser.add_argument('--sampletime', '-s', type=int, default=2,
+                        help="Sampling time in seconds, should be larger than the largest task schedule time.")
+    parser.add_argument('--username', '-u', default=None,
+                        help="username for authorization if the mqtt server requires one.")
+    parser.add_argument('--password', '-p', default=None,
+                        help="password for authorization if the mqtt server requires one.")
+    parser.add_argument('mqtt_hostname', help="Hostname of mqtt server")
+    parser.add_argument('device_hostname', help="Hostname of muwerk-device")
+    args = parser.parse_args()
+
+    mt = MuwerkTop(args.mqtt_hostname, args.device_hostname,
+                   args.sampletime*1000, args.domain, args.username, args.password)
     while mt.connection_state is False:
         time.sleep(0.1)
-    stattop = f"omu/{muhost}/$SYS/stat"
-    print(f"Subscribing to {stattop}")
-    mt.mqttc.subscribe(stattop)
+    if args.domain == "":
+        stat_topic = f"{args.device_hostname}/$SYS/stat"
+    else:
+        stat_topic = f"{args.domain}/{args.device_hostname}/$SYS/stat"
+    print(f"Subscribing to {stat_topic}")
+    mt.mqttc.subscribe(stat_topic)
     mt.start()
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        mt.stop()
         for i in range(mt.last_lines):
             print()
-        print("Unsubscribing...")
-        time.sleep(3)
+        print("Unsubscribing...", end="")
+        mt.stop()
+        print(" Done.")
     except Exception as e:
         print(f"Exception: {e}")

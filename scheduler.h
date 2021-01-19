@@ -20,7 +20,6 @@
 #include <functional>
 #endif
 
-//! \brief The muwerk namespace
 namespace ustd {
 
 #define SCHEDULER_MAIN 0
@@ -349,14 +348,14 @@ class Scheduler {
     }
 
 #ifndef __ATTINY__
-    bool schedReceive(String topic, String msg, String originator) {
+    bool schedReceive(const char *topic, const char *msg) {
         const char *p0, *p1;
-        p0 = topic.c_str();
+        p0 = topic ? topic : "";
         p1 = strchr(p0, '/');
         if (p1) {
             ++p1;
             if (!strcmp(p1, "stat/get")) {
-                statIntervallMs = atoi(msg.c_str());
+                statIntervallMs = msg ? atoi(msg) : 0;
                 if (statIntervallMs) {
                     bGenStats = true;
                     resetStats(true);
@@ -380,18 +379,22 @@ class Scheduler {
          */
 #ifndef __ATTINY__
         if (!strncmp(topic.c_str(), "$SYS", 4))
-            if (schedReceive(topic, msg, originator))
+            if (schedReceive(topic.c_str(), msg.c_str()))
                 return true;
 #endif
-        T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG));
-        memset(pMsg, 0, sizeof(T_MSG));
-        pMsg->originator = (char *)malloc(originator.length() + 1);
-        pMsg->msg = (char *)malloc(msg.length() + 1);
-        pMsg->topic = (char *)malloc(topic.length() + 1);
-        strcpy(pMsg->originator, originator.c_str());
-        strcpy(pMsg->topic, topic.c_str());
-        strcpy(pMsg->msg, msg.c_str());
-        return msgqueue.push(pMsg);
+        T_MSG *pMsg = (T_MSG *)malloc(sizeof(T_MSG) +
+                                      (3 + originator.length() + topic.length() + msg.length()) *
+                                          sizeof(char));
+        if (pMsg) {
+            pMsg->originator = (char *)(&pMsg[1]);
+            pMsg->topic = pMsg->originator + ((originator.length() + 1) * sizeof(char));
+            pMsg->msg = pMsg->topic + ((topic.length() + 1) * sizeof(char));
+            strcpy(pMsg->originator, originator.c_str());
+            strcpy(pMsg->topic, topic.c_str());
+            strcpy(pMsg->msg, msg.c_str());
+            return msgqueue.push(pMsg);
+        }
+        return false;
     }
 
     int subscribe(int taskID, String topic, T_SUBS subs, String originator = "") {
@@ -411,17 +414,21 @@ class Scheduler {
         T_SUBSCRIPTION sub;
         memset(&sub, 0, sizeof(sub));
         sub.taskID = taskID;
-        sub.topic = (char *)malloc(topic.length() + 1);
-        strcpy(sub.topic, topic.c_str());
-        sub.originator = (char *)malloc(originator.length() + 1);
-        strcpy(sub.originator, originator.c_str());
         sub.subs = subs;
-        ++subscriptionHandle;
-        sub.subscriptionHandle = subscriptionHandle;
-        if (subscriptionList.add(sub) == -1)
-            return -1;
-        else
-            return subscriptionHandle;
+        sub.subscriptionHandle = subscriptionHandle + 1;
+        sub.topic = (char *)malloc((topic.length() + originator.length() + 2) * sizeof(char));
+        if (sub.topic) {
+            sub.originator = sub.topic + ((topic.length() + 1) * sizeof(char));
+            strcpy(sub.topic, topic.c_str());
+            strcpy(sub.originator, originator.c_str());
+            if (subscriptionList.add(sub) != -1) {
+                ++subscriptionHandle;
+                return subscriptionHandle;
+            }
+            // free up memory
+            free(sub.topic);
+        }
+        return -1;
     }
 
     bool unsubscribe(int subscriptionHandle) {
@@ -435,7 +442,6 @@ class Scheduler {
         for (unsigned int i = 0; i < subscriptionList.length(); i++) {
             if (subscriptionList[i].subscriptionHandle == subscriptionHandle) {
                 free(subscriptionList[i].topic);
-                free(subscriptionList[i].originator);
                 subscriptionList.erase(i);
                 return true;
             }
@@ -450,8 +456,9 @@ class Scheduler {
             for (unsigned int i = 0; i < subscriptionList.length(); i++) {
                 if (mqttmatch(pMsg->topic, subscriptionList[i].topic)) {
                     if (*(pMsg->originator) != 0)
-                        if (String(pMsg->originator) == String(subscriptionList[i].originator))
+                        if (strcmp(subscriptionList[i].originator, pMsg->originator) == 0) {
                             continue;
+                        }
                     unsigned long startTime = micros();
                     subscriptionList[i].subs(pMsg->topic, pMsg->msg, pMsg->originator);
 
@@ -464,9 +471,6 @@ class Scheduler {
                     }
                 }
             }
-            free(pMsg->originator);
-            free(pMsg->topic);
-            free(pMsg->msg);
             free(pMsg);
         }
     }
@@ -487,24 +491,27 @@ class Scheduler {
          */
         T_TASKENTRY taskEnt;
         memset(&taskEnt, 0, sizeof(taskEnt));
-        ++taskID;
-        taskEnt.taskID = taskID;
+        taskEnt.taskID = taskID + 1;
         taskEnt.task = task;
         taskEnt.minMicros = minMicroSecs;
         taskEnt.prio = prio;
-        if (name != "") {
+        if (name.length()) {
             taskEnt.szName = (char *)malloc(name.length() + 1);
+            if (!taskEnt.szName) {
+                return -1;
+            }
             strcpy(taskEnt.szName, name.c_str());
         } else {
             taskEnt.szName = nullptr;
         }
-        if (taskList.add(taskEnt) >= 0)
+        if (taskList.add(taskEnt) >= 0) {
+            ++taskID;
             return taskID;
-        else {
-            if (taskEnt.szName != nullptr)
-                free(taskEnt.szName);
-            return -1;
         }
+        if (taskEnt.szName) {
+            free(taskEnt.szName);
+        }
+        return -1;
     }
 
     bool remove(int taskID) {
@@ -710,5 +717,5 @@ class Scheduler {
         ESP.wdtFeed();
 #endif
     }
-};
+};  // namespace ustd
 }  // namespace ustd
