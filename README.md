@@ -166,7 +166,7 @@ Related projects:
 
 History
 -------
-* 0.X.X (2021-01-XX) [not yes released]
+* 0.5.1 (2021-01-19)
   * Added `readString` with length validation to `ustd::jsonfile`
   * New task `ustd::doctor` implements a remote diagnostics interface via pub/sub messages.
   * `ustd::Console` has now a better interface for using other Printer-derived stream objects, `ustd::SerialConsole` can now be used with alternative serial interfaces
