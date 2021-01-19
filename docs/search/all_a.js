@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['mqttmatch_42',['mqttmatch',['../classustd_1_1Scheduler.html#a38d3c7d07aa6cf4ec48baa1f4d74698b',1,'ustd::Scheduler']]],
-  ['muwerk_43',['muwerk',['../md_README.html',1,'']]],
-  ['muwerk_20is_20a_20cooperative_20scheduler_20with_20mqtt_2dlike_20communication_20queues_44',['muwerk is a cooperative scheduler with MQTT-like communication queues',['../index.html',1,'']]]
+  ['loop_43',['loop',['../classustd_1_1Scheduler.html#ad4bc560843bbf84408eca8ad194c6e6a',1,'ustd::Scheduler']]]
 ];

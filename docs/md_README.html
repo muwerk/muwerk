@@ -165,12 +165,21 @@ $(function() {
 </ul>
 <h1>History </h1>
 <ul>
+<li>0.5.1 (2021-01-19)<ul>
+<li>Added <code>readString</code> with length validation to <code><a class="el" href="classustd_1_1jsonfile.html" title="muwerk JSON File Class">ustd::jsonfile</a></code></li>
+<li>New task <code>ustd::doctor</code> implements a remote diagnostics interface via pub/sub messages.</li>
+<li><code><a class="el" href="classustd_1_1Console.html" title="muwerk Console Class">ustd::Console</a></code> has now a better interface for using other Printer-derived stream objects, <code><a class="el" href="classustd_1_1SerialConsole.html" title="muwerk Serial Console Class">ustd::SerialConsole</a></code> can now be used with alternative serial interfaces</li>
+<li>Improvements to stability and memory handling on <code><a class="el" href="classustd_1_1Scheduler.html" title="muwerk Scheduler Class">ustd::Scheduler</a></code></li>
+<li>Additional commandline options for <code>mutop</code></li>
+</ul>
+</li>
 <li>0.5.0 (2021-01-15) Major update including:<ul>
 <li>New Serial Console class that provides a minimal interactive shell that can be extended with custom commands.</li>
 <li>New portable filesystem functions that provide abstraction between LittleFS and SPIFFS (and in future others).</li>
 <li>New class for managing JSON files with possibility to access members with an MQTT-topic-like path syntax.</li>
 <li>New utility classes <code>heartbeat</code> and <code>timeout</code>.</li>
 <li>New utility functions <code>shift</code> and <code>split</code> for string argument handling.</li>
+<li>Analysis tool <code>mutop</code> that allows to monitor tasks and resource consumption for mqtt connected systems.</li>
 <li><code>$SYS/STAT</code> format expanded to contain uptime, free memory, and per-task infos task-id and schedule-time.</li>
 </ul>
 </li>

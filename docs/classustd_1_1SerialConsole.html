@@ -90,8 +90,12 @@ Inheritance diagram for ustd::SerialConsole:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7ca2aae4fab1163424de34a838d76fc9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1SerialConsole.html#a7ca2aae4fab1163424de34a838d76fc9">begin</a> (<a class="el" href="classustd_1_1Scheduler.html">Scheduler</a> *_pSched, String initialCommand=&quot;&quot;, unsigned long baudrate=115200)</td></tr>
-<tr class="separator:a7ca2aae4fab1163424de34a838d76fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae19d6543e30122f16069bdba3e449ccf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1SerialConsole.html#ae19d6543e30122f16069bdba3e449ccf">SerialConsole</a> ()</td></tr>
+<tr class="separator:ae19d6543e30122f16069bdba3e449ccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a978374074f23724f7cc4854c0f6492a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1SerialConsole.html#a978374074f23724f7cc4854c0f6492a0">begin</a> (<a class="el" href="classustd_1_1Scheduler.html">Scheduler</a> *_pSched, String initialCommand=&quot;&quot;, unsigned long pollRate=60)</td></tr>
+<tr class="separator:a978374074f23724f7cc4854c0f6492a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6fe8c9d6ff8fce0f3671dba35ceb3a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1SerialConsole.html#ac6fe8c9d6ff8fce0f3671dba35ceb3a7">begin</a> (<a class="el" href="classustd_1_1Scheduler.html">Scheduler</a> *_pSched, Stream *pSerial, String initialCommand=&quot;&quot;, unsigned long pollRate=60)</td></tr>
+<tr class="separator:ac6fe8c9d6ff8fce0f3671dba35ceb3a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a586ee89c420f3ee0fd8e7556d9dd7bff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a586ee89c420f3ee0fd8e7556d9dd7bff">execute</a> (String command)</td></tr>
 <tr class="separator:a586ee89c420f3ee0fd8e7556d9dd7bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a376b939e3721419b7c16a7db1153fe7a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">extend</a> (String command, <a class="el" href="namespaceustd.html#a43414d402e7b537717c6eb1dddd5ae38">T_COMMANDFN</a> handler)</td></tr>
@@ -103,9 +107,95 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>muwerk Serial <a class="el" href="classustd_1_1Console.html" title="muwerk Console Class">Console</a> Class </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a7ca2aae4fab1163424de34a838d76fc9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ca2aae4fab1163424de34a838d76fc9">&#9670;&nbsp;</a></span>begin()</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ae19d6543e30122f16069bdba3e449ccf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae19d6543e30122f16069bdba3e449ccf">&#9670;&nbsp;</a></span>SerialConsole()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ustd::SerialConsole::SerialConsole </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Instantiate a Serial <a class="el" href="classustd_1_1Console.html" title="muwerk Console Class">Console</a></p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac6fe8c9d6ff8fce0f3671dba35ceb3a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6fe8c9d6ff8fce0f3671dba35ceb3a7">&#9670;&nbsp;</a></span>begin() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ustd::SerialConsole::begin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classustd_1_1Scheduler.html">Scheduler</a> *&#160;</td>
+          <td class="paramname"><em>_pSched</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Stream *&#160;</td>
+          <td class="paramname"><em>pSerial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>initialCommand</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramname"><em>pollRate</em> = <code>60</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Starts the console using the specified serial interface</p>
+<p>The specified serial interface must be intiialized and configured (baudrate, etc.) before starting the serial console.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_pSched</td><td>Pointer to the muwerk scheduler. </td></tr>
+    <tr><td class="paramname">pSerial</td><td>Pointer to the serial interface to use </td></tr>
+    <tr><td class="paramname">initialCommand</td><td>(optional, default none) Initial command to execute. </td></tr>
+    <tr><td class="paramname">pollRate</td><td>(optional, default 60 msec) Pollrate in milliseconds of the serial interface</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a978374074f23724f7cc4854c0f6492a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a978374074f23724f7cc4854c0f6492a0">&#9670;&nbsp;</a></span>begin() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -129,7 +219,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">unsigned long&#160;</td>
-          <td class="paramname"><em>baudrate</em> = <code>115200</code>&#160;</td>
+          <td class="paramname"><em>pollRate</em> = <code>60</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -143,12 +233,13 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Starts the console</p>
+<p>Starts the console on the default serial interface</p>
+<p>The serial interface <code>Serial</code> must be intiialized and configured (baudrate, etc.) before starting the serial console.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">_pSched</td><td>Pointer to the muwerk scheduler. </td></tr>
     <tr><td class="paramname">initialCommand</td><td>(optional, default none) Initial command to execute. </td></tr>
-    <tr><td class="paramname">baudrate</td><td>(optional, default 115200) The baud rate of the serial interface</td></tr>
+    <tr><td class="paramname">pollRate</td><td>(optional, default 60 msec) Pollrate in milliseconds of the serial interface</td></tr>
   </table>
   </dd>
 </dl>

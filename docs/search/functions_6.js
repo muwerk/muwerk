@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['heartbeat_141',['heartbeat',['../classustd_1_1heartbeat.html#abe33bfb1db9350934156aa24691ed58f',1,'ustd::heartbeat']]]
+  ['getuptime_145',['getUptime',['../classustd_1_1Scheduler.html#a3c784b1e4ee15b1cf8f5bc07bc7e976e',1,'ustd::Scheduler']]]
 ];

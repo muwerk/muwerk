@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['filter_31',['filter',['../classustd_1_1sensorprocessor.html#a9034c548d2787f744c2057e32e0f0aaa',1,'ustd::sensorprocessor::filter(double *pvalue)'],['../classustd_1_1sensorprocessor.html#a4bf344587d3eb2e063cf0741c5554377',1,'ustd::sensorprocessor::filter(long *plvalue)']]],
-  ['fsbegin_32',['fsBegin',['../namespaceustd.html#a08c7d50d4a7e1231285b891beb71bac0',1,'ustd']]],
-  ['fsdelete_33',['fsDelete',['../namespaceustd.html#ad8b32046406543419c2fc069023faffe',1,'ustd']]],
-  ['fsopen_34',['fsOpen',['../namespaceustd.html#a4ee9592c27c0b43abda368b813c0ddb4',1,'ustd']]],
-  ['fsopendir_35',['fsOpenDir',['../namespaceustd.html#a557562b7642d3fce8d3387a4a52b10f2',1,'ustd']]]
+  ['elapsed_28',['elapsed',['../classustd_1_1heartbeat.html#a961ac1b7045cd2230fb65c1cba314a7c',1,'ustd::heartbeat']]],
+  ['execute_29',['execute',['../classustd_1_1Console.html#a586ee89c420f3ee0fd8e7556d9dd7bff',1,'ustd::Console']]],
+  ['exists_30',['exists',['../classustd_1_1jsonfile.html#a688a8946a438d484c2854231902c1b3f',1,'ustd::jsonfile']]],
+  ['extend_31',['extend',['../classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a',1,'ustd::Console']]]
 ];

@@ -116,6 +116,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae9bcc222c17079b98d1c3b1d5305f97b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae09413edf6ead4a73af4202ac3cf06d1"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#ae09413edf6ead4a73af4202ac3cf06d1">readString</a> (String key, String defaultVal=&quot;&quot;)</td></tr>
 <tr class="separator:ae09413edf6ead4a73af4202ac3cf06d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fef42ea23a7559a67728d50e9ef749e"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#a0fef42ea23a7559a67728d50e9ef749e">readString</a> (String key, unsigned int minLength, String defaultVal=&quot;&quot;)</td></tr>
+<tr class="separator:a0fef42ea23a7559a67728d50e9ef749e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1ea9db0cf977a9b5116e76e09dcca42"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#ab1ea9db0cf977a9b5116e76e09dcca42">readDouble</a> (String key, double defaultVal)</td></tr>
 <tr class="separator:ab1ea9db0cf977a9b5116e76e09dcca42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e4c6251e6dda81a6112f2dafc244749"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#a2e4c6251e6dda81a6112f2dafc244749">readDouble</a> (String key, double minVal, double maxVal, double defaultVal)</td></tr>
@@ -167,6 +169,8 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:a48d5b77031da6c36f7369a453175eafa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9258c30d25b871a950ccba596b388bc3"><td class="memItemLeft" align="right" valign="top">static String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#a9258c30d25b871a950ccba596b388bc3">atomicReadString</a> (String key, String defaultVal=&quot;&quot;)</td></tr>
 <tr class="separator:a9258c30d25b871a950ccba596b388bc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6d58644da6470233a5887049481c088"><td class="memItemLeft" align="right" valign="top">static String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#ae6d58644da6470233a5887049481c088">atomicReadString</a> (String key, unsigned int minLength, String defaultVal=&quot;&quot;)</td></tr>
+<tr class="separator:ae6d58644da6470233a5887049481c088"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adefcc82e5f8810a22f3764c37dc71775"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#adefcc82e5f8810a22f3764c37dc71775">atomicReadDouble</a> (String key, double defaultVal)</td></tr>
 <tr class="separator:adefcc82e5f8810a22f3764c37dc71775"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c4358baac25ead7d6a838baa406f024"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1jsonfile.html#a0c4358baac25ead7d6a838baa406f024">atomicReadDouble</a> (String key, double minVal, double maxVal, double defaultVal)</td></tr>
@@ -208,7 +212,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="line">connectTimeout = jf.<a class="code" href="classustd_1_1jsonfile.html#a2ecc032924242e85ffe2016a6da6f64c">readLong</a>( <span class="stringliteral">&quot;net/station/connectTimeout&quot;</span>, 3, 3600, 15 );</div>
 <div class="line">bRebootOnContinuedWifiFailure = jf.<a class="code" href="classustd_1_1jsonfile.html#ae9bcc222c17079b98d1c3b1d5305f97b">readBool</a>( <span class="stringliteral">&quot;net/station/rebootOnFailure&quot;</span>, <span class="keyword">true</span> );</div>
 <div class="ttc" id="aclassustd_1_1jsonfile_html"><div class="ttname"><a href="classustd_1_1jsonfile.html">ustd::jsonfile</a></div><div class="ttdoc">muwerk JSON File Class</div><div class="ttdef"><b>Definition:</b> jsonfile.h:67</div></div>
-<div class="ttc" id="aclassustd_1_1jsonfile_html_a2ecc032924242e85ffe2016a6da6f64c"><div class="ttname"><a href="classustd_1_1jsonfile.html#a2ecc032924242e85ffe2016a6da6f64c">ustd::jsonfile::readLong</a></div><div class="ttdeci">long readLong(String key, long defaultVal)</div><div class="ttdef"><b>Definition:</b> jsonfile.h:618</div></div>
+<div class="ttc" id="aclassustd_1_1jsonfile_html_a2ecc032924242e85ffe2016a6da6f64c"><div class="ttname"><a href="classustd_1_1jsonfile.html#a2ecc032924242e85ffe2016a6da6f64c">ustd::jsonfile::readLong</a></div><div class="ttdeci">long readLong(String key, long defaultVal)</div><div class="ttdef"><b>Definition:</b> jsonfile.h:640</div></div>
 <div class="ttc" id="aclassustd_1_1jsonfile_html_ae9bcc222c17079b98d1c3b1d5305f97b"><div class="ttname"><a href="classustd_1_1jsonfile.html#ae9bcc222c17079b98d1c3b1d5305f97b">ustd::jsonfile::readBool</a></div><div class="ttdeci">bool readBool(String key, bool defaultVal)</div><div class="ttdef"><b>Definition:</b> jsonfile.h:499</div></div>
 </div><!-- fragment --><h3>Example of writing multiple values</h3>
 <p>In this example the values are first written in the cache and then commited in order to speed up the operation.</p>
@@ -800,7 +804,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="a9258c30d25b871a950ccba596b388bc3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9258c30d25b871a950ccba596b388bc3">&#9670;&nbsp;</a></span>atomicReadString()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9258c30d25b871a950ccba596b388bc3">&#9670;&nbsp;</a></span>atomicReadString() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -840,6 +844,57 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The requested value or <code>defaultVal</code> if value not found.</dd></dl>
+
+</div>
+</div>
+<a id="ae6d58644da6470233a5887049481c088"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6d58644da6470233a5887049481c088">&#9670;&nbsp;</a></span>atomicReadString() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static String ustd::jsonfile::atomicReadString </td>
+          <td>(</td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>minLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>defaultVal</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Read a string value from a JSON-file. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>Combined filename and json-object-path. </td></tr>
+    <tr><td class="paramname">minLength</td><td>Minimum acceptable string length. </td></tr>
+    <tr><td class="paramname">defaultVal</td><td>value returned, if key is not found. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The requested value or <code>defaultVal</code> if value not found or invalid.</dd></dl>
 
 </div>
 </div>
@@ -2112,7 +2167,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="ae09413edf6ead4a73af4202ac3cf06d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae09413edf6ead4a73af4202ac3cf06d1">&#9670;&nbsp;</a></span>readString()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae09413edf6ead4a73af4202ac3cf06d1">&#9670;&nbsp;</a></span>readString() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2152,6 +2207,57 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The requested value or <code>defaultVal</code> if value not found.</dd></dl>
+
+</div>
+</div>
+<a id="a0fef42ea23a7559a67728d50e9ef749e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fef42ea23a7559a67728d50e9ef749e">&#9670;&nbsp;</a></span>readString() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">String ustd::jsonfile::readString </td>
+          <td>(</td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>minLength</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>defaultVal</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Read a string value from a JSON-file. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>Combined filename and json-object-path. </td></tr>
+    <tr><td class="paramname">minLength</td><td>Minimum acceptable string length. </td></tr>
+    <tr><td class="paramname">defaultVal</td><td>value returned, if key is not found. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The requested value or <code>defaultVal</code> if value not found or invalid.</dd></dl>
 
 </div>
 </div>

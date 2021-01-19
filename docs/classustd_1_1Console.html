@@ -90,8 +90,8 @@ Inheritance diagram for ustd::Console:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:acfe90b5216170c45a9655985f2b3ba2f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#acfe90b5216170c45a9655985f2b3ba2f">Console</a> (String name, Print &amp;Output)</td></tr>
-<tr class="separator:acfe90b5216170c45a9655985f2b3ba2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab16a12a7f94b735aa2c34fa79737bc24"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#ab16a12a7f94b735aa2c34fa79737bc24">Console</a> (String name, Print *printer)</td></tr>
+<tr class="separator:ab16a12a7f94b735aa2c34fa79737bc24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a586ee89c420f3ee0fd8e7556d9dd7bff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a586ee89c420f3ee0fd8e7556d9dd7bff">execute</a> (String command)</td></tr>
 <tr class="separator:a586ee89c420f3ee0fd8e7556d9dd7bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a376b939e3721419b7c16a7db1153fe7a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">extend</a> (String command, <a class="el" href="namespaceustd.html#a43414d402e7b537717c6eb1dddd5ae38">T_COMMANDFN</a> handler)</td></tr>
@@ -118,29 +118,32 @@ Public Member Functions</h2></td></tr>
 <div class="line"><span class="keywordtype">void</span> apploop() {}</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> setup() {</div>
+<div class="line">    <span class="comment">// initialize the serial interface</span></div>
+<div class="line">    Serial.<a class="code" href="classustd_1_1SerialConsole.html#a978374074f23724f7cc4854c0f6492a0">begin</a>( 115200 );</div>
+<div class="line"> </div>
 <div class="line">    <span class="comment">// extend console</span></div>
 <div class="line">    con.<a class="code" href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">extend</a>( <span class="stringliteral">&quot;hurz&quot;</span>, []( String cmd, String args ) {</div>
-<div class="line">        Output.println( <span class="stringliteral">&quot;Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!&quot;</span> );</div>
+<div class="line">        printer-&gt;println( <span class="stringliteral">&quot;Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!&quot;</span> );</div>
 <div class="line">        <span class="keywordflow">while</span> ( args.length() ) {</div>
 <div class="line">            String arg = ustd::shift( args );</div>
-<div class="line">            Output.println( arg + <span class="stringliteral">&quot;   HURZ!&quot;</span> );</div>
+<div class="line">            printer-&gt;println( arg + <span class="stringliteral">&quot;   HURZ!&quot;</span> );</div>
 <div class="line">        }</div>
 <div class="line">    } );</div>
 <div class="line"> </div>
-<div class="line">    con.<a class="code" href="classustd_1_1SerialConsole.html#a7ca2aae4fab1163424de34a838d76fc9">begin</a>( &amp;sched );</div>
+<div class="line">    con.<a class="code" href="classustd_1_1SerialConsole.html#a978374074f23724f7cc4854c0f6492a0">begin</a>( &amp;sched );</div>
 <div class="line">    <span class="keywordtype">int</span> tID = sched.add( apploop, <span class="stringliteral">&quot;main&quot;</span>, 50000 );</div>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> loop() {</div>
 <div class="line">    sched.loop();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassustd_1_1Console_html_a376b939e3721419b7c16a7db1153fe7a"><div class="ttname"><a href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">ustd::Console::extend</a></div><div class="ttdeci">int extend(String command, T_COMMANDFN handler)</div><div class="ttdef"><b>Definition:</b> console.h:164</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:206</div></div>
-<div class="ttc" id="aclassustd_1_1SerialConsole_html"><div class="ttname"><a href="classustd_1_1SerialConsole.html">ustd::SerialConsole</a></div><div class="ttdoc">muwerk Serial Console Class</div><div class="ttdef"><b>Definition:</b> console.h:951</div></div>
-<div class="ttc" id="aclassustd_1_1SerialConsole_html_a7ca2aae4fab1163424de34a838d76fc9"><div class="ttname"><a href="classustd_1_1SerialConsole.html#a7ca2aae4fab1163424de34a838d76fc9">ustd::SerialConsole::begin</a></div><div class="ttdeci">void begin(Scheduler *_pSched, String initialCommand=&quot;&quot;, unsigned long baudrate=115200)</div><div class="ttdef"><b>Definition:</b> console.h:966</div></div>
+<div class="ttc" id="aclassustd_1_1Console_html_a376b939e3721419b7c16a7db1153fe7a"><div class="ttname"><a href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">ustd::Console::extend</a></div><div class="ttdeci">int extend(String command, T_COMMANDFN handler)</div><div class="ttdef"><b>Definition:</b> console.h:167</div></div>
+<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:205</div></div>
+<div class="ttc" id="aclassustd_1_1SerialConsole_html"><div class="ttname"><a href="classustd_1_1SerialConsole.html">ustd::SerialConsole</a></div><div class="ttdoc">muwerk Serial Console Class</div><div class="ttdef"><b>Definition:</b> console.h:942</div></div>
+<div class="ttc" id="aclassustd_1_1SerialConsole_html_a978374074f23724f7cc4854c0f6492a0"><div class="ttname"><a href="classustd_1_1SerialConsole.html#a978374074f23724f7cc4854c0f6492a0">ustd::SerialConsole::begin</a></div><div class="ttdeci">void begin(Scheduler *_pSched, String initialCommand=&quot;&quot;, unsigned long pollRate=60)</div><div class="ttdef"><b>Definition:</b> console.h:959</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="acfe90b5216170c45a9655985f2b3ba2f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acfe90b5216170c45a9655985f2b3ba2f">&#9670;&nbsp;</a></span>Console()</h2>
+<a id="ab16a12a7f94b735aa2c34fa79737bc24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab16a12a7f94b735aa2c34fa79737bc24">&#9670;&nbsp;</a></span>Console()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -157,8 +160,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Print &amp;&#160;</td>
-          <td class="paramname"><em>Output</em>&#160;</td>
+          <td class="paramtype">Print *&#160;</td>
+          <td class="paramname"><em>printer</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -175,7 +178,7 @@ Public Member Functions</h2></td></tr>
 <p>Creates a console </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">name</td><td>Name used for task registration and message origin </td></tr>
-    <tr><td class="paramname">Output</td><td>Reference to a printer that receives the output</td></tr>
+    <tr><td class="paramname">printer</td><td>Pointer to a printer that receives the output</td></tr>
   </table>
   </dd>
 </dl>
