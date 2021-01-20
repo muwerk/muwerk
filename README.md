@@ -166,6 +166,7 @@ Related projects:
 
 History
 -------
+* 0.5.2 (2021-01-20) `library.properties` project name repaired, to allow Arduino automatic update.
 * 0.5.1 (2021-01-19)
   * Added `readString` with length validation to `ustd::jsonfile`
   * New task `ustd::doctor` implements a remote diagnostics interface via pub/sub messages.
