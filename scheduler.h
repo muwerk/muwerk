@@ -84,13 +84,11 @@ typedef struct {
     T_PRIO prio;
     unsigned long minMicros;
     unsigned long lastCall;
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     unsigned long lateTime;
     unsigned long cpuTime;
     unsigned long callCount;
-    /*
-    unsigned long cpuPerCall;
-    unsigned long latePerCall;
-    */
+#endif
 } T_TASKENTRY;
 
 // forward declaration
@@ -237,7 +235,7 @@ class Scheduler {
         taskID = 0;  // 0 is SCHEDULER_MAIN
         upTime = 0;
         upTimeTicker = micros();
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         resetStats(true);
 #endif
 
@@ -347,7 +345,7 @@ class Scheduler {
         return -1;
     }
 
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     bool schedReceive(const char *topic, const char *msg) {
         const char *p0, *p1;
         p0 = topic ? topic : "";
@@ -377,7 +375,7 @@ class Scheduler {
          * @param originator Optional name of originator-task
          * @return true on successful publish.
          */
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         if (!strncmp(topic.c_str(), "$SYS", 4))
             if (schedReceive(topic.c_str(), msg.c_str()))
                 return true;
@@ -459,9 +457,10 @@ class Scheduler {
                         if (strcmp(subscriptionList[i].originator, pMsg->originator) == 0) {
                             continue;
                         }
-                    unsigned long startTime = micros();
                     subscriptionList[i].subs(pMsg->topic, pMsg->msg, pMsg->originator);
 
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
+                    unsigned long startTime = micros();
                     if (subscriptionList[i].taskID != SCHEDULER_MAIN) {
                         int ind = getIndexFromTaskID(subscriptionList[i].taskID);
                         if (ind != -1)
@@ -469,6 +468,7 @@ class Scheduler {
                     } else {
                         mainTime += timeDiff(startTime, micros());
                     }
+#endif
                 }
             }
             free(pMsg);
@@ -589,13 +589,15 @@ class Scheduler {
             pTaskEnt->task();
             currentTaskID = -2;
             pTaskEnt->lastCall = startTime;
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
             pTaskEnt->lateTime += tDelta - pTaskEnt->minMicros;
             pTaskEnt->cpuTime += timeDiff(startTime, micros());
             ++pTaskEnt->callCount;
+#endif
         }
     }
 
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     void resetStats(bool bHard = false) {
         for (unsigned int i = 0; i < taskList.length(); i++) {
             taskList[i].cpuTime = 0;
@@ -689,7 +691,7 @@ class Scheduler {
         systemTime += timeDiff(systemTimer, current);
         appTimer = current;
         if (!bSingleTaskMode) {
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
             checkStats();
 #endif
             checkMsgQueue();
