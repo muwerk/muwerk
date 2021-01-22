@@ -50,8 +50,9 @@ enum T_MSGTYPE {
 //! \brief Scheduler Task Function
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void()> T_TASK;
+#elif defined(__ATTINY__)
+typedef void (*T_TASK)();
 #else
-// typedef void (*T_TASK)();
 typedef ustd::function<void()> T_TASK;
 #endif
 
