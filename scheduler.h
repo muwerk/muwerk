@@ -50,8 +50,9 @@ enum T_MSGTYPE {
 //! \brief Scheduler Task Function
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void()> T_TASK;
+#elif defined(__ATTINY__)
+typedef void (*T_TASK)();
 #else
-// typedef void (*T_TASK)();
 typedef ustd::function<void()> T_TASK;
 #endif
 
@@ -64,8 +65,9 @@ typedef struct {
 //! \brief Scheduler Subscription Function
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
+#elif defined(__ATTINY__)
+typedef void (*T_SUBS)(String topic, String msg, String originator);
 #else
-// typedef void (*T_SUBS)(String topic, String msg, String originator);
 typedef ustd::function<void(String topic, String msg, String originator)> T_SUBS;
 #endif
 
@@ -84,13 +86,11 @@ typedef struct {
     T_PRIO prio;
     unsigned long minMicros;
     unsigned long lastCall;
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     unsigned long lateTime;
     unsigned long cpuTime;
     unsigned long callCount;
-    /*
-    unsigned long cpuPerCall;
-    unsigned long latePerCall;
-    */
+#endif
 } T_TASKENTRY;
 
 // forward declaration
@@ -113,7 +113,7 @@ define</a> before including ustd headers.
 ## Minimal scheduler:
 
 ~~~{.cpp}
-#define __ATTINY__ 1   // Platform defines required, see doc, mainpage.
+#define __ATMEGA__ 1   // Platform defines required, see doc, mainpage.
 #include <scheduler.h>
 
 ustd::Scheduler sched;
@@ -212,16 +212,17 @@ class Scheduler {
     int taskID;
     bool bSingleTaskMode = false;
     int singleTaskID = -1;
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     bool bGenStats = false;
     unsigned long statIntervallMs = 0;
     unsigned long statTimer;
-    // unsigned long idleTime = 0;
     unsigned long systemTimer;
     unsigned long systemTime = 0;
     unsigned long appTimer;
     unsigned long appTime = 0;
     unsigned long mainTime = 0;  // Time spent with SCHEDULER_MAIN id.
-    unsigned long upTime = 0;    // Seconds system is running
+#endif
+    unsigned long upTime = 0;  // Seconds system is running
     unsigned long upTimeTicker = 0;
     int currentTaskID = -2;  // TaskID that is currently been executed
 
@@ -237,7 +238,7 @@ class Scheduler {
         taskID = 0;  // 0 is SCHEDULER_MAIN
         upTime = 0;
         upTimeTicker = micros();
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         resetStats(true);
 #endif
 
@@ -347,7 +348,7 @@ class Scheduler {
         return -1;
     }
 
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     bool schedReceive(const char *topic, const char *msg) {
         const char *p0, *p1;
         p0 = topic ? topic : "";
@@ -377,7 +378,7 @@ class Scheduler {
          * @param originator Optional name of originator-task
          * @return true on successful publish.
          */
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         if (!strncmp(topic.c_str(), "$SYS", 4))
             if (schedReceive(topic.c_str(), msg.c_str()))
                 return true;
@@ -459,9 +460,10 @@ class Scheduler {
                         if (strcmp(subscriptionList[i].originator, pMsg->originator) == 0) {
                             continue;
                         }
-                    unsigned long startTime = micros();
                     subscriptionList[i].subs(pMsg->topic, pMsg->msg, pMsg->originator);
 
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
+                    unsigned long startTime = micros();
                     if (subscriptionList[i].taskID != SCHEDULER_MAIN) {
                         int ind = getIndexFromTaskID(subscriptionList[i].taskID);
                         if (ind != -1)
@@ -469,6 +471,7 @@ class Scheduler {
                     } else {
                         mainTime += timeDiff(startTime, micros());
                     }
+#endif
                 }
             }
             free(pMsg);
@@ -589,13 +592,15 @@ class Scheduler {
             pTaskEnt->task();
             currentTaskID = -2;
             pTaskEnt->lastCall = startTime;
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
             pTaskEnt->lateTime += tDelta - pTaskEnt->minMicros;
             pTaskEnt->cpuTime += timeDiff(startTime, micros());
             ++pTaskEnt->callCount;
+#endif
         }
     }
 
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     void resetStats(bool bHard = false) {
         for (unsigned int i = 0; i < taskList.length(); i++) {
             taskList[i].cpuTime = 0;
@@ -686,10 +691,12 @@ class Scheduler {
             upTime += 1;
             upTimeTicker += 1000000;
         }
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         systemTime += timeDiff(systemTimer, current);
         appTimer = current;
+#endif
         if (!bSingleTaskMode) {
-#ifndef __ATTINY__
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
             checkStats();
 #endif
             checkMsgQueue();
@@ -711,8 +718,10 @@ class Scheduler {
             appTimer = micros();
 #endif
         }
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         appTime += timeDiff(appTimer, micros());
         systemTimer = micros();
+#endif
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtFeed();
 #endif
