@@ -211,16 +211,17 @@ class Scheduler {
     int taskID;
     bool bSingleTaskMode = false;
     int singleTaskID = -1;
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
     bool bGenStats = false;
     unsigned long statIntervallMs = 0;
     unsigned long statTimer;
-    // unsigned long idleTime = 0;
     unsigned long systemTimer;
     unsigned long systemTime = 0;
     unsigned long appTimer;
     unsigned long appTime = 0;
     unsigned long mainTime = 0;  // Time spent with SCHEDULER_MAIN id.
-    unsigned long upTime = 0;    // Seconds system is running
+#endif
+    unsigned long upTime = 0;  // Seconds system is running
     unsigned long upTimeTicker = 0;
     int currentTaskID = -2;  // TaskID that is currently been executed
 
@@ -689,8 +690,10 @@ class Scheduler {
             upTime += 1;
             upTimeTicker += 1000000;
         }
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         systemTime += timeDiff(systemTimer, current);
         appTimer = current;
+#endif
         if (!bSingleTaskMode) {
 #if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
             checkStats();
@@ -714,8 +717,10 @@ class Scheduler {
             appTimer = micros();
 #endif
         }
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_512B
         appTime += timeDiff(appTimer, micros());
         systemTimer = micros();
+#endif
 #if defined(__ESP__) && !defined(__ESP32__)
         ESP.wdtFeed();
 #endif
