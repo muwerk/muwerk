@@ -166,6 +166,7 @@ Related projects:
 
 History
 -------
+* 0.5.3 (2021-01-22) `UST_FEATURE_MEM` defines used (requires `ustd` version 0.4.1 or higher), ATtiny T_TASK limited to static functions.
 * 0.5.2 (2021-01-20) `library.properties` project name repaired, to allow Arduino automatic update.
 * 0.5.1 (2021-01-19)
   * Added `readString` with length validation to `ustd::jsonfile`
