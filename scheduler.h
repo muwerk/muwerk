@@ -65,8 +65,9 @@ typedef struct {
 //! \brief Scheduler Subscription Function
 #if defined(__ESP__) || defined(__UNIXOID__)
 typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
+#elif defined(__ATTINY__)
+typedef void (*T_SUBS)(String topic, String msg, String originator);
 #else
-// typedef void (*T_SUBS)(String topic, String msg, String originator);
 typedef ustd::function<void(String topic, String msg, String originator)> T_SUBS;
 #endif
 
@@ -112,7 +113,7 @@ define</a> before including ustd headers.
 ## Minimal scheduler:
 
 ~~~{.cpp}
-#define __ATTINY__ 1   // Platform defines required, see doc, mainpage.
+#define __ATMEGA__ 1   // Platform defines required, see doc, mainpage.
 #include <scheduler.h>
 
 ustd::Scheduler sched;
