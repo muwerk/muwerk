@@ -412,8 +412,7 @@ class Scheduler {
          * @return subscriptionHandle on success (needed for unsubscribe), or -1
          * on error.
          */
-        T_SUBSCRIPTION sub;
-        memset(&sub, 0, sizeof(sub));
+        T_SUBSCRIPTION sub = {};
         sub.taskID = taskID;
         sub.subs = subs;
         sub.subscriptionHandle = subscriptionHandle + 1;
@@ -492,8 +491,7 @@ class Scheduler {
          * @param prio Not yet supported.
          * @return taskID is successful, -1 on error.
          */
-        T_TASKENTRY taskEnt;
-        memset(&taskEnt, 0, sizeof(taskEnt));
+        T_TASKENTRY taskEnt = {};
         taskEnt.taskID = taskID + 1;
         taskEnt.task = task;
         taskEnt.minMicros = minMicroSecs;
