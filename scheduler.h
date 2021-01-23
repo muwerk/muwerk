@@ -620,7 +620,12 @@ class Scheduler {
             return;
         unsigned long now = micros();
         unsigned long tDelta = timeDiff(statTimer, now);
+#ifdef USTD_FEATURE_FREE_MEMORY
         unsigned long mem = (unsigned long)freeMemory();
+#else
+        unsigned long mem = 0;
+#pragma message("freeMemory() is not implemented for this platform.")
+#endif
         if (tDelta > statIntervallMs * 1000) {
             // local stats
             for (unsigned int i = 0; i < taskList.length(); i++) {
