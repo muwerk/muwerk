@@ -648,7 +648,7 @@ class Scheduler {
             if (jsonstr != nullptr) {
                 memset(jsonstr, 0, memreq);
                 sprintf(jsonstr, skeleton_head, tDelta, systemTime, appTime, mainTime, upTime, mem,
-                        taskList.length());
+                        (long)taskList.length());
                 for (unsigned int i = 0; i < taskList.length(); i++) {
                     char *p = &jsonstr[strlen(jsonstr)];
                     if (taskList[i].szName == nullptr) {
