@@ -141,7 +141,7 @@ class Console {
          * @return commandHandle on success (needed for unextend), or -1
          * on error.
          */
-        T_COMMAND cmd {};
+        T_COMMAND cmd = {};
         cmd.id = ++commandHandle;
         cmd.fn = handler;
         cmd.command = (char *)malloc(command.length() + 1);
