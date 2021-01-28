@@ -32,9 +32,9 @@ jobs:
     - name: Install NRF52 tool from adafruit for NRF52 platform
       run:
         pip install --upgrade adafruit-nrfutil
-    - name: Make ustd lib files available for tests
+    - name: Make muwerk lib files available for tests
       run:
-        cp -v ${{github.workspace}}/*.h ${{github.workspace}}/Examples/platformio/include
+        cp -v ${{github.workspace}}/*.h ${{github.workspace}}/Examples/minimal/include
     - name: Run PlatformIO
       run:
-        pio run -d ${{github.workspace}}/Examples/platformio
+        pio run -d ${{github.workspace}}/Examples/minimal
