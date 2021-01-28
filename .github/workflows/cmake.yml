@@ -32,7 +32,7 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake ${{github.workspace}}/Examples/mac-linux -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
-    - name Get ustd dependencies
+    - name: Get ustd dependencies
       working-directory: ${{github.workspace}}/Examples/mac-linux
       shell: bash
       run: git clone https://github.com/muwerk/ustd
