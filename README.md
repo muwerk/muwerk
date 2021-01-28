@@ -166,7 +166,7 @@ Related projects:
 
 History
 -------
-* 0.5.4 (2021-01-28) [not yet published] Minor fixes:
+* 0.5.4 (2021-01-28) Minor fixes:
   * `ustd::Console` and `ustd::SerialConsole` do now honour the USTD_FEATURE_xxx defines.
   * Safe struct inits (no memset())
   * Support for new platforms defined in [ustd](https://github.com/muwerk/ustd#platform-defines) (__ARM__, __RISC_V__)
