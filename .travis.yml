@@ -17,7 +17,7 @@ matrix:
         - platformio lib update
 
       script:
-        - pio ci --lib="." --project-option="build_flags=-D __ESP__" --board=esp12e Examples/minimal/mu_minimal.cpp
+        - pio ci --lib="." --project-option="build_flags=-D __ESP__" --board=esp12e Examples/minimal/src/mu_minimal.cpp
 
     - language: cpp
       compiler: gcc
