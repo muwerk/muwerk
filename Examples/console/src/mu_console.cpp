@@ -1,4 +1,4 @@
-#define USE_SERIAL_DBG 1
+//#define USE_SERIAL_DBG 1
 
 // Make sure to use a platform define before following includes
 #include "platform.h"
@@ -6,28 +6,31 @@
 #include "heartbeat.h"
 #include "console.h"
 
+#if defined(QUIRK_RENAME_SERIAL)
+// Feather M0 fix for non-standard port-name
+#define Serial Serial5
+#endif
+
 ustd::Scheduler sched;
-ustd::Console console;
+// Console will use default Serial:
+ustd::SerialConsole console;
 
 int blinkerID;
 void appLoop();
 
 void task0(String topic, String msg, String originator) {
-    static bool led = false;
-
     // when receiving a message published to subscribed topic "led", do:
     if (msg == "on") {
         digitalWrite(LED_BUILTIN, LOW);  // Turn the LED on
-        led = true;
     }
     if (msg == "off") {
         digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off
-        led = false;
     }
 }
 
 void task1() {                                // scheduled every 50ms
     static ustd::heartbeat intervall = 500L;  // 500 msec
+    static bool ison;
 
     if (intervall.beat()) {
         if (ison == false) {
@@ -43,6 +46,7 @@ void task1() {                                // scheduled every 50ms
     }
 }
 
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
 void command0(String cmd, String args) {
     // extract first argument
     String arg1 = ustd::shift(args);
@@ -75,13 +79,16 @@ void command0(String cmd, String args) {
         Serial.println("\nInvalid option " + arg1 + " supplied");
     }
 }
+#endif
 
 void setup() {
     Serial.begin(115200);
 
     pinMode(LED_BUILTIN, OUTPUT);
 
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
     console.extend("led", command0);
+#endif
     console.begin(&sched);
 
     int tID = sched.add(appLoop, "main");
