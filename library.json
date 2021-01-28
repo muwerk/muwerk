@@ -23,7 +23,7 @@
         "authors": "Dominik Schlösser, Leo Moll",
         "frameworks": "arduino"
     },
-    "version": "0.5.3",
+    "version": "0.5.4",
     "frameworks": "arduino",
     "platforms": "*"
 }
