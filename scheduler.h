@@ -412,8 +412,7 @@ class Scheduler {
          * @return subscriptionHandle on success (needed for unsubscribe), or -1
          * on error.
          */
-        T_SUBSCRIPTION sub;
-        memset(&sub, 0, sizeof(sub));
+        T_SUBSCRIPTION sub = {};
         sub.taskID = taskID;
         sub.subs = subs;
         sub.subscriptionHandle = subscriptionHandle + 1;
@@ -492,8 +491,7 @@ class Scheduler {
          * @param prio Not yet supported.
          * @return taskID is successful, -1 on error.
          */
-        T_TASKENTRY taskEnt;
-        memset(&taskEnt, 0, sizeof(taskEnt));
+        T_TASKENTRY taskEnt = {};
         taskEnt.taskID = taskID + 1;
         taskEnt.task = task;
         taskEnt.minMicros = minMicroSecs;
@@ -620,7 +618,12 @@ class Scheduler {
             return;
         unsigned long now = micros();
         unsigned long tDelta = timeDiff(statTimer, now);
+#ifdef USTD_FEATURE_FREE_MEMORY
         unsigned long mem = (unsigned long)freeMemory();
+#else
+        unsigned long mem = 0;
+#pragma message("freeMemory() is not implemented for this platform.")
+#endif
         if (tDelta > statIntervallMs * 1000) {
             // local stats
             for (unsigned int i = 0; i < taskList.length(); i++) {
@@ -645,7 +648,7 @@ class Scheduler {
             if (jsonstr != nullptr) {
                 memset(jsonstr, 0, memreq);
                 sprintf(jsonstr, skeleton_head, tDelta, systemTime, appTime, mainTime, upTime, mem,
-                        taskList.length());
+                        (long)taskList.length());
                 for (unsigned int i = 0; i < taskList.length(); i++) {
                     char *p = &jsonstr[strlen(jsonstr)];
                     if (taskList[i].szName == nullptr) {

@@ -168,10 +168,18 @@ if __name__ == "__main__":
                    args.sampletime*1000, args.domain, args.username, args.password)
     while mt.connection_state is False:
         time.sleep(0.1)
+
+    subs_topic = args.device_hostname
+
+    # cluster support, from cluster address mqtthost/serialhost, strip /serialhost
+    ind = subs_topic.find('/')
+    if ind != -1:
+        subs_topic = subs_topic[:ind]
+
     if args.domain == "":
-        stat_topic = f"{args.device_hostname}/$SYS/stat"
+        stat_topic = f"{subs_topic}/$SYS/stat"
     else:
-        stat_topic = f"{args.domain}/{args.device_hostname}/$SYS/stat"
+        stat_topic = f"{args.domain}/{subs_topic}/$SYS/stat"
     print(f"Subscribing to {stat_topic}")
     mt.mqttc.subscribe(stat_topic)
     mt.start()

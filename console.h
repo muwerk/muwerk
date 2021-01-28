@@ -7,41 +7,9 @@
 #include "muwerk.h"
 #include "scheduler.h"
 
-// project configration defines:
-//
-// __SUPPORT_FS__       - include file system functions
-// __SUPPORT_EXTEND__   - allow to extend consoles with custom commands
-// __SUPPORT_DATE__     - include `date` command
-// __SUPPORT_SETDATE__  - allow to set date and time with `date`
-// __SUPPORT_LOWMEM__   - reduce memory imprint where possible
-
-#ifdef __ATMEGA__
-#define __SUPPORT_EXTEND__
-#endif
-
-#ifdef __ESP__
-#define __SUPPORT_FS__
-#define __SUPPORT_EXTEND__
-#define __SUPPORT_DATE__
-#endif
-
-#ifdef __UNO__
-#define __SUPPORT_LOWMEM__
-#endif
-
-#ifdef __SUPPORT_FS__
+#ifdef USTD_FEATURE_FILESYSTEM
 #include "filesystem.h"
 #include "jsonfile.h"
-#endif
-
-#ifdef __SUPPORT_DATE__
-#include <time.h>
-#endif
-
-#ifdef __SUPPORT_LOWMEM__
-#undef __SUPPORT_DATE__
-#undef __SUPPORT_EXTEND__
-#undef __SUPPORT_FS__
 #endif
 
 namespace ustd {
@@ -119,7 +87,7 @@ void loop() {
 */
 class Console {
   protected:
-#ifdef __SUPPORT_EXTEND__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
     typedef struct {
         int id;
         char *command;
@@ -146,7 +114,7 @@ class Console {
     }
 
     virtual ~Console() {
-#ifdef __SUPPORT_EXTEND__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         for (unsigned int i = 0; i < commands.length(); i++) {
             free(commands[i].command);
         }
@@ -163,7 +131,7 @@ class Console {
         return execute();
     }
 
-#ifdef __SUPPORT_EXTEND__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
     int extend(String command, T_COMMANDFN handler) {
         /*! Extend the console with a custom command
          *
@@ -173,8 +141,7 @@ class Console {
          * @return commandHandle on success (needed for unextend), or -1
          * on error.
          */
-        T_COMMAND cmd;
-        memset(&cmd, 0, sizeof(cmd));
+        T_COMMAND cmd = {};
         cmd.id = ++commandHandle;
         cmd.fn = handler;
         cmd.command = (char *)malloc(command.length() + 1);
@@ -264,13 +231,13 @@ class Console {
             cmd_uptime();
         } else if (cmd == "info") {
             cmd_info();
-#ifndef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         } else if (cmd == "mem") {
             cmd_mem();
 #endif
         } else if (cmd == "ps") {
             cmd_ps();
-#ifdef __SUPPORT_DATE__
+#ifdef USTD_FEATURE_CLK_READ
         } else if (cmd == "date") {
             cmd_date();
 #endif
@@ -278,7 +245,7 @@ class Console {
             cmd_sub();
         } else if (cmd == "pub") {
             cmd_pub();
-#ifdef __SUPPORT_FS__
+#ifdef USTD_FEATURE_FILESYSTEM
         } else if (cmd == "ls") {
             cmd_ls();
         } else if (cmd == "rm") {
@@ -295,19 +262,19 @@ class Console {
 
     void cmd_help() {
         String help = "commands: help, pub, sub, uname, uptime, ps, info";
-#ifndef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         help += ", mem";
 #endif
-#ifdef __SUPPORT_DATE__
+#ifdef USTD_FEATURE_CLK_READ
         help += ", date";
 #endif
-#ifdef __SUPPORT_FS__
+#ifdef USTD_FEATURE_FILESYSTEM
         help += ", ls, rm, cat, jf";
 #endif
 #ifdef __ESP__
         help += ", debug, wifi, reboot";
 #endif
-#ifdef __SUPPORT_EXTEND__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         for (unsigned int i = 0; i < commands.length(); i++) {
             help += ", ";
             help += commands[i].command;
@@ -389,7 +356,7 @@ class Console {
 
     void cmd_ps() {
         printer->println();
-#ifndef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         printer->println("Scheduler Information:");
         printer->println("----------------------");
 #endif
@@ -399,7 +366,7 @@ class Console {
         if (pSched->taskList.length()) {
             printer->println();
             printer->println("  TID    Interval       Count    CPU Time   Late Time  Name");
-#ifndef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
             printer->println("----------------------------------------------------------------");
 #endif
         }
@@ -412,7 +379,7 @@ class Console {
         printer->println();
     }
 
-#ifndef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
     void cmd_mem() {
         printer->println();
 #ifdef __ESP__
@@ -456,7 +423,7 @@ class Console {
 #endif  // __ARDUINO__
 #endif  // __ESP__
     }
-#endif  // __SUPPORT_LOWMEM__
+#endif
 
     void cmd_info() {
         printer->println();
@@ -490,7 +457,7 @@ class Console {
 #endif  // __ESP32__
 #else
 #ifdef __ARDUINO__
-#ifdef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY < USTD_FEATURE_MEM_8K
         printer->print("mem ");
         printer->print(freeMemory());
         printer->print(", ");
@@ -505,11 +472,11 @@ class Console {
         printer->println();
 #endif  // __LOWMEM
 #else
-#ifdef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY < USTD_FEATURE_MEM_8K
         printer->println("No info");
 #else
         printer->println("No information available");
-#endif  //__SUPPORT_LOWMEM__
+#endif
         printer->println();
 #endif  // __ARDUINO__
 #endif  // __ESP__
@@ -600,12 +567,12 @@ class Console {
         }
     }
 
-#ifdef __SUPPORT_DATE__
+#ifdef USTD_FEATURE_CLK_READ
     void cmd_date() {
         String arg = pullArg();
         arg.toLowerCase();
         if (arg == "-h") {
-#ifdef __SUPPORT_SETDATE__
+#ifdef USTD_FEATURE_CLK_SET
             printer->println("usage: date [[YYYY-MM-DD] hh:mm:ss]");
 #else
             printer->println("usage: date");
@@ -623,7 +590,7 @@ class Console {
                     (int)lt->tm_mon + 1, (int)lt->tm_mday, (int)lt->tm_hour, (int)lt->tm_min,
                     (int)lt->tm_sec, t);
         } else {
-#ifdef __SUPPORT_SETDATE__
+#ifdef USTD_FEATURE_CLK_SET
             if (args.length()) {
                 // we have 2 arguments - the first is a date
                 int i = sscanf(arg.c_str(), "%4i-%2i-%2i", &lt->tm_year, &lt->tm_mon, &lt->tm_mday);
@@ -657,9 +624,9 @@ class Console {
 #endif  // __ESP__
         }
     }
-#endif  // __SUPPORT_DATE__
+#endif  // USTD_FEATURE_CLK_READ
 
-#ifdef __SUPPORT_FS__
+#ifdef USTD_FEATURE_FILESYSTEM
     void cmd_ls() {
         ustd::array<String> paths;
         bool extended = false;
@@ -827,7 +794,7 @@ class Console {
 #endif
 
     bool cmd_custom(String &cmd) {
-#ifdef __SUPPORT_EXTEND__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         for (unsigned int i = 0; i < commands.length(); i++) {
             if (cmd == commands[i].command) {
                 commands[i].fn(cmd, args);
@@ -847,7 +814,7 @@ class Console {
         int iSubId =
             pSched->subscribe(tID, topic, [this](String topic, String msg, String originator) {
                 printer->print("\r>> ");
-#ifndef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
                 if (originator.length()) {
                     printer->print("[");
                     printer->print(originator);
@@ -923,7 +890,7 @@ void loop() {
 
 */
 
-#ifdef __SUPPORT_LOWMEM__
+#if USTD_FEATURE_MEMORY < USTD_FEATURE_MEM_8K
 #define MU_SERIAL_BUF_SIZE 0
 #else
 #ifdef __ARDUINO__
