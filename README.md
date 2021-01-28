@@ -167,7 +167,9 @@ Related projects:
 History
 -------
 * 0.5.4 (2021-01-XX) [not yet published] Minor fixes:
-  * `ustd::Console` and `ustd::SerialConsole` do now hnour the USTD_FEATURE_xxx defines.
+  * `ustd::Console` and `ustd::SerialConsole` do now honour the USTD_FEATURE_xxx defines.
+  * Safe struct inits (no memset())
+  * Support for new platforms defined in ustd
 * 0.5.3 (2021-01-22) `UST_FEATURE_MEM` defines used (requires `ustd` version 0.4.1 or higher), ATtiny T_TASK limited to static functions.
 * 0.5.2 (2021-01-20) `library.properties` project name repaired, to allow Arduino automatic update.
 * 0.5.1 (2021-01-19)
