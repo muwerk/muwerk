@@ -4,6 +4,7 @@ muwerk
 
 [![ESP12e build](https://travis-ci.org/muwerk/muwerk.svg?branch=master)](https://travis-ci.org/muwerk/muwerk)
 [![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://muwerk.github.io/muwerk/docs/index.html)
+[![CMake](https://github.com/muwerk/muwerk/workflows/CMake/badge.svg)](https://github.com/muwerk/muwerk/actions)
 
 muwerk is a cooperative scheduler with mqtt-like queues.
 
