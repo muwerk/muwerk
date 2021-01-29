@@ -111,24 +111,33 @@ class Doctor {
 #endif  // __ESP32__
 #elif defined(__ARDUINO__)
 #ifdef __ATMEGA__
-        ic2info["hardware"] = (const char *)"Arduino MEGA";
+        diaginfo["hardware"] = (const char *)"Arduino MEGA";
 #elif defined(__UNO__)
-        ic2info["hardware"] = (const char *)"Arduino UNO";
+        diaginfo["hardware"] = (const char *)"Arduino UNO";
 #else
-        ic2info["hardware"] = (const char *)"Arduino unknown";
+        diaginfo["hardware"] = (const char *)"Arduino unknown";
+#elif  // __ARDUINO__
+#if defined(__RISC_V__)
+        diaginfo["hardware"] = (const char *)"RISC-V";
+#endif __RISC_V__
+#if defined(__ARM__)
+        diaginfo["hardware"] = (const char *)"ARM";
+#endif  // __ARM__
 #endif  // __ARDUINO__
 #endif  // __ESP__
         pSched->publish(name + "/diagnostics", JSON.stringify(diaginfo));
     }
 
+#if defined(USTD_FEATURE_MEMORY_INFO)
     void publishMemory() {
         int mem = freeMemory();
         pSched->publish(name + "/memory", String(mem));
     }
+#endif
 
     void publishTimeinfo() {
         JSONVar timeinfo;
-#ifdef __ESP__
+#ifdef __USTD_FEATURE_CLK_READ__
         time_t now = time(nullptr);
         char szTime[24];
         struct tm *plt = localtime(&now);
@@ -152,6 +161,7 @@ class Doctor {
     }
 
     void subsMsg(String topic, String msg, String originator) {
+#if defined(USTD_FEATURE_MEMORY_INFO)
         if (topic == name + "/memory/get") {
             if (msg != "") {
                 int period = msg.toInt();
@@ -161,17 +171,18 @@ class Doctor {
             }
             publishMemory();
         }
+#endif
         if (topic == name + "/diagnostics/get") {
             publishDiagnostics();
         }
         if (topic == name + "/timeinfo/get") {
             publishTimeinfo();
         }
-        if (topic == name + "/restart") {
 #ifdef __ESP__
+        if (topic == name + "/restart") {
             ESP.restart();
-#endif
         }
+#endif
     };
 };  // Doctor
 
