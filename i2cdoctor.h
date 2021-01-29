@@ -75,17 +75,17 @@ class I2CDoctor {
     ~I2CDoctor() {
     }
 
-    void begin(Scheduler *_pSched, TwoWire *_pWire = nullptr) {
+    void begin(Scheduler *_pSched, TwoWire *_pWire) {
         /*! Starts the Doctor Task
          *
+         * Wire.begin() must have been called before calling this. ESP32
+         * will crash otherwise.
+         *
          * @param _pSched Pointer to the muwerk scheduler.
-         * @param _pWire Optional pointer to Wire-instance
+         * @param _pWire Pointer to Wire-instance, use &Wire for default
          */
         pSched = _pSched;
-        if (_pWire != nullptr)
-            pWire = &Wire;
-        else
-            pWire = _pWire;
+        pWire = _pWire;
 
         tID = pSched->add([this]() { this->loop(); }, name, 100000);  // every 100 ms
 

@@ -96,7 +96,8 @@ void setup() {
     Serial.begin(115200);
     doc.begin(&sched);
 #if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
-    i2cdoc.begin(&sched);
+    Wire.begin();
+    i2cdoc.begin(&sched, &Wire);
 #endif
     pinMode(LED_BUILTIN, OUTPUT);
 
