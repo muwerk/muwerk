@@ -89,25 +89,25 @@ class Doctor {
 
   protected:
     void publishDiagnostics() {
-        JSONVar i2cinfo;
-        i2cinfo["free_memory"] = freeMemory();
+        JSONVar diaginfo;
+        diaginfo["free_memory"] = freeMemory();
 #ifdef __ESP__
-        i2cinfo["sdk_version"] = (const char *)ESP.getSdkVersion();
-        i2cinfo["cpu_frequency"] = (int)ESP.getCpuFreqMHz();
-        i2cinfo["free_sketch_space"] = (int)ESP.getFreeSketchSpace();
-        i2cinfo["flash_size"] = (int)ESP.getFlashChipSize();
-        i2cinfo["flash_speed_mhz"] = (float)((float)ESP.getFlashChipSpeed() / 1000000.0f);
-        i2cinfo["program_size"] = (int)ESP.getSketchSize();
+        diaginfo["sdk_version"] = (const char *)ESP.getSdkVersion();
+        diaginfo["cpu_frequency"] = (int)ESP.getCpuFreqMHz();
+        diaginfo["free_sketch_space"] = (int)ESP.getFreeSketchSpace();
+        diaginfo["flash_size"] = (int)ESP.getFlashChipSize();
+        diaginfo["flash_speed_mhz"] = (float)((float)ESP.getFlashChipSpeed() / 1000000.0f);
+        diaginfo["program_size"] = (int)ESP.getSketchSize();
 #ifdef __ESP32__
-        ic2info["hardware"] = (const char *)"ESP32";
-        i2cinfo["chip_revision"] = (int)ESP.getChipRevision();
+        diaginfo["hardware"] = (const char *)"ESP32";
+        diaginfo["chip_revision"] = (int)ESP.getChipRevision();
 #else
-        i2cinfo["hardware"] = (const char *)"ESP8266";
-        i2cinfo["chip_id"] = (int)ESP.getChipId();
-        i2cinfo["core_version"] = (const char *)(ESP.getCoreVersion().c_str());
-        i2cinfo["flash_chip_id"] = (int)ESP.getFlashChipId();
-        i2cinfo["real_flash_size"] = (int)ESP.getFlashChipRealSize();
-        i2cinfo["last_reset_reason"] = (const char *)(ESP.getResetReason().c_str());
+        diaginfo["hardware"] = (const char *)"ESP8266";
+        diaginfo["chip_id"] = (int)ESP.getChipId();
+        diaginfo["core_version"] = (const char *)(ESP.getCoreVersion().c_str());
+        diaginfo["flash_chip_id"] = (int)ESP.getFlashChipId();
+        diaginfo["real_flash_size"] = (int)ESP.getFlashChipRealSize();
+        diaginfo["last_reset_reason"] = (const char *)(ESP.getResetReason().c_str());
 #endif  // __ESP32__
 #elif defined(__ARDUINO__)
 #ifdef __ATMEGA__
@@ -118,7 +118,7 @@ class Doctor {
         ic2info["hardware"] = (const char *)"Arduino unknown";
 #endif  // __ARDUINO__
 #endif  // __ESP__
-        pSched->publish(name + "/diagnostics", JSON.stringify(i2cinfo));
+        pSched->publish(name + "/diagnostics", JSON.stringify(diaginfo));
     }
 
     void publishMemory() {
