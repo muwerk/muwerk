@@ -1,4 +1,4 @@
-// doctor.h -- system diagnostics via messages / mqtt
+// i2cdoctor.h -- i2c system diagnostics via messages / mqtt
 #pragma once
 
 #include <Arduino_JSON.H>
@@ -18,7 +18,7 @@ namespace ustd {
 The I2CDoctor class implements a remote diagnostics for i2c-devices interface via pub/sub messages.
 If the system is connected to MQTT, any MQTT client can be used to access diagnostics.
 
-* publish: `hostname/i2cdoctor/i2cinfo/get` -> `hostname/i2cdoctor/i2cinfo`, json list of used
+* publish: `hostname/doctor/i2cinfo/get` -> `hostname/doctor/i2cinfo`, json list of used
 i2c-ports in the system.
 
 ## Sample of adding the i2c-doctor:
@@ -31,7 +31,7 @@ i2c-ports in the system.
 #include <console.h>
 
 ustd::Scheduler sched( 10, 16, 32 );
-ustd::I2CDoctor i2cdoc("i2cdoctor");
+ustd::I2CDoctor i2cdoc;
 ustd::Net net(LED_BUILTIN);
 ustd::Mqtt mqtt;
 
