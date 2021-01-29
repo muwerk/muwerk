@@ -5,7 +5,11 @@
 #include "scheduler.h"
 #include "heartbeat.h"
 #include "doctor.h"
+
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
+// Protrinket has not enough mem, UNO would work.
 #include "i2cdoctor.h"
+#endif
 #include "console.h"
 
 #if defined(QUIRK_RENAME_SERIAL)
@@ -14,6 +18,11 @@
 #endif
 
 ustd::Scheduler sched;
+
+ustd::Doctor doc;
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
+ustd::I2CDoctor i2cdoc;
+#endif
 // Console will use default Serial:
 ustd::SerialConsole console;
 
@@ -85,7 +94,10 @@ void command0(String cmd, String args) {
 
 void setup() {
     Serial.begin(115200);
-
+    doc.begin(&sched);
+#if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
+    i2cdoc.begin(&sched);
+#endif
     pinMode(LED_BUILTIN, OUTPUT);
 
 #if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
