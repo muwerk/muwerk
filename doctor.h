@@ -90,7 +90,9 @@ class Doctor {
   protected:
     void publishDiagnostics() {
         JSONVar diaginfo;
+#if defined(USTD_FEATURE_FREE_MEMORY)
         diaginfo["free_memory"] = freeMemory();
+#endif
 #ifdef __ESP__
         diaginfo["sdk_version"] = (const char *)ESP.getSdkVersion();
         diaginfo["cpu_frequency"] = (int)ESP.getCpuFreqMHz();
@@ -109,26 +111,30 @@ class Doctor {
         diaginfo["real_flash_size"] = (int)ESP.getFlashChipRealSize();
         diaginfo["last_reset_reason"] = (const char *)(ESP.getResetReason().c_str());
 #endif  // __ESP32__
-#elif defined(__ARDUINO__)
+#endif  // __ESP__
+
+#if defined(__ARDUINO__)
 #ifdef __ATMEGA__
         diaginfo["hardware"] = (const char *)"Arduino MEGA";
 #elif defined(__UNO__)
         diaginfo["hardware"] = (const char *)"Arduino UNO";
 #else
         diaginfo["hardware"] = (const char *)"Arduino unknown";
-#elif  // __ARDUINO__
+#endif
+#endif  // __ARDUINO__
+
 #if defined(__RISC_V__)
         diaginfo["hardware"] = (const char *)"RISC-V";
-#endif __RISC_V__
+#endif  // __RISC_V__
+
 #if defined(__ARM__)
         diaginfo["hardware"] = (const char *)"ARM";
 #endif  // __ARM__
-#endif  // __ARDUINO__
-#endif  // __ESP__
+
         pSched->publish(name + "/diagnostics", JSON.stringify(diaginfo));
     }
 
-#if defined(USTD_FEATURE_MEMORY_INFO)
+#if defined(USTD_FEATURE_FREE_MEMORY)
     void publishMemory() {
         int mem = freeMemory();
         pSched->publish(name + "/memory", String(mem));
@@ -145,23 +151,25 @@ class Doctor {
         timeinfo["time"] = (const char *)szTime;
         strftime(szTime, 20, "%Y.%m.%d %H:%M:%S", plt);
         timeinfo["date"] = (const char *)szTime;
+        timeinfo["time_t"] = (long)time(nullptr);
 #endif
         timeinfo["uptime"] = (long)pSched->getUptime();
-        timeinfo["time_t"] = (long)time(nullptr);
         timeinfo["millis"] = millis();
         pSched->publish(name + "/timeinfo", JSON.stringify(timeinfo));
     }
 
     void loop() {
         if (bActive) {
+#if defined(USTD_FEATURE_FREE_MEMORY)
             if (memoryInterval.beat()) {
                 publishMemory();
             }
+#endif
         }
     }
 
     void subsMsg(String topic, String msg, String originator) {
-#if defined(USTD_FEATURE_MEMORY_INFO)
+#if defined(USTD_FEATURE_FREE_MEMORY)
         if (topic == name + "/memory/get") {
             if (msg != "") {
                 int period = msg.toInt();

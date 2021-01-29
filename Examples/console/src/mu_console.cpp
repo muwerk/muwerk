@@ -4,6 +4,8 @@
 #include "platform.h"
 #include "scheduler.h"
 #include "heartbeat.h"
+#include "doctor.h"
+#include "i2cdoctor.h"
 #include "console.h"
 
 #if defined(QUIRK_RENAME_SERIAL)
