@@ -66,7 +66,7 @@ $(function() {
 <div class="title">muwerk </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a href="https://travis-ci.org/muwerk/muwerk"><img src="https://travis-ci.org/muwerk/muwerk.svg?branch=master" alt="ESP12e build" style="pointer-events: none;" class="inline"/></a> <a href="https://muwerk.github.io/muwerk/docs/index.html"><img src="https://img.shields.io/badge/docs-dev-blue.svg" alt="Dev Docs" style="pointer-events: none;" class="inline"/></a></p>
+<div class="textblock"><p><a href="https://travis-ci.org/muwerk/muwerk"><img src="https://travis-ci.org/muwerk/muwerk.svg?branch=master" alt="ESP12e build" style="pointer-events: none;" class="inline"/></a> <a href="https://muwerk.github.io/muwerk/docs/index.html"><img src="https://img.shields.io/badge/docs-dev-blue.svg" alt="Dev Docs" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/muwerk/muwerk/actions"><img src="https://github.com/muwerk/muwerk/workflows/CMake/badge.svg" alt="CMake" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/muwerk/muwerk/actions"><img src="https://github.com/muwerk/muwerk/workflows/PlatformIO%20CI/badge.svg" alt="PlatformIO CI" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/muwerk/muwerk/actions"><img src="https://github.com/muwerk/muwerk/workflows/Console/badge.svg" alt="Console" style="pointer-events: none;" class="inline"/></a></p>
 <p>muwerk is a cooperative scheduler with mqtt-like queues.</p>
 <h1>Dependencies </h1>
 <p>muwerk relies only on <a href="https://github.com/muwerk/ustd">ustd</a>. Check documentation for required <a href="https://github.com/muwerk/ustd/blob/master/README.md">platform defines</a>.</p>
@@ -165,6 +165,8 @@ $(function() {
 </ul>
 <h1>History </h1>
 <ul>
+<li>0.5.5 (2021-01-29) Support for all platforms with <code>Doctor</code> and <code>I2CDoctor</code>.</li>
+<li>CI (2021-01-28 All supported platforms are build-checked automatically with Github actions.</li>
 <li>0.5.4 (2021-01-28) Minor fixes:<ul>
 <li><code><a class="el" href="classustd_1_1Console.html" title="muwerk Console Class">ustd::Console</a></code> and <code><a class="el" href="classustd_1_1SerialConsole.html" title="muwerk Serial Console Class">ustd::SerialConsole</a></code> do now honour the USTD_FEATURE_xxx defines.</li>
 <li>Safe struct inits (no memset())</li>
