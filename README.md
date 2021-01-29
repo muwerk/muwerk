@@ -169,6 +169,7 @@ Related projects:
 
 History
 -------
+* 0.5.5 (2021-01-29) Support for all platforms with `Doctor` and `I2CDoctor`. 
 * CI (2021-01-28 All supported platforms are build-checked automatically with Github actions.
 * 0.5.4 (2021-01-28) Minor fixes:
   * `ustd::Console` and `ustd::SerialConsole` do now honour the USTD_FEATURE_xxx defines.
