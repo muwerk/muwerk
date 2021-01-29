@@ -4,6 +4,9 @@ muwerk
 
 [![ESP12e build](https://travis-ci.org/muwerk/muwerk.svg?branch=master)](https://travis-ci.org/muwerk/muwerk)
 [![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://muwerk.github.io/muwerk/docs/index.html)
+[![CMake](https://github.com/muwerk/muwerk/workflows/CMake/badge.svg)](https://github.com/muwerk/muwerk/actions)
+[![PlatformIO CI](https://github.com/muwerk/muwerk/workflows/PlatformIO%20CI/badge.svg)](https://github.com/muwerk/muwerk/actions)
+[![Console](https://github.com/muwerk/muwerk/workflows/Console/badge.svg)](https://github.com/muwerk/muwerk/actions)
 
 muwerk is a cooperative scheduler with mqtt-like queues.
 
@@ -166,6 +169,8 @@ Related projects:
 
 History
 -------
+* 0.5.5 (2021-01-29) Support for all platforms with `Doctor` and `I2CDoctor`. 
+* CI (2021-01-28 All supported platforms are build-checked automatically with Github actions.
 * 0.5.4 (2021-01-28) Minor fixes:
   * `ustd::Console` and `ustd::SerialConsole` do now honour the USTD_FEATURE_xxx defines.
   * Safe struct inits (no memset())

@@ -52,5 +52,5 @@ in your path:
 ```bash
 
 chmod +x mutop.py
-ln -s $(readlink -f mutop.py) /usr/local/bin/mutop
+ln -s <fullpath>/mutop.py /usr/local/bin/mutop
 ```

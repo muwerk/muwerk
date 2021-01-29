@@ -89,46 +89,61 @@ class Doctor {
 
   protected:
     void publishDiagnostics() {
-        JSONVar i2cinfo;
-        i2cinfo["free_memory"] = freeMemory();
+        JSONVar diaginfo;
+#if defined(USTD_FEATURE_FREE_MEMORY)
+        diaginfo["free_memory"] = freeMemory();
+#endif
 #ifdef __ESP__
-        i2cinfo["sdk_version"] = (const char *)ESP.getSdkVersion();
-        i2cinfo["cpu_frequency"] = (int)ESP.getCpuFreqMHz();
-        i2cinfo["free_sketch_space"] = (int)ESP.getFreeSketchSpace();
-        i2cinfo["flash_size"] = (int)ESP.getFlashChipSize();
-        i2cinfo["flash_speed_mhz"] = (float)((float)ESP.getFlashChipSpeed() / 1000000.0f);
-        i2cinfo["program_size"] = (int)ESP.getSketchSize();
+        diaginfo["sdk_version"] = (const char *)ESP.getSdkVersion();
+        diaginfo["cpu_frequency"] = (int)ESP.getCpuFreqMHz();
+        diaginfo["free_sketch_space"] = (int)ESP.getFreeSketchSpace();
+        diaginfo["flash_size"] = (int)ESP.getFlashChipSize();
+        diaginfo["flash_speed_mhz"] = (float)((float)ESP.getFlashChipSpeed() / 1000000.0f);
+        diaginfo["program_size"] = (int)ESP.getSketchSize();
 #ifdef __ESP32__
-        ic2info["hardware"] = (const char *)"ESP32";
-        i2cinfo["chip_revision"] = (int)ESP.getChipRevision();
+        diaginfo["hardware"] = (const char *)"ESP32";
+        diaginfo["chip_revision"] = (int)ESP.getChipRevision();
 #else
-        i2cinfo["hardware"] = (const char *)"ESP8266";
-        i2cinfo["chip_id"] = (int)ESP.getChipId();
-        i2cinfo["core_version"] = (const char *)(ESP.getCoreVersion().c_str());
-        i2cinfo["flash_chip_id"] = (int)ESP.getFlashChipId();
-        i2cinfo["real_flash_size"] = (int)ESP.getFlashChipRealSize();
-        i2cinfo["last_reset_reason"] = (const char *)(ESP.getResetReason().c_str());
+        diaginfo["hardware"] = (const char *)"ESP8266";
+        diaginfo["chip_id"] = (int)ESP.getChipId();
+        diaginfo["core_version"] = (const char *)(ESP.getCoreVersion().c_str());
+        diaginfo["flash_chip_id"] = (int)ESP.getFlashChipId();
+        diaginfo["real_flash_size"] = (int)ESP.getFlashChipRealSize();
+        diaginfo["last_reset_reason"] = (const char *)(ESP.getResetReason().c_str());
 #endif  // __ESP32__
-#elif defined(__ARDUINO__)
-#ifdef __ATMEGA__
-        ic2info["hardware"] = (const char *)"Arduino MEGA";
-#elif defined(__UNO__)
-        ic2info["hardware"] = (const char *)"Arduino UNO";
-#else
-        ic2info["hardware"] = (const char *)"Arduino unknown";
-#endif  // __ARDUINO__
 #endif  // __ESP__
-        pSched->publish(name + "/diagnostics", JSON.stringify(i2cinfo));
+
+#if defined(__ARDUINO__)
+#ifdef __ATMEGA__
+        diaginfo["hardware"] = (const char *)"Arduino MEGA";
+#elif defined(__UNO__)
+        diaginfo["hardware"] = (const char *)"Arduino UNO";
+#else
+        diaginfo["hardware"] = (const char *)"Arduino unknown";
+#endif
+#endif  // __ARDUINO__
+
+#if defined(__RISC_V__)
+        diaginfo["hardware"] = (const char *)"RISC-V";
+#endif  // __RISC_V__
+
+#if defined(__ARM__)
+        diaginfo["hardware"] = (const char *)"ARM";
+#endif  // __ARM__
+
+        pSched->publish(name + "/diagnostics", JSON.stringify(diaginfo));
     }
 
+#if defined(USTD_FEATURE_FREE_MEMORY)
     void publishMemory() {
         int mem = freeMemory();
         pSched->publish(name + "/memory", String(mem));
     }
+#endif
 
     void publishTimeinfo() {
         JSONVar timeinfo;
-#ifdef __ESP__
+#ifdef USTD_FEATURE_CLK_READ
         time_t now = time(nullptr);
         char szTime[24];
         struct tm *plt = localtime(&now);
@@ -136,22 +151,25 @@ class Doctor {
         timeinfo["time"] = (const char *)szTime;
         strftime(szTime, 20, "%Y.%m.%d %H:%M:%S", plt);
         timeinfo["date"] = (const char *)szTime;
+        timeinfo["time_t"] = (long)time(nullptr);
 #endif
         timeinfo["uptime"] = (long)pSched->getUptime();
-        timeinfo["time_t"] = (long)time(nullptr);
         timeinfo["millis"] = millis();
         pSched->publish(name + "/timeinfo", JSON.stringify(timeinfo));
     }
 
     void loop() {
         if (bActive) {
+#if defined(USTD_FEATURE_FREE_MEMORY)
             if (memoryInterval.beat()) {
                 publishMemory();
             }
+#endif
         }
     }
 
     void subsMsg(String topic, String msg, String originator) {
+#if defined(USTD_FEATURE_FREE_MEMORY)
         if (topic == name + "/memory/get") {
             if (msg != "") {
                 int period = msg.toInt();
@@ -161,17 +179,18 @@ class Doctor {
             }
             publishMemory();
         }
+#endif
         if (topic == name + "/diagnostics/get") {
             publishDiagnostics();
         }
         if (topic == name + "/timeinfo/get") {
             publishTimeinfo();
         }
-        if (topic == name + "/restart") {
 #ifdef __ESP__
+        if (topic == name + "/restart") {
             ESP.restart();
-#endif
         }
+#endif
     };
 };  // Doctor
 

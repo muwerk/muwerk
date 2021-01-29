@@ -1,4 +1,4 @@
-// doctor.h -- system diagnostics via messages / mqtt
+// i2cdoctor.h -- i2c system diagnostics via messages / mqtt
 #pragma once
 
 #include <Arduino_JSON.H>
@@ -18,7 +18,7 @@ namespace ustd {
 The I2CDoctor class implements a remote diagnostics for i2c-devices interface via pub/sub messages.
 If the system is connected to MQTT, any MQTT client can be used to access diagnostics.
 
-* publish: `hostname/i2cdoctor/i2cinfo/get` -> `hostname/i2cdoctor/i2cinfo`, json list of used
+* publish: `hostname/doctor/i2cinfo/get` -> `hostname/doctor/i2cinfo`, json list of used
 i2c-ports in the system.
 
 ## Sample of adding the i2c-doctor:
@@ -31,7 +31,7 @@ i2c-ports in the system.
 #include <console.h>
 
 ustd::Scheduler sched( 10, 16, 32 );
-ustd::I2CDoctor i2cdoc("i2cdoctor");
+ustd::I2CDoctor i2cdoc;
 ustd::Net net(LED_BUILTIN);
 ustd::Mqtt mqtt;
 
@@ -75,17 +75,17 @@ class I2CDoctor {
     ~I2CDoctor() {
     }
 
-    void begin(Scheduler *_pSched, TwoWire *_pWire = nullptr) {
+    void begin(Scheduler *_pSched, TwoWire *_pWire) {
         /*! Starts the Doctor Task
          *
+         * Wire.begin() must have been called before calling this. ESP32
+         * will crash otherwise.
+         *
          * @param _pSched Pointer to the muwerk scheduler.
-         * @param _pWire Optional pointer to Wire-instance
+         * @param _pWire Pointer to Wire-instance, use &Wire for default
          */
         pSched = _pSched;
-        if (_pWire != nullptr)
-            pWire = &Wire;
-        else
-            pWire = _pWire;
+        pWire = _pWire;
 
         tID = pSched->add([this]() { this->loop(); }, name, 100000);  // every 100 ms
 
