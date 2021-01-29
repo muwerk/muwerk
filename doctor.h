@@ -143,7 +143,7 @@ class Doctor {
 
     void publishTimeinfo() {
         JSONVar timeinfo;
-#ifdef __USTD_FEATURE_CLK_READ__
+#ifdef USTD_FEATURE_CLK_READ
         time_t now = time(nullptr);
         char szTime[24];
         struct tm *plt = localtime(&now);
