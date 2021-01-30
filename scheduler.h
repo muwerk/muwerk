@@ -2,21 +2,15 @@
 
 #pragma once
 
-/*
-#include "../ustd/platform.h"
-#include "../ustd/array.h"
-#include "../ustd/queue.h"
-#include "../ustd/functional.h"
-*/
-#include "platform.h"
-#include "array.h"
-#include "queue.h"
-#include "functional.h"
+#include "ustd_platform.h"
+#include "ustd_array.h"
+#include "ustd_queue.h"
+#include "ustd_functional.h"
 #include "muwerk.h"
 
 #include <stdio.h>
 
-#if defined(__ESP__) || defined(__UNIXOID__)
+#if defined(__ESP__) || defined(__ESP32__) || defined(__UNIXOID__)
 #include <functional>
 #endif
 

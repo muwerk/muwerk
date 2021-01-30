@@ -1,7 +1,7 @@
 //#define USE_SERIAL_DBG 1
 
 // Make sure to use a platform define before following includes
-#include "platform.h"
+#include "ustd_platform.h"
 #include "scheduler.h"
 #include "heartbeat.h"
 #include "doctor.h"
