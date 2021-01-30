@@ -165,6 +165,7 @@ $(function() {
 </ul>
 <h1>History </h1>
 <ul>
+<li>0.6.0 (2021-01-30) <b>Breaking change</b> for ustd library include: ustd include-files have now <code>ustd_</code> prefix to prevent name-clashes with various platform-sdks. [queue.h clashed with ESP8266-Wifi, platform.h clashed with RISC-V SDK, hence new names <code>ustd_queue.h</code> and <code>ustd_platform.h</code> etc.]</li>
 <li>0.5.5 (2021-01-29) Support for all platforms with <code>Doctor</code> and <code>I2CDoctor</code>.</li>
 <li>CI (2021-01-28 All supported platforms are build-checked automatically with Github actions.</li>
 <li>0.5.4 (2021-01-28) Minor fixes:<ul>
