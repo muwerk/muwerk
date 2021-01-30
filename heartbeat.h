@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "platform.h"
+#include "ustd_platform.h"
 #include "muwerk.h"
 
 namespace ustd {
