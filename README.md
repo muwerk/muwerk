@@ -169,7 +169,8 @@ Related projects:
 
 History
 -------
-* 0.6.0 (2021-01-30) Breaking change for ustd library include: ustd include-files have now `ustd_` prefix.
+* 0.6.0 (2021-01-30) **Breaking change** for ustd library include: ustd include-files have now `ustd_` prefix to prevent name-clashes with various platform-sdks. [queue.h clashed with ESP8266-Wifi, platform.h clashed with
+RISC-V SDK, hence new names `ustd_queue.h` and `ustd_platform.h` etc.]
 * CI (2021-01-28 All supported platforms are build-checked automatically with Github actions.
 * 0.5.4 (2021-01-28) Minor fixes:
   * `ustd::Console` and `ustd::SerialConsole` do now honour the USTD_FEATURE_xxx defines.
