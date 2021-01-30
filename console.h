@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "platform.h"
-#include "array.h"
+#include "ustd_platform.h"
+#include "ustd_array.h"
 #include "muwerk.h"
 #include "scheduler.h"
 

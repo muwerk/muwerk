@@ -35,8 +35,8 @@ used by:
 * * <a href="https://github.com/muwerk/munet">munet github repository</a>
 */
 
-#include "platform.h"
-#include "array.h"
+#include "ustd_platform.h"
+#include "ustd_array.h"
 
 //! \brief The muwerk namespace
 namespace ustd {
