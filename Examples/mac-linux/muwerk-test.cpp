@@ -7,11 +7,11 @@
 
 #define USE_SERIAL_DBG 1
 
-#include "platform.h"
+#include "ustd_platform.h"
 
-#include "array.h"
-#include "map.h"
-#include "queue.h"
+#include "ustd_array.h"
+#include "ustd_map.h"
+#include "ustd_queue.h"
 
 #include "scheduler.h"
 
