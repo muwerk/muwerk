@@ -268,7 +268,7 @@ template <typename T_FLOAT> class numericFunction {
         Note: current minimum and maximum must be given to pminX and pmaxX (see \ref min(), \ref
         max() ).
 
-        @param ar ustd::array to be rescaled
+        @param par point to ustd::array to be rescaled
         @param pminX pointer to mimimum value of array-members in ar, will be overwriten with new
         actual minimum.
         @param pmaxX pointer to maximum value of array-members in ar, will be overwriten with new
@@ -317,10 +317,11 @@ template <typename T_FLOAT> class numericFunction {
     static int linsearch(ustd::array<T_FLOAT> &ar, T_FLOAT x) {
         /*! Get largest index element in ar that is smaller than x using bineary search.
 
-        Note: ar must be strictly monotone rising.
+        Note: ar must be strictly monotone rising. If x is outside of minX and maxX,
+        the nearest array index (either 0 or length-1) is given.
 
         @param ar ustd::array
-        @param newMax values to be search
+        @param x value to be searched
         */
         int a = 0, b = ar.length() - 1, n;
         while (b - a > 1) {
@@ -375,7 +376,7 @@ template <typename T_FLOAT> class numericFunction {
     }
 
     T_FLOAT operator()(T_FLOAT x) {
-        /*! interpolate f(x), uses \ref interpolate(x)
+        /*! interpolate f(x), uses \ref interpol()
         @param x value to be approximated by f(x).
         */
         return interpol(x);
