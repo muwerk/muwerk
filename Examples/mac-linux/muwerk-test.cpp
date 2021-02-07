@@ -14,6 +14,7 @@
 #include "ustd_queue.h"
 
 #include "scheduler.h"
+#include "sensors.h"
 
 using std::cout;
 using std::endl;
@@ -123,6 +124,17 @@ void t2() {
         ;
 }
 
+void numericTests() {
+    const float cx[] = {0., 1., 2., 3.}, cy[] = {9, 3, 2.8, 1};
+    ustd::numericFunction<float> f(cx, cy, sizeof(cx) / sizeof(float), true);
+
+    printf("%d %d %f %f %f %f\n", f.x.length(), f.y.length(), f.minX, f.minY, f.maxX, f.maxY);
+    for (int ix = 0; ix < 100; ix++) {
+        float xi = (float)ix / 10.0 - 3.0;
+        printf("%f -> %f\n", xi, f(xi));
+    }
+}
+
 int main() {
     cout << "Testing mustd..." << endl;
     array<int> ar = array<int>(1, 100, 1);
@@ -144,7 +156,7 @@ int main() {
     bool merr = false;
     for (int i = 0; i < mp.length(); i++) {
         if (mp.keys[i] != i || i != mp.values[i]) {
-            printf("Maps err at %d: ds<->%d\n", i, mp.keys[i], mp.values[i]);
+            printf("Maps err at %d: %d<->%d\n", i, mp.keys[i], mp.values[i]);
             merr = true;
         }
     }
@@ -174,7 +186,7 @@ int main() {
     int sS = sched.subscribe(SCHEDULER_MAIN, "$SYS/stat", stats);
 
     unsigned long oldt = -1;
-    while (time(nullptr) - t1 < 10) {
+    while (time(nullptr) - t1 < 3) {
         if (time(nullptr) - t1 != oldt) {
             oldt = time(nullptr) - t1;
             Serial.print("========Timestamp: ");
@@ -192,6 +204,8 @@ int main() {
     sched.unsubscribe(sS);
 
     cout << "Done sched test" << endl;
+
+    numericTests();
 
     int nerrs = testcases();
     if (nerrs > 0)

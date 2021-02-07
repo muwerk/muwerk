@@ -1,7 +1,7 @@
 // doctor.h -- system diagnostics via messages / mqtt
 #pragma once
 
-#include <Arduino_JSON.H>
+#include <Arduino_JSON.h>
 
 #include "scheduler.h"
 #include "heartbeat.h"
