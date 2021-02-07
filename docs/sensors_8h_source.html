@@ -225,67 +225,67 @@ $(function() {
 <div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;    }</div>
 <div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160; </div>
 <div class="line"><a name="l00317"></a><span class="lineno"><a class="line" href="classustd_1_1numericFunction.html#a18083cb5255044499d5a9c2d62db531e">  317</a></span>&#160;    <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classustd_1_1numericFunction.html#a18083cb5255044499d5a9c2d62db531e">linsearch</a>(ustd::array&lt;T_FLOAT&gt; &amp;ar, T_FLOAT x) {</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;        <span class="keywordtype">int</span> a = 0, b = ar.length() - 1, n;</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;        <span class="keywordflow">while</span> (b - a &gt; 1) {</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;            n = (a + b) / 2;</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            <span class="keywordflow">if</span> (ar[n] == x)</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;                <span class="keywordflow">return</span> n;</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            <span class="keywordflow">if</span> (x &gt; ar[n])</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;                a = n;</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;            <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                b = n;</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;        }</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;        <span class="keywordflow">return</span> a;</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    }</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160; </div>
-<div class="line"><a name="l00338"></a><span class="lineno"><a class="line" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">  338</a></span>&#160;    T_FLOAT <a class="code" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">interpol</a>(T_FLOAT xi) {</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;        T_FLOAT dx1, dx2, dy;</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;        <span class="keywordflow">if</span> (len == 0)</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;            <span class="keywordflow">return</span> 0.0;</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;        <span class="keywordflow">if</span> (len == 1)</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;            <span class="keywordflow">return</span> x[0];</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;        <span class="keywordflow">if</span> (xi &lt; minX) {</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;            <span class="keywordflow">if</span> (!extrapolate)</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;                <span class="keywordflow">return</span> y[0];</div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;            <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;                dx1 = x[0] - xi;</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;                dx2 = x[1] - x[0];</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;                dy = y[1] - y[0];</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                <span class="keywordflow">return</span> y[0] - dy / dx2 * dx1;</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;            }</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;        }</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;        <span class="keywordflow">if</span> (xi &gt; maxX) {</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;            <span class="keywordflow">if</span> (!extrapolate)</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;                <span class="keywordflow">return</span> y[len - 1];</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;            <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;                dx1 = x[len - 1] - x[len];</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;                dx2 = xi - x[len - 1];</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;                dy = y[len - 1] - y[len - 2];</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;                <span class="keywordflow">return</span> y[len - 1] + dy / dx1 * dx2;</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;            }</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;        }</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> n = <a class="code" href="classustd_1_1numericFunction.html#a18083cb5255044499d5a9c2d62db531e">linsearch</a>(x, xi);</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;        <span class="keywordflow">if</span> (n &gt;= len - 1)</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;            <span class="keywordflow">return</span> y[len - 1];</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;        dx1 = x[n] - x[n + 1];</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;        dx2 = xi - x[n];</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;        dy = y[n + 1] - y[n];</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;        <span class="keywordtype">float</span> yi = y[n] - dy / dx1 * dx2;</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;        <span class="keywordflow">return</span> yi;</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;    }</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160; </div>
-<div class="line"><a name="l00377"></a><span class="lineno"><a class="line" href="classustd_1_1numericFunction.html#a7bb66a1419a34715ab2c064d7a82673b">  377</a></span>&#160;    T_FLOAT <a class="code" href="classustd_1_1numericFunction.html#a7bb66a1419a34715ab2c064d7a82673b">operator()</a>(T_FLOAT x) {</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">interpol</a>(x);</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    }</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;};</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160; </div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;}  <span class="comment">// namespace ustd</span></div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;        <span class="keywordtype">int</span> a = 0, b = ar.length() - 1, n;</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;        <span class="keywordflow">while</span> (b - a &gt; 1) {</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            n = (a + b) / 2;</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;            <span class="keywordflow">if</span> (ar[n] == x)</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;                <span class="keywordflow">return</span> n;</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;            <span class="keywordflow">if</span> (x &gt; ar[n])</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                a = n;</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;            <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;                b = n;</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;        }</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;        <span class="keywordflow">return</span> a;</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;    }</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160; </div>
+<div class="line"><a name="l00339"></a><span class="lineno"><a class="line" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">  339</a></span>&#160;    T_FLOAT <a class="code" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">interpol</a>(T_FLOAT xi) {</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;        T_FLOAT dx1, dx2, dy;</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;        <span class="keywordflow">if</span> (len == 0)</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;            <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;        <span class="keywordflow">if</span> (len == 1)</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;            <span class="keywordflow">return</span> x[0];</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;        <span class="keywordflow">if</span> (xi &lt; minX) {</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;            <span class="keywordflow">if</span> (!extrapolate)</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;                <span class="keywordflow">return</span> y[0];</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;            <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;                dx1 = x[0] - xi;</div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;                dx2 = x[1] - x[0];</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                dy = y[1] - y[0];</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;                <span class="keywordflow">return</span> y[0] - dy / dx2 * dx1;</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;            }</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;        }</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;        <span class="keywordflow">if</span> (xi &gt; maxX) {</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;            <span class="keywordflow">if</span> (!extrapolate)</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;                <span class="keywordflow">return</span> y[len - 1];</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;            <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;                dx1 = x[len - 1] - x[len];</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;                dx2 = xi - x[len - 1];</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;                dy = y[len - 1] - y[len - 2];</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;                <span class="keywordflow">return</span> y[len - 1] + dy / dx1 * dx2;</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;            }</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;        }</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> n = <a class="code" href="classustd_1_1numericFunction.html#a18083cb5255044499d5a9c2d62db531e">linsearch</a>(x, xi);</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;        <span class="keywordflow">if</span> (n &gt;= len - 1)</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;            <span class="keywordflow">return</span> y[len - 1];</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;        dx1 = x[n] - x[n + 1];</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;        dx2 = xi - x[n];</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;        dy = y[n + 1] - y[n];</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;        <span class="keywordtype">float</span> yi = y[n] - dy / dx1 * dx2;</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;        <span class="keywordflow">return</span> yi;</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;    }</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160; </div>
+<div class="line"><a name="l00378"></a><span class="lineno"><a class="line" href="classustd_1_1numericFunction.html#a7bb66a1419a34715ab2c064d7a82673b">  378</a></span>&#160;    T_FLOAT <a class="code" href="classustd_1_1numericFunction.html#a7bb66a1419a34715ab2c064d7a82673b">operator()</a>(T_FLOAT x) {</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">interpol</a>(x);</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    }</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;};</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160; </div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;}  <span class="comment">// namespace ustd</span></div>
 <div class="ttc" id="aclassustd_1_1numericFunction_html"><div class="ttname"><a href="classustd_1_1numericFunction.html">ustd::numericFunction</a></div><div class="ttdoc">muwerk numicFunction class</div><div class="ttdef"><b>Definition:</b> sensors.h:193</div></div>
 <div class="ttc" id="aclassustd_1_1numericFunction_html_a18083cb5255044499d5a9c2d62db531e"><div class="ttname"><a href="classustd_1_1numericFunction.html#a18083cb5255044499d5a9c2d62db531e">ustd::numericFunction::linsearch</a></div><div class="ttdeci">static int linsearch(ustd::array&lt; T_FLOAT &gt; &amp;ar, T_FLOAT x)</div><div class="ttdef"><b>Definition:</b> sensors.h:317</div></div>
 <div class="ttc" id="aclassustd_1_1numericFunction_html_a22704822e69d04ae0b38ef81c7b8e822"><div class="ttname"><a href="classustd_1_1numericFunction.html#a22704822e69d04ae0b38ef81c7b8e822">ustd::numericFunction::rescaleY</a></div><div class="ttdeci">void rescaleY(T_FLOAT newMin, T_FLOAT newMax)</div><div class="ttdef"><b>Definition:</b> sensors.h:308</div></div>
 <div class="ttc" id="aclassustd_1_1numericFunction_html_a4c75b48ff56f517f772e9a4897eda8e6"><div class="ttname"><a href="classustd_1_1numericFunction.html#a4c75b48ff56f517f772e9a4897eda8e6">ustd::numericFunction::rescale</a></div><div class="ttdeci">static void rescale(ustd::array&lt; T_FLOAT &gt; *par, T_FLOAT *pminX, T_FLOAT *pmaxX, T_FLOAT newMin, T_FLOAT newMax)</div><div class="ttdef"><b>Definition:</b> sensors.h:264</div></div>
-<div class="ttc" id="aclassustd_1_1numericFunction_html_a4e872b9a48f4def5ef19e9292ad0e9b4"><div class="ttname"><a href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">ustd::numericFunction::interpol</a></div><div class="ttdeci">T_FLOAT interpol(T_FLOAT xi)</div><div class="ttdef"><b>Definition:</b> sensors.h:338</div></div>
-<div class="ttc" id="aclassustd_1_1numericFunction_html_a7bb66a1419a34715ab2c064d7a82673b"><div class="ttname"><a href="classustd_1_1numericFunction.html#a7bb66a1419a34715ab2c064d7a82673b">ustd::numericFunction::operator()</a></div><div class="ttdeci">T_FLOAT operator()(T_FLOAT x)</div><div class="ttdef"><b>Definition:</b> sensors.h:377</div></div>
+<div class="ttc" id="aclassustd_1_1numericFunction_html_a4e872b9a48f4def5ef19e9292ad0e9b4"><div class="ttname"><a href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">ustd::numericFunction::interpol</a></div><div class="ttdeci">T_FLOAT interpol(T_FLOAT xi)</div><div class="ttdef"><b>Definition:</b> sensors.h:339</div></div>
+<div class="ttc" id="aclassustd_1_1numericFunction_html_a7bb66a1419a34715ab2c064d7a82673b"><div class="ttname"><a href="classustd_1_1numericFunction.html#a7bb66a1419a34715ab2c064d7a82673b">ustd::numericFunction::operator()</a></div><div class="ttdeci">T_FLOAT operator()(T_FLOAT x)</div><div class="ttdef"><b>Definition:</b> sensors.h:378</div></div>
 <div class="ttc" id="aclassustd_1_1numericFunction_html_a87659d2c7015db3c0a4c68712c901ad6"><div class="ttname"><a href="classustd_1_1numericFunction.html#a87659d2c7015db3c0a4c68712c901ad6">ustd::numericFunction::min</a></div><div class="ttdeci">static T_FLOAT min(ustd::array&lt; T_FLOAT &gt; ar)</div><div class="ttdef"><b>Definition:</b> sensors.h:240</div></div>
 <div class="ttc" id="aclassustd_1_1numericFunction_html_ac216e858e9c0779aa66b33065474672a"><div class="ttname"><a href="classustd_1_1numericFunction.html#ac216e858e9c0779aa66b33065474672a">ustd::numericFunction::max</a></div><div class="ttdeci">static T_FLOAT max(ustd::array&lt; T_FLOAT &gt; ar)</div><div class="ttdef"><b>Definition:</b> sensors.h:252</div></div>
 <div class="ttc" id="aclassustd_1_1numericFunction_html_ac8b87deb9cc6b766e6ddf335f9dde015"><div class="ttname"><a href="classustd_1_1numericFunction.html#ac8b87deb9cc6b766e6ddf335f9dde015">ustd::numericFunction::rescaleX</a></div><div class="ttdeci">void rescaleX(T_FLOAT newMin, T_FLOAT newMax)</div><div class="ttdef"><b>Definition:</b> sensors.h:300</div></div>

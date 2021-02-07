@@ -282,11 +282,11 @@ template&lt;typename T_FLOAT &gt; </div>
 </table>
 </div><div class="memdoc">
 <p>Get largest index element in ar that is smaller than x using bineary search.</p>
-<p>Note: ar must be strictly monotone rising.</p>
+<p>Note: ar must be strictly monotone rising. If x is outside of minX and maxX, the nearest array index (either 0 or length-1) is given.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ar</td><td>ustd::array </td></tr>
-    <tr><td class="paramname">newMax</td><td>values to be search</td></tr>
+    <tr><td class="paramname">x</td><td>value to be searched</td></tr>
   </table>
   </dd>
 </dl>
@@ -386,7 +386,7 @@ template&lt;typename T_FLOAT &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>interpolate f(x), uses interpolate(x) </p><dl class="params"><dt>Parameters</dt><dd>
+<p>interpolate f(x), uses <a class="el" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">interpol()</a> </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">x</td><td>value to be approximated by f(x).</td></tr>
   </table>
@@ -452,7 +452,7 @@ template&lt;typename T_FLOAT &gt; </div>
 <p>Note: current minimum and maximum must be given to pminX and pmaxX (see <a class="el" href="classustd_1_1numericFunction.html#a87659d2c7015db3c0a4c68712c901ad6">min()</a>, <a class="el" href="classustd_1_1numericFunction.html#ac216e858e9c0779aa66b33065474672a">max()</a> ).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ar</td><td>ustd::array to be rescaled </td></tr>
+    <tr><td class="paramname">par</td><td>point to ustd::array to be rescaled </td></tr>
     <tr><td class="paramname">pminX</td><td>pointer to mimimum value of array-members in ar, will be overwriten with new actual minimum. </td></tr>
     <tr><td class="paramname">pmaxX</td><td>pointer to maximum value of array-members in ar, will be overwriten with new actual maximum. </td></tr>
     <tr><td class="paramname">newMin</td><td>The entire array ar is transformed linearily so that the new minimum is newMin </td></tr>
