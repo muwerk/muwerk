@@ -68,6 +68,7 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classustd_1_1numericFunction-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">ustd::numericFunction&lt; T_FLOAT &gt; Class Template Reference</div>  </div>
@@ -83,6 +84,25 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ad13ed7bec50c46db53cf4788692dc432"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#ad13ed7bec50c46db53cf4788692dc432">numericFunction</a> (const T_FLOAT px[], const T_FLOAT py[], unsigned int count, bool _extrapolate=false)</td></tr>
 <tr class="separator:ad13ed7bec50c46db53cf4788692dc432"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8b87deb9cc6b766e6ddf335f9dde015"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#ac8b87deb9cc6b766e6ddf335f9dde015">rescaleX</a> (T_FLOAT newMin, T_FLOAT newMax)</td></tr>
+<tr class="separator:ac8b87deb9cc6b766e6ddf335f9dde015"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22704822e69d04ae0b38ef81c7b8e822"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#a22704822e69d04ae0b38ef81c7b8e822">rescaleY</a> (T_FLOAT newMin, T_FLOAT newMax)</td></tr>
+<tr class="separator:a22704822e69d04ae0b38ef81c7b8e822"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e872b9a48f4def5ef19e9292ad0e9b4"><td class="memItemLeft" align="right" valign="top">T_FLOAT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#a4e872b9a48f4def5ef19e9292ad0e9b4">interpol</a> (T_FLOAT xi)</td></tr>
+<tr class="separator:a4e872b9a48f4def5ef19e9292ad0e9b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bb66a1419a34715ab2c064d7a82673b"><td class="memItemLeft" align="right" valign="top">T_FLOAT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#a7bb66a1419a34715ab2c064d7a82673b">operator()</a> (T_FLOAT x)</td></tr>
+<tr class="separator:a7bb66a1419a34715ab2c064d7a82673b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a87659d2c7015db3c0a4c68712c901ad6"><td class="memItemLeft" align="right" valign="top">static T_FLOAT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#a87659d2c7015db3c0a4c68712c901ad6">min</a> (ustd::array&lt; T_FLOAT &gt; ar)</td></tr>
+<tr class="separator:a87659d2c7015db3c0a4c68712c901ad6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac216e858e9c0779aa66b33065474672a"><td class="memItemLeft" align="right" valign="top">static T_FLOAT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#ac216e858e9c0779aa66b33065474672a">max</a> (ustd::array&lt; T_FLOAT &gt; ar)</td></tr>
+<tr class="separator:ac216e858e9c0779aa66b33065474672a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c75b48ff56f517f772e9a4897eda8e6"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#a4c75b48ff56f517f772e9a4897eda8e6">rescale</a> (ustd::array&lt; T_FLOAT &gt; *par, T_FLOAT *pminX, T_FLOAT *pmaxX, T_FLOAT newMin, T_FLOAT newMax)</td></tr>
+<tr class="separator:a4c75b48ff56f517f772e9a4897eda8e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18083cb5255044499d5a9c2d62db531e"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1numericFunction.html#a18083cb5255044499d5a9c2d62db531e">linsearch</a> (ustd::array&lt; T_FLOAT &gt; &amp;ar, T_FLOAT x)</td></tr>
+<tr class="separator:a18083cb5255044499d5a9c2d62db531e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename T_FLOAT&gt;<br />
@@ -178,12 +198,357 @@ template&lt;typename T_FLOAT &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Instatiate a <a class="el" href="classustd_1_1numericFunction.html" title="muwerk numicFunction class">numericFunction</a> with point px and py. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Instatiate a <a class="el" href="classustd_1_1numericFunction.html" title="muwerk numicFunction class">numericFunction</a> with point px and py.</p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">px</td><td>array of length count of x-values. </td></tr>
     <tr><td class="paramname">py</td><td>corresponding array of y-values, f(px[i])=py[i] </td></tr>
     <tr><td class="paramname">count</td><td>array member count of both px and py </td></tr>
     <tr><td class="paramname">_extrapolate</td><td>false: if px is ouside of the defined points, x&lt;min(px) gives py[0], x&gt;max(px) gives py[count-1], on true linear approximation is used.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4e872b9a48f4def5ef19e9292ad0e9b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e872b9a48f4def5ef19e9292ad0e9b4">&#9670;&nbsp;</a></span>interpol()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T_FLOAT <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::interpol </td>
+          <td>(</td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>xi</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get interpolated value at point f(xi) </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xi</td><td>Value of x used to interpole f(x)</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a18083cb5255044499d5a9c2d62db531e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18083cb5255044499d5a9c2d62db531e">&#9670;&nbsp;</a></span>linsearch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::linsearch </td>
+          <td>(</td>
+          <td class="paramtype">ustd::array&lt; T_FLOAT &gt; &amp;&#160;</td>
+          <td class="paramname"><em>ar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>x</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get largest index element in ar that is smaller than x using bineary search.</p>
+<p>Note: ar must be strictly monotone rising.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ar</td><td>ustd::array </td></tr>
+    <tr><td class="paramname">newMax</td><td>values to be search</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac216e858e9c0779aa66b33065474672a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac216e858e9c0779aa66b33065474672a">&#9670;&nbsp;</a></span>max()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static T_FLOAT <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::max </td>
+          <td>(</td>
+          <td class="paramtype">ustd::array&lt; T_FLOAT &gt;&#160;</td>
+          <td class="paramname"><em>ar</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>get maximum value of array ar </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ar</td><td>ustd::array</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a87659d2c7015db3c0a4c68712c901ad6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87659d2c7015db3c0a4c68712c901ad6">&#9670;&nbsp;</a></span>min()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static T_FLOAT <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::min </td>
+          <td>(</td>
+          <td class="paramtype">ustd::array&lt; T_FLOAT &gt;&#160;</td>
+          <td class="paramname"><em>ar</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>get minimum value of array ar </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ar</td><td>ustd::array</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7bb66a1419a34715ab2c064d7a82673b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bb66a1419a34715ab2c064d7a82673b">&#9670;&nbsp;</a></span>operator()()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T_FLOAT <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::operator() </td>
+          <td>(</td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>interpolate f(x), uses interpolate(x) </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>value to be approximated by f(x).</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a4c75b48ff56f517f772e9a4897eda8e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c75b48ff56f517f772e9a4897eda8e6">&#9670;&nbsp;</a></span>rescale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::rescale </td>
+          <td>(</td>
+          <td class="paramtype">ustd::array&lt; T_FLOAT &gt; *&#160;</td>
+          <td class="paramname"><em>par</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_FLOAT *&#160;</td>
+          <td class="paramname"><em>pminX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_FLOAT *&#160;</td>
+          <td class="paramname"><em>pmaxX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>newMin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>newMax</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>inplace rescale an array so that it conforms to newMin and newMax</p>
+<p>Note: current minimum and maximum must be given to pminX and pmaxX (see <a class="el" href="classustd_1_1numericFunction.html#a87659d2c7015db3c0a4c68712c901ad6">min()</a>, <a class="el" href="classustd_1_1numericFunction.html#ac216e858e9c0779aa66b33065474672a">max()</a> ).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ar</td><td>ustd::array to be rescaled </td></tr>
+    <tr><td class="paramname">pminX</td><td>pointer to mimimum value of array-members in ar, will be overwriten with new actual minimum. </td></tr>
+    <tr><td class="paramname">pmaxX</td><td>pointer to maximum value of array-members in ar, will be overwriten with new actual maximum. </td></tr>
+    <tr><td class="paramname">newMin</td><td>The entire array ar is transformed linearily so that the new minimum is newMin </td></tr>
+    <tr><td class="paramname">newMax</td><td>The entire array ar is transformed linearily so that the new maximum is newMax.</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac8b87deb9cc6b766e6ddf335f9dde015"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8b87deb9cc6b766e6ddf335f9dde015">&#9670;&nbsp;</a></span>rescaleX()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::rescaleX </td>
+          <td>(</td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>newMin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>newMax</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Rescale x-axis linearily</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newMin</td><td>new start of x-values </td></tr>
+    <tr><td class="paramname">newMax</td><td>new end of x-values</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a22704822e69d04ae0b38ef81c7b8e822"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22704822e69d04ae0b38ef81c7b8e822">&#9670;&nbsp;</a></span>rescaleY()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T_FLOAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classustd_1_1numericFunction.html">ustd::numericFunction</a>&lt; T_FLOAT &gt;::rescaleY </td>
+          <td>(</td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>newMin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T_FLOAT&#160;</td>
+          <td class="paramname"><em>newMax</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Rescale y-axis linearily</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">newMin</td><td>new start of y-values </td></tr>
+    <tr><td class="paramname">newMax</td><td>new end of y-values</td></tr>
   </table>
   </dd>
 </dl>
