@@ -200,6 +200,7 @@ template <typename T_FLOAT> class numericFunction {
     numericFunction(const T_FLOAT px[], const T_FLOAT py[], unsigned int count,
                     bool _extrapolate = false) {
         /*! Instatiate a numericFunction with point px and py.
+
         @param px array of length count of x-values.
         @param py corresponding array of y-values, f(px[i])=py[i]
         @param count array member count of both px and py
@@ -237,7 +238,7 @@ template <typename T_FLOAT> class numericFunction {
     }
 
     static T_FLOAT min(ustd::array<T_FLOAT> ar) {
-        /* get minimum value of array ar
+        /*! get minimum value of array ar
         @param ar ustd::array
         */
         T_FLOAT minVal = 0.0;
@@ -249,7 +250,7 @@ template <typename T_FLOAT> class numericFunction {
     }
 
     static T_FLOAT max(ustd::array<T_FLOAT> ar) {
-        /* get maximum value of array ar
+        /*! get maximum value of array ar
         @param ar ustd::array
         */
         T_FLOAT maxVal = 0.0;
@@ -262,8 +263,11 @@ template <typename T_FLOAT> class numericFunction {
 
     static void rescale(ustd::array<T_FLOAT> *par, T_FLOAT *pminX, T_FLOAT *pmaxX, T_FLOAT newMin,
                         T_FLOAT newMax) {
-        /* inplace rescale an array so that it conforms to newMin and newMax
-        Note: current minimum and maximum must be given to pminX and pmaxX (see \ref min, \ref max).
+        /*! inplace rescale an array so that it conforms to newMin and newMax
+
+        Note: current minimum and maximum must be given to pminX and pmaxX (see \ref min(), \ref
+        max() ).
+
         @param ar ustd::array to be rescaled
         @param pminX pointer to mimimum value of array-members in ar, will be overwriten with new
         actual minimum.
@@ -294,14 +298,16 @@ template <typename T_FLOAT> class numericFunction {
     }
 
     void rescaleX(T_FLOAT newMin, T_FLOAT newMax) {
-        /* Rescale x-axis linearily
+        /*! Rescale x-axis linearily
+
         @param newMin new start of x-values
         @param newMax new end of x-values
         */
         rescale(&x, &minX, &maxX, newMin, newMax);
     }
     void rescaleY(T_FLOAT newMin, T_FLOAT newMax) {
-        /* Rescale y-axis linearily
+        /*! Rescale y-axis linearily
+
         @param newMin new start of y-values
         @param newMax new end of y-values
         */
@@ -309,10 +315,12 @@ template <typename T_FLOAT> class numericFunction {
     }
 
     static int linsearch(ustd::array<T_FLOAT> &ar, T_FLOAT x) {
-        /* Get largest index element in ar that is smaller than x using bineary search.
+        /*! Get largest index element in ar that is smaller than x using bineary search.
+
         Note: ar must be strictly monotone rising.
+
         @param ar ustd::array
-        @newMax values to be search
+        @param newMax values to be search
         */
         int a = 0, b = ar.length() - 1, n;
         while (b - a > 1) {
@@ -328,7 +336,7 @@ template <typename T_FLOAT> class numericFunction {
     }
 
     T_FLOAT interpol(T_FLOAT xi) {
-        /* Get interpolated value at point f(xi)
+        /*! Get interpolated value at point f(xi)
         @param xi Value of x used to interpole f(x)
         */
         T_FLOAT dx1, dx2, dy;
@@ -367,7 +375,9 @@ template <typename T_FLOAT> class numericFunction {
     }
 
     T_FLOAT operator()(T_FLOAT x) {
-        /* call \ref interpolate(x) */
+        /*! interpolate f(x), uses \ref interpolate(x)
+        @param x value to be approximated by f(x).
+        */
         return interpol(x);
     }
 };
