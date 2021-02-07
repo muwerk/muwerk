@@ -1,7 +1,7 @@
 // i2cdoctor.h -- i2c system diagnostics via messages / mqtt
 #pragma once
 
-#include <Arduino_JSON.H>
+#include <Arduino_JSON.h>
 #ifndef tiny_twi_h
 #include <Wire.h>
 #else
