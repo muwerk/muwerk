@@ -188,7 +188,7 @@ class sensorprocessor {
     3.100000 -> 0.940000
     3.200000 -> 0.880000
     ...
-    ~~~
+~~~
 */
 template <typename T_FLOAT> class numericFunction {
   public:
