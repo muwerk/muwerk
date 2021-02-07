@@ -66,15 +66,15 @@ Sample stat json (single output-line from `Examples/mac-linux`):
         "tdt" : [["task1", 1, 50000, 10, 99240, 7], ["task2", 2, 75000, 7, 34937, 0]]}
 ```
 
-| Field | Explanation                            |
-| ----- | -------------------------------------- |
-| dt    | µsec since last stat sample            |
-| syt   | time in usec used by OS                |
-| apt   | time in usec used by mwerk tasks       |
-| mat   | time in usec for housekeeping          |
-| upt   | uptime of system in seconds            |
-| mem   | free memory, max. INT_MAX for unixoids |
-| tsks  | number of muwerk tasks `tn`            |
+| Field | Explanation                                                                                                                                                                                                                                                                                              |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| dt    | µsec since last stat sample                                                                                                                                                                                                                                                                              |
+| syt   | time in usec used by OS                                                                                                                                                                                                                                                                                  |
+| apt   | time in usec used by mwerk tasks                                                                                                                                                                                                                                                                         |
+| mat   | time in usec for housekeeping                                                                                                                                                                                                                                                                            |
+| upt   | uptime of system in seconds                                                                                                                                                                                                                                                                              |
+| mem   | free memory, max. INT_MAX for unixoids                                                                                                                                                                                                                                                                   |
+| tsks  | number of muwerk tasks `tn`                                                                                                                                                                                                                                                                              |
 | tdt   | array of `tn` entries for each task, containing: task-name `tname` , `tid` taskID of process, `sched_time` scheduling time, number of times task was executed during sample time `cn`, usecs used by this task during this sample `sct`, accumulated usecs task execution was later than scheduled `slt` |
 
 This example shows a `dt=500ms` sample, it has two tasks, `task1`, `id=1` was called
@@ -168,6 +168,11 @@ Related projects:
 
 History
 -------
+* 0.6.x (not yet released)
+  * New: numericFunction approximator class: piece-wise linear approximation
+    of a function defined by a set of points (x1,y1), (x2, y2)...(xn,yn) for
+    calibration etc. 
+  * fix: `doctor.h` and `i2cdoctor.h` hat wrong casing for `Adrduino_JSON.h` include.
 * 0.6.0 (2021-01-30) **Breaking change** for ustd library include: ustd include-files have now `ustd_` prefix to prevent name-clashes with various platform-sdks. [queue.h clashed with ESP8266-Wifi, platform.h clashed with
 RISC-V SDK, hence new names `ustd_queue.h` and `ustd_platform.h` etc.]
 * 0.5.5 (2021-01-29) Support for all platforms with `Doctor` and `I2CDoctor`. 
