@@ -142,7 +142,7 @@ class sensorprocessor {
     }
 };
 
-/*!  \brief muwerk numicFunction class
+/*!  \brief muwerk numericFunction class
  *
  * numericFunktion approximates arbitrary values x of a function f(x) defined
  * by a number points (x,y) using linear approximation to nearest neighbour-points.
