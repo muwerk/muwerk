@@ -172,7 +172,7 @@ History
   * New: numericFunction approximator class: piece-wise linear approximation
     of a function defined by a set of points (x1,y1), (x2, y2)...(xn,yn) for
     calibration etc. 
-  * fix: `doctor.h` and `i2cdoctor.h` hat wrong casing for `Adrduino_JSON.h` include.
+  * fix: `doctor.h` and `i2cdoctor.h` hat wrong casing for `Arduino_JSON.h` include.
 * 0.6.0 (2021-01-30) **Breaking change** for ustd library include: ustd include-files have now `ustd_` prefix to prevent name-clashes with various platform-sdks. [queue.h clashed with ESP8266-Wifi, platform.h clashed with
 RISC-V SDK, hence new names `ustd_queue.h` and `ustd_platform.h` etc.]
 * 0.5.5 (2021-01-29) Support for all platforms with `Doctor` and `I2CDoctor`. 
