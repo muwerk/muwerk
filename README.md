@@ -168,7 +168,7 @@ Related projects:
 
 History
 -------
-* 0.6.x (not yet released)
+* 0.6.1 (2021-02-12)
   * New: numericFunction approximator class: piece-wise linear approximation
     of a function defined by a set of points (x1,y1), (x2, y2)...(xn,yn) for
     calibration etc. 
