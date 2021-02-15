@@ -69,7 +69,7 @@ void split(String &src, char delimiter, array<String> &result) {
     String source = src;
     String sb;
     while (true) {
-#ifdef __UNIXOID__
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
         ind = (int)source.find(delimiter);
 #else
         ind = source.indexOf(delimiter);
@@ -78,7 +78,7 @@ void split(String &src, char delimiter, array<String> &result) {
             result.add(source);
             return;
         } else {
-#ifdef __UNIXOID__
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
             sb = source.substr(0, ind);
             result.add(sb);
             source = source.substr(ind + 1);
@@ -103,7 +103,7 @@ String shift(String &src, char delimiter = ' ', String defValue = "") {
     if (src == "") {
         return defValue;
     }
-#ifdef __UNIXOID__
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
     int ind = (int)src.find(delimiter);
 #else
     int ind = src.indexOf(delimiter);
@@ -113,7 +113,7 @@ String shift(String &src, char delimiter = ' ', String defValue = "") {
         ret = src;
         src = "";
     } else {
-#ifdef __UNIXOID__
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
         ret = src.substr(0, ind);
         src = src.substr(ind + 1);
         // src.trim();
