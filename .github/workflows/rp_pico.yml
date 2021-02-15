@@ -28,7 +28,7 @@ jobs:
       run: sudo apt-get install gcc-arm-none-eabi libnewlib-arm-none-eabi
 
     - name: Get ustd dependencies
-      working-directory: ${{github.workspace}}/Examples/mac-linux
+      working-directory: ${{github.workspace}}/Examples/rp2040
       shell: bash
       run: git clone https://github.com/muwerk/ustd
 
