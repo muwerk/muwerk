@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.13)
 #set("PICO_SDK_PATH" "~/gith/pico-sdk")
 include(pico_sdk_import.cmake)
 
-project(ustd_rp2040)
-include_directories(../.. ../../../../ustd ../../../ustd ustd)
+project(rp2040)
+include_directories(../.. ../../../../ustd ../../../ustd ../../ustd ../ustd ustd)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
