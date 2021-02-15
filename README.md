@@ -6,6 +6,7 @@ muwerk
 [![CMake](https://github.com/muwerk/muwerk/workflows/CMake/badge.svg)](https://github.com/muwerk/muwerk/actions)
 [![PlatformIO CI](https://github.com/muwerk/muwerk/workflows/PlatformIO%20CI/badge.svg)](https://github.com/muwerk/muwerk/actions)
 [![Console](https://github.com/muwerk/muwerk/workflows/Console/badge.svg)](https://github.com/muwerk/muwerk/actions)
+[![Raspberry_Pico](https://github.com/muwerk/muwerk/workflows/Raspberry_Pico/badge.svg)](https://github.com/muwerk/muwerk/actions)
 
 muwerk is a cooperative scheduler with mqtt-like queues.
 
@@ -168,6 +169,7 @@ Related projects:
 
 History
 -------
+* 0.6.2 (2021-02-xx) (not released) Scheduler support for rp2040 Raspberry Pico
 * 0.6.1 (2021-02-12)
   * New: numericFunction approximator class: piece-wise linear approximation
     of a function defined by a set of points (x1,y1), (x2, y2)...(xn,yn) for
