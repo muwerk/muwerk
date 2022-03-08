@@ -45,7 +45,7 @@ jobs:
 
     - name: Install valgrind
       shell: bash
-      run: sudo apt install valgrind
+      run: sudo apt upgrade && sudo apt install valgrind
       
     - name: Test
       working-directory: ${{github.workspace}}/Examples/mac-linux/build
