@@ -587,7 +587,7 @@ class Console {
 #ifdef __ESP__
             DBGF("Setting date to: %4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n",
                  lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min,
-                 lt->tm_sec, newt);
+                 lt->tm_sec, (unsigned long)newt);
 #endif
             time(&newt);
             // invoke myself to display resulting date
