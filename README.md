@@ -169,7 +169,7 @@ Related projects:
 
 History
 -------
-* 0.6.2 (2021-02-xx) (not released) Scheduler support for rp2040 Raspberry Pico
+* 0.6.2 (2021-02-xx) (not yet released) Scheduler support for rp2040 Raspberry Pico, fix console.h data type.
 * 0.6.1 (2021-02-12)
   * New: numericFunction approximator class: piece-wise linear approximation
     of a function defined by a set of points (x1,y1), (x2, y2)...(xn,yn) for
