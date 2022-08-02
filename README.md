@@ -93,7 +93,7 @@ how to parse the statistical information.
 MQTT-like Communications and Architecture Overview
 --------------------------------------------------
 
-A more complete example is available at [blink](https://github.com/muwerk/muwerk/blob/master/Examples/minimal/mu_minimal.cpp)
+A more complete example is available at [blink](https://github.com/muwerk/muwerk/blob/master/Examples/minimal/src/mu_minimal.cpp)
 that shows how tasks can communicate MQTT-style with each other and -- blink a led.
 
 Tasks can communicate with each other using an MQTT-like pub/sub mechanism.
