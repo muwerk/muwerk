@@ -161,11 +161,12 @@ Related projects:
 * [munet](https://github.com/muwerk/munet/blob/master/README.md), modules for network
   connectivity for ESP8266 and ESP32 devices, implements Wireless connection to access point,
   NTP time protocol, OTA over-the-air udpate, MQTT-stack (using [PubSubClient]).
-* [mupplets](https://github.com/muwerk/mupplets/blob/master/README.md), a number of
+* [mupplets](https://github.com/muwerk/mupplet-core), [mupplet-sensor](https://github.com/muwerk/mupplet-sensor) a number of
   implementations for sensors and io-devices. Mupplets implement processes for muwerk and expose
   muwerk's pub/sub interface to allow other mupplets or apps to access the mupplet's functionality.
   Mupplets can be sensor-drivers or or more specialized modules, e.g. clock functionality for a
   led display.
+* [examples](https://github.com/muwerk/examples) show the excellent composability using tasks and messages.
 
 History
 -------
