@@ -6,6 +6,7 @@ muwerk
 [![CMake](https://github.com/muwerk/muwerk/workflows/CMake/badge.svg)](https://github.com/muwerk/muwerk/actions)
 [![PlatformIO CI](https://github.com/muwerk/muwerk/workflows/PlatformIO%20CI/badge.svg)](https://github.com/muwerk/muwerk/actions)
 [![Console](https://github.com/muwerk/muwerk/workflows/Console/badge.svg)](https://github.com/muwerk/muwerk/actions)
+[![Raspberry_Pico](https://github.com/muwerk/muwerk/workflows/Raspberry_Pico/badge.svg)](https://github.com/muwerk/muwerk/actions)
 
 muwerk is a cooperative scheduler with mqtt-like queues.
 
@@ -92,7 +93,7 @@ how to parse the statistical information.
 MQTT-like Communications and Architecture Overview
 --------------------------------------------------
 
-A more complete example is available at [blink](https://github.com/muwerk/muwerk/blob/master/Examples/minimal/mu_minimal.cpp)
+A more complete example is available at [blink](https://github.com/muwerk/muwerk/blob/master/Examples/minimal/src/mu_minimal.cpp)
 that shows how tasks can communicate MQTT-style with each other and -- blink a led.
 
 Tasks can communicate with each other using an MQTT-like pub/sub mechanism.
@@ -160,14 +161,16 @@ Related projects:
 * [munet](https://github.com/muwerk/munet/blob/master/README.md), modules for network
   connectivity for ESP8266 and ESP32 devices, implements Wireless connection to access point,
   NTP time protocol, OTA over-the-air udpate, MQTT-stack (using [PubSubClient]).
-* [mupplets](https://github.com/muwerk/mupplets/blob/master/README.md), a number of
+* [mupplets](https://github.com/muwerk/mupplet-core), [mupplet-sensor](https://github.com/muwerk/mupplet-sensor) a number of
   implementations for sensors and io-devices. Mupplets implement processes for muwerk and expose
   muwerk's pub/sub interface to allow other mupplets or apps to access the mupplet's functionality.
   Mupplets can be sensor-drivers or or more specialized modules, e.g. clock functionality for a
   led display.
+* [examples](https://github.com/muwerk/examples) show the excellent composability using tasks and messages.
 
 History
 -------
+* 0.6.2 (2021-02-xx) (not yet released) Scheduler support for rp2040 Raspberry Pico, fix console.h data type.
 * 0.6.1 (2021-02-12)
   * New: numericFunction approximator class: piece-wise linear approximation
     of a function defined by a set of points (x1,y1), (x2, y2)...(xn,yn) for

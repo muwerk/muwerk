@@ -235,8 +235,6 @@ class Console {
         } else if (cmd == "mem") {
             cmd_mem();
 #endif
-        } else if (cmd == "ps") {
-            cmd_ps();
 #ifdef USTD_FEATURE_CLK_READ
         } else if (cmd == "date") {
             cmd_date();
@@ -261,7 +259,7 @@ class Console {
     }
 
     void cmd_help() {
-        String help = "commands: help, pub, sub, uname, uptime, ps, info";
+        String help = "commands: help, pub, sub, uname, uptime, info";
 #if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         help += ", mem";
 #endif
@@ -352,31 +350,6 @@ class Console {
             }
         }
         outputf("%2.2lu:%2.2lu:%2.2lu\r\n", hours, minutes, seconds);
-    }
-
-    void cmd_ps() {
-        printer->println();
-#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
-        printer->println("Scheduler Information:");
-        printer->println("----------------------");
-#endif
-        printer->println("System Time: " + String(pSched->systemTime));
-        printer->println("App Time: " + String(pSched->appTime));
-        printer->println("Running Tasks: " + String(pSched->taskList.length()));
-        if (pSched->taskList.length()) {
-            printer->println();
-            printer->println("  TID    Interval       Count    CPU Time   Late Time  Name");
-#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
-            printer->println("----------------------------------------------------------------");
-#endif
-        }
-        for (unsigned int i = 0; i < pSched->taskList.length(); i++) {
-            outputf("%5i  %10lu  %10lu  %10lu  %10lu  ", pSched->taskList[i].taskID,
-                    pSched->taskList[i].minMicros, pSched->taskList[i].callCount,
-                    pSched->taskList[i].cpuTime, pSched->taskList[i].lateTime);
-            printer->println(pSched->taskList[i].szName);
-        }
-        printer->println();
     }
 
 #if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
@@ -614,7 +587,7 @@ class Console {
 #ifdef __ESP__
             DBGF("Setting date to: %4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\n",
                  lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min,
-                 lt->tm_sec, newt);
+                 lt->tm_sec, (unsigned long)newt);
 #endif
             time(&newt);
             // invoke myself to display resulting date

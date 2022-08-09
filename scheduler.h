@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-#if defined(__ESP__) || defined(__ESP32__) || defined(__UNIXOID__)
+#if defined(__ESP__) || defined(__ESP32__) || defined(__UNIXOID__) || defined(__RP_PICO__)
 #include <functional>
 #endif
 
@@ -42,7 +42,7 @@ enum T_MSGTYPE {
 };
 
 //! \brief Scheduler Task Function
-#if defined(__ESP__) || defined(__UNIXOID__)
+#if defined(__ESP__) || defined(__ESP32__) || defined(__UNIXOID__) || defined(__RP_PICO__)
 typedef std::function<void()> T_TASK;
 #elif defined(__ATTINY__)
 typedef void (*T_TASK)();
@@ -57,7 +57,7 @@ typedef struct {
 } T_MSG;
 
 //! \brief Scheduler Subscription Function
-#if defined(__ESP__) || defined(__UNIXOID__)
+#if defined(__ESP__) || defined(__ESP32__) || defined(__UNIXOID__) || defined(__RP_PICO__)
 typedef std::function<void(String topic, String msg, String originator)> T_SUBS;
 #elif defined(__ATTINY__)
 typedef void (*T_SUBS)(String topic, String msg, String originator);
@@ -261,7 +261,7 @@ class Scheduler {
          * subscriptions can contain the MQTT wildcards '#' and '+'.
          * @param pubstr Topic that is being published. No wildcards allowed.
          * @param substr Topics that are subscribed, allows MQTT wildcards '#'
-         * and '*'.
+         * and '+'.
          * @return true, if pubstr matches substr, false otherwise.
          */
         if (pubstr == substr)

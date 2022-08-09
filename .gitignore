@@ -1,5 +1,6 @@
-Examples/mac-linux/build
-Examples/mac-linux/Build
+build/
+Build/
 lsp.log
 .pio/
+.ccls-cache/
 
