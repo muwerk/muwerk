@@ -261,7 +261,7 @@ class Scheduler {
          * subscriptions can contain the MQTT wildcards '#' and '+'.
          * @param pubstr Topic that is being published. No wildcards allowed.
          * @param substr Topics that are subscribed, allows MQTT wildcards '#'
-         * and '*'.
+         * and '+'.
          * @return true, if pubstr matches substr, false otherwise.
          */
         if (pubstr == substr)
