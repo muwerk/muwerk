@@ -140,6 +140,26 @@ class sensorprocessor {
         lastVal = SENSOR_VALUE_INVALID;
         last = millis();
     }
+
+    void update(unsigned int _smoothInterval = 5, int unsigned _pollTimeSec = 60,
+                    double _eps = 0.1) {
+        /*! Update filter parameters and reset.
+         *
+         * Note: this is equivalent of recreating a new instance.
+         *
+        @param _smoothInterval The size of the interval of sensor value history
+        that are being averaged using exponential decay.
+        @param _pollTimeSec If this is !=0, a valid sensor reading is generated
+        at least every pollTimeSec, regardless of value changes.
+        @param _eps The minimal change required for the smoothed sensor value in
+        order to create a new valid reading. Useful for supressing small
+        fluctuations.
+        */
+        smoothInterval = _smoothInterval;
+        pollTimeSec = _pollTimeSec;
+        eps = _eps;
+        reset();
+    }
 };
 
 /*!  \brief muwerk numericFunction class
