@@ -89,6 +89,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4bf344587d3eb2e063cf0741c5554377"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a071c31a8633d4f5cc0cb3b8509c8e1a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1sensorprocessor.html#a071c31a8633d4f5cc0cb3b8509c8e1a7">reset</a> ()</td></tr>
 <tr class="separator:a071c31a8633d4f5cc0cb3b8509c8e1a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6dfdc6b92bb30f947dab9d24dbd4edb7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1sensorprocessor.html#a6dfdc6b92bb30f947dab9d24dbd4edb7">update</a> (unsigned int _smoothInterval=5, int unsigned _pollTimeSec=60, double _eps=0.1)</td></tr>
+<tr class="separator:a6dfdc6b92bb30f947dab9d24dbd4edb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >muwerk sensorprocessor class </p>
@@ -260,6 +262,58 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p >Delete the filter history</p>
+
+</div>
+</div>
+<a id="a6dfdc6b92bb30f947dab9d24dbd4edb7" name="a6dfdc6b92bb30f947dab9d24dbd4edb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6dfdc6b92bb30f947dab9d24dbd4edb7">&#9670;&nbsp;</a></span>update()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ustd::sensorprocessor::update </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>_smoothInterval</em> = <code>5</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int unsigned&#160;</td>
+          <td class="paramname"><em>_pollTimeSec</em> = <code>60</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>_eps</em> = <code>0.1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Update filter parameters and reset.</p>
+<p >Note: this is equivalent of recreating a new instance.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_smoothInterval</td><td>The size of the interval of sensor value history that are being averaged using exponential decay. </td></tr>
+    <tr><td class="paramname">_pollTimeSec</td><td>If this is !=0, a valid sensor reading is generated at least every pollTimeSec, regardless of value changes. </td></tr>
+    <tr><td class="paramname">_eps</td><td>The minimal change required for the smoothed sensor value in order to create a new valid reading. Useful for supressing small fluctuations.</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
