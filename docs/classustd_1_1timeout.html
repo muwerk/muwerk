@@ -106,7 +106,7 @@ Public Member Functions</h2></td></tr>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;scheduler.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;timeout&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_class" href="classustd_1_1Scheduler.html">ustd::Scheduler</a> sched;</div>
+<div class="line"><a class="code hl_class" href="classustd_1_1_scheduler.html">ustd::Scheduler</a> sched;</div>
 <div class="line"><a class="code hl_class" href="classustd_1_1timeout.html">ustd::timeout</a>   connectTimeout = 15000; <span class="comment">// 15 seconds in millliseconds</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> appLoop();</div>
@@ -135,13 +135,13 @@ Public Member Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> setup() {</div>
 <div class="line">    <span class="comment">// Create a task for the main application loop code:</span></div>
-<div class="line">    <span class="keywordtype">int</span> tID = sched.<a class="code hl_function" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(appLoop, <span class="stringliteral">&quot;main&quot;</span>);</div>
+<div class="line">    <span class="keywordtype">int</span> tID = sched.<a class="code hl_function" href="classustd_1_1_scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(appLoop, <span class="stringliteral">&quot;main&quot;</span>);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Create a second task that is called every 50ms</span></div>
-<div class="line">    sched.<a class="code hl_function" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(someTask, <span class="stringliteral">&quot;someTask&quot;</span>, 50000L);</div>
+<div class="line">    sched.<a class="code hl_function" href="classustd_1_1_scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(someTask, <span class="stringliteral">&quot;someTask&quot;</span>, 50000L);</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:199</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html_a23ee4eba2bc076d8cd69328225d16eea"><div class="ttname"><a href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">ustd::Scheduler::add</a></div><div class="ttdeci">int add(T_TASK task, String name, unsigned long minMicroSecs=100000L, T_PRIO prio=PRIO_NORMAL)</div><div class="ttdef"><b>Definition:</b> scheduler.h:475</div></div>
+<div class="ttc" id="aclassustd_1_1_scheduler_html"><div class="ttname"><a href="classustd_1_1_scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:199</div></div>
+<div class="ttc" id="aclassustd_1_1_scheduler_html_a23ee4eba2bc076d8cd69328225d16eea"><div class="ttname"><a href="classustd_1_1_scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">ustd::Scheduler::add</a></div><div class="ttdeci">int add(T_TASK task, String name, unsigned long minMicroSecs=100000L, T_PRIO prio=PRIO_NORMAL)</div><div class="ttdef"><b>Definition:</b> scheduler.h:475</div></div>
 <div class="ttc" id="aclassustd_1_1timeout_html"><div class="ttname"><a href="classustd_1_1timeout.html">ustd::timeout</a></div><div class="ttdoc">muwerk Timeout Class</div><div class="ttdef"><b>Definition:</b> timeout.h:59</div></div>
 <div class="ttc" id="aclassustd_1_1timeout_html_a39d9b7415d01e07b77106e0c7771da5a"><div class="ttname"><a href="classustd_1_1timeout.html#a39d9b7415d01e07b77106e0c7771da5a">ustd::timeout::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdef"><b>Definition:</b> timeout.h:94</div></div>
 <div class="ttc" id="aclassustd_1_1timeout_html_a4b0f69ced59e3fc738ec1384bc5387bd"><div class="ttname"><a href="classustd_1_1timeout.html#a4b0f69ced59e3fc738ec1384bc5387bd">ustd::timeout::test</a></div><div class="ttdeci">bool test() const</div><div class="ttdef"><b>Definition:</b> timeout.h:87</div></div>

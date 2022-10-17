@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.5"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>muwerk Scheduler Library: ustd::I2CDoctor Class Reference</title>
+<title>muwerk Scheduler Library: ustd::Doctor Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -70,41 +70,41 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceustd.html">ustd</a></li><li class="navelem"><a class="el" href="classustd_1_1I2CDoctor.html">I2CDoctor</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceustd.html">ustd</a></li><li class="navelem"><a class="el" href="classustd_1_1_doctor.html">Doctor</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="classustd_1_1I2CDoctor-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">ustd::I2CDoctor Class Reference</div></div>
+<a href="classustd_1_1_doctor-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">ustd::Doctor Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>muwerk <a class="el" href="classustd_1_1I2CDoctor.html" title="muwerk I2CDoctor Class">I2CDoctor</a> Class  
- <a href="classustd_1_1I2CDoctor.html#details">More...</a></p>
+<p>muwerk <a class="el" href="classustd_1_1_doctor.html" title="muwerk Doctor Class">Doctor</a> Class  
+ <a href="classustd_1_1_doctor.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="i2cdoctor_8h_source.html">i2cdoctor.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="doctor_8h_source.html">doctor.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5b3a53e02ae64e5d74654fa8d638fe4e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1I2CDoctor.html#a5b3a53e02ae64e5d74654fa8d638fe4e">I2CDoctor</a> (String name=&quot;doctor&quot;)</td></tr>
-<tr class="separator:a5b3a53e02ae64e5d74654fa8d638fe4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a589f8a5287b721ace9aef96f9acc9601"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1I2CDoctor.html#a589f8a5287b721ace9aef96f9acc9601">begin</a> (<a class="el" href="classustd_1_1Scheduler.html">Scheduler</a> *_pSched, TwoWire *_pWire)</td></tr>
-<tr class="separator:a589f8a5287b721ace9aef96f9acc9601"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2893783d7968eae437cd9e911e3170ce"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_doctor.html#a2893783d7968eae437cd9e911e3170ce">Doctor</a> (String name=&quot;doctor&quot;)</td></tr>
+<tr class="separator:a2893783d7968eae437cd9e911e3170ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8672efce03abce6b40de27510d51e03c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_doctor.html#a8672efce03abce6b40de27510d51e03c">begin</a> (<a class="el" href="classustd_1_1_scheduler.html">Scheduler</a> *_pSched)</td></tr>
+<tr class="separator:a8672efce03abce6b40de27510d51e03c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >muwerk <a class="el" href="classustd_1_1I2CDoctor.html" title="muwerk I2CDoctor Class">I2CDoctor</a> Class </p>
-<p >The <a class="el" href="classustd_1_1I2CDoctor.html" title="muwerk I2CDoctor Class">I2CDoctor</a> class implements a remote diagnostics for i2c-devices interface via pub/sub messages. If the system is connected to MQTT, any MQTT client can be used to access diagnostics.</p>
-<p >publish: <code>hostname/doctor/i2cinfo/get</code> -&gt; <code>hostname/doctor/i2cinfo</code>, json list of used i2c-ports in the system.</p>
-<h2>Sample of adding the i2c-doctor:</h2>
+<div class="textblock"><p >muwerk <a class="el" href="classustd_1_1_doctor.html" title="muwerk Doctor Class">Doctor</a> Class </p>
+<p >The doctor class implements a remote diagnostics interface via pub/sub messages. If the system is connected to MQTT, any MQTT client can be used to access diagnostics.</p>
+<p >publish: <code>hostname/doctor/memory/get</code> -&gt; <code>hostname/doctor/memory</code>, msgs=free memory. publish: <code>hostname/doctor/timeinfo/get</code> -&gt; <code>hostname/doctor/timeinfo</code>, json time related information. publish: <code>hostname/doctor/diagnostics/get</code> -&gt; <code>hostname/doctor/diagnostics</code>, json system related information. publish: <code>hostname/doctor/restart</code> -&gt; restarts system.</p>
+<h2>Sample of adding the doctor:</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;scheduler.h&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &lt;doctor.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;console.h&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_class" href="classustd_1_1Scheduler.html">ustd::Scheduler</a> sched( 10, 16, 32 );</div>
-<div class="line"><a class="code hl_class" href="classustd_1_1I2CDoctor.html">ustd::I2CDoctor</a> i2cdoc;</div>
+<div class="line"><a class="code hl_class" href="classustd_1_1_scheduler.html">ustd::Scheduler</a> sched( 10, 16, 32 );</div>
+<div class="line"><a class="code hl_class" href="classustd_1_1_doctor.html">ustd::Doctor</a> doc(<span class="stringliteral">&quot;doctor&quot;</span>);</div>
 <div class="line">ustd::Net net(LED_BUILTIN);</div>
 <div class="line">ustd::Mqtt mqtt;</div>
 <div class="line"> </div>
@@ -114,19 +114,18 @@ Public Member Functions</h2></td></tr>
 <div class="line">    net.begin(&amp;sched);</div>
 <div class="line">    mqtt.begin(&amp;sched);</div>
 <div class="line"> </div>
-<div class="line">    i2cdoc.<a class="code hl_function" href="classustd_1_1I2CDoctor.html#a589f8a5287b721ace9aef96f9acc9601">begin</a>(&amp;sched);</div>
+<div class="line">    doc.begin(&amp;sched);</div>
 <div class="line">    <span class="keywordtype">int</span> tID = sched.add( apploop, <span class="stringliteral">&quot;main&quot;</span>, 50000 );</div>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> loop() {</div>
 <div class="line">    sched.loop();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassustd_1_1I2CDoctor_html"><div class="ttname"><a href="classustd_1_1I2CDoctor.html">ustd::I2CDoctor</a></div><div class="ttdoc">muwerk I2CDoctor Class</div><div class="ttdef"><b>Definition:</b> i2cdoctor.h:54</div></div>
-<div class="ttc" id="aclassustd_1_1I2CDoctor_html_a589f8a5287b721ace9aef96f9acc9601"><div class="ttname"><a href="classustd_1_1I2CDoctor.html#a589f8a5287b721ace9aef96f9acc9601">ustd::I2CDoctor::begin</a></div><div class="ttdeci">void begin(Scheduler *_pSched, TwoWire *_pWire)</div><div class="ttdef"><b>Definition:</b> i2cdoctor.h:78</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:199</div></div>
+<div class="ttc" id="aclassustd_1_1_doctor_html"><div class="ttname"><a href="classustd_1_1_doctor.html">ustd::Doctor</a></div><div class="ttdoc">muwerk Doctor Class</div><div class="ttdef"><b>Definition:</b> doctor.h:53</div></div>
+<div class="ttc" id="aclassustd_1_1_scheduler_html"><div class="ttname"><a href="classustd_1_1_scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:199</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a5b3a53e02ae64e5d74654fa8d638fe4e" name="a5b3a53e02ae64e5d74654fa8d638fe4e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5b3a53e02ae64e5d74654fa8d638fe4e">&#9670;&#160;</a></span>I2CDoctor()</h2>
+<a id="a2893783d7968eae437cd9e911e3170ce" name="a2893783d7968eae437cd9e911e3170ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2893783d7968eae437cd9e911e3170ce">&#9670;&#160;</a></span>Doctor()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -135,7 +134,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">ustd::I2CDoctor::I2CDoctor </td>
+          <td class="memname">ustd::Doctor::Doctor </td>
           <td>(</td>
           <td class="paramtype">String&#160;</td>
           <td class="paramname"><em>name</em> = <code>&quot;doctor&quot;</code></td><td>)</td>
@@ -148,13 +147,13 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Instantiates an <a class="el" href="classustd_1_1I2CDoctor.html" title="muwerk I2CDoctor Class">I2CDoctor</a> Task</p>
+<p >Instantiates a <a class="el" href="classustd_1_1_doctor.html" title="muwerk Doctor Class">Doctor</a> Task</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a589f8a5287b721ace9aef96f9acc9601" name="a589f8a5287b721ace9aef96f9acc9601"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a589f8a5287b721ace9aef96f9acc9601">&#9670;&#160;</a></span>begin()</h2>
+<a id="a8672efce03abce6b40de27510d51e03c" name="a8672efce03abce6b40de27510d51e03c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8672efce03abce6b40de27510d51e03c">&#9670;&#160;</a></span>begin()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -163,21 +162,11 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void ustd::I2CDoctor::begin </td>
+          <td class="memname">void ustd::Doctor::begin </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classustd_1_1Scheduler.html">Scheduler</a> *&#160;</td>
-          <td class="paramname"><em>_pSched</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype"><a class="el" href="classustd_1_1_scheduler.html">Scheduler</a> *&#160;</td>
+          <td class="paramname"><em>_pSched</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">TwoWire *&#160;</td>
-          <td class="paramname"><em>_pWire</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -186,12 +175,10 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Starts the <a class="el" href="classustd_1_1Doctor.html" title="muwerk Doctor Class">Doctor</a> Task</p>
-<p >Wire.begin() must have been called before calling this. ESP32 will crash otherwise.</p>
+<p >Starts the <a class="el" href="classustd_1_1_doctor.html" title="muwerk Doctor Class">Doctor</a> Task</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">_pSched</td><td>Pointer to the muwerk scheduler. </td></tr>
-    <tr><td class="paramname">_pWire</td><td>Pointer to Wire-instance, use &amp;Wire for default</td></tr>
+    <tr><td class="paramname">_pSched</td><td>Pointer to the muwerk scheduler.</td></tr>
   </table>
   </dd>
 </dl>
@@ -199,7 +186,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li><a class="el" href="i2cdoctor_8h_source.html">i2cdoctor.h</a></li>
+<li><a class="el" href="doctor_8h_source.html">doctor.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

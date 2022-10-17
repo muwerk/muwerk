@@ -101,11 +101,11 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >muwerk HeartBeat Class </p>
-<p >Implements a helper class for handling periodical operations at fixed intervals in scheduled tasks. The typical use case is in conjunction with a <a class="el" href="classustd_1_1Scheduler.html">ustd::Scheduler</a> task: let's assume you have an operation that has to be performed every 15 seconds.</p>
+<p >Implements a helper class for handling periodical operations at fixed intervals in scheduled tasks. The typical use case is in conjunction with a <a class="el" href="classustd_1_1_scheduler.html">ustd::Scheduler</a> task: let's assume you have an operation that has to be performed every 15 seconds.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;scheduler.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;heartbeat.h&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_class" href="classustd_1_1Scheduler.html">ustd::Scheduler</a> sched;</div>
+<div class="line"><a class="code hl_class" href="classustd_1_1_scheduler.html">ustd::Scheduler</a> sched;</div>
 <div class="line"><a class="code hl_class" href="classustd_1_1heartbeat.html">ustd::heartbeat</a> periodical = 15000; <span class="comment">// 15 seconds in millliseconds</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> appLoop();</div>
@@ -123,13 +123,13 @@ Public Member Functions</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> setup() {</div>
 <div class="line">    <span class="comment">// Create a task for the main application loop code:</span></div>
-<div class="line">    <span class="keywordtype">int</span> tID = sched.<a class="code hl_function" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(appLoop, <span class="stringliteral">&quot;main&quot;</span>);</div>
+<div class="line">    <span class="keywordtype">int</span> tID = sched.<a class="code hl_function" href="classustd_1_1_scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(appLoop, <span class="stringliteral">&quot;main&quot;</span>);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Create a second task that is called every 50ms</span></div>
-<div class="line">    sched.<a class="code hl_function" href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(someTask, <span class="stringliteral">&quot;someTask&quot;</span>, 50000L);</div>
+<div class="line">    sched.<a class="code hl_function" href="classustd_1_1_scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">add</a>(someTask, <span class="stringliteral">&quot;someTask&quot;</span>, 50000L);</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:199</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html_a23ee4eba2bc076d8cd69328225d16eea"><div class="ttname"><a href="classustd_1_1Scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">ustd::Scheduler::add</a></div><div class="ttdeci">int add(T_TASK task, String name, unsigned long minMicroSecs=100000L, T_PRIO prio=PRIO_NORMAL)</div><div class="ttdef"><b>Definition:</b> scheduler.h:475</div></div>
+<div class="ttc" id="aclassustd_1_1_scheduler_html"><div class="ttname"><a href="classustd_1_1_scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:199</div></div>
+<div class="ttc" id="aclassustd_1_1_scheduler_html_a23ee4eba2bc076d8cd69328225d16eea"><div class="ttname"><a href="classustd_1_1_scheduler.html#a23ee4eba2bc076d8cd69328225d16eea">ustd::Scheduler::add</a></div><div class="ttdeci">int add(T_TASK task, String name, unsigned long minMicroSecs=100000L, T_PRIO prio=PRIO_NORMAL)</div><div class="ttdef"><b>Definition:</b> scheduler.h:475</div></div>
 <div class="ttc" id="aclassustd_1_1heartbeat_html"><div class="ttname"><a href="classustd_1_1heartbeat.html">ustd::heartbeat</a></div><div class="ttdoc">muwerk HeartBeat Class</div><div class="ttdef"><b>Definition:</b> heartbeat.h:47</div></div>
 <div class="ttc" id="aclassustd_1_1heartbeat_html_a013a24d135b2cee7ffc6bd8b2d23e318"><div class="ttname"><a href="classustd_1_1heartbeat.html#a013a24d135b2cee7ffc6bd8b2d23e318">ustd::heartbeat::beat</a></div><div class="ttdeci">unsigned long beat()</div><div class="ttdef"><b>Definition:</b> heartbeat.h:75</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>

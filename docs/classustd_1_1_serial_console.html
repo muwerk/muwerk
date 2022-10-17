@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.5"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>muwerk Scheduler Library: ustd::Console Class Reference</title>
+<title>muwerk Scheduler Library: ustd::SerialConsole Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -70,87 +70,53 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceustd.html">ustd</a></li><li class="navelem"><a class="el" href="classustd_1_1Console.html">Console</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceustd.html">ustd</a></li><li class="navelem"><a class="el" href="classustd_1_1_serial_console.html">SerialConsole</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="classustd_1_1Console-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">ustd::Console Class Reference</div></div>
+<a href="classustd_1_1_serial_console-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">ustd::SerialConsole Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>muwerk <a class="el" href="classustd_1_1Console.html" title="muwerk Console Class">Console</a> Class  
- <a href="classustd_1_1Console.html#details">More...</a></p>
+<p>muwerk Serial <a class="el" href="classustd_1_1_console.html" title="muwerk Console Class">Console</a> Class  
+ <a href="classustd_1_1_serial_console.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="console_8h_source.html">console.h</a>&gt;</code></p>
 <div class="dynheader">
-Inheritance diagram for ustd::Console:</div>
+Inheritance diagram for ustd::SerialConsole:</div>
 <div class="dyncontent">
  <div class="center">
-  <img src="classustd_1_1Console.png" usemap="#ustd::Console_map" alt=""/>
-  <map id="ustd::Console_map" name="ustd::Console_map">
-<area href="classustd_1_1SerialConsole.html" title="muwerk Serial Console Class" alt="ustd::SerialConsole" shape="rect" coords="0,56,120,80"/>
+  <img src="classustd_1_1_serial_console.png" usemap="#ustd::SerialConsole_map" alt=""/>
+  <map id="ustd::SerialConsole_map" name="ustd::SerialConsole_map">
+<area href="classustd_1_1_console.html" title="muwerk Console Class" alt="ustd::Console" shape="rect" coords="0,0,120,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab16a12a7f94b735aa2c34fa79737bc24"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#ab16a12a7f94b735aa2c34fa79737bc24">Console</a> (String name, Print *printer)</td></tr>
-<tr class="separator:ab16a12a7f94b735aa2c34fa79737bc24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a586ee89c420f3ee0fd8e7556d9dd7bff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a586ee89c420f3ee0fd8e7556d9dd7bff">execute</a> (String command)</td></tr>
+<tr class="memitem:ae19d6543e30122f16069bdba3e449ccf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_serial_console.html#ae19d6543e30122f16069bdba3e449ccf">SerialConsole</a> ()</td></tr>
+<tr class="separator:ae19d6543e30122f16069bdba3e449ccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a978374074f23724f7cc4854c0f6492a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_serial_console.html#a978374074f23724f7cc4854c0f6492a0">begin</a> (<a class="el" href="classustd_1_1_scheduler.html">Scheduler</a> *_pSched, String initialCommand=&quot;&quot;, unsigned long pollRate=60)</td></tr>
+<tr class="separator:a978374074f23724f7cc4854c0f6492a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6fe8c9d6ff8fce0f3671dba35ceb3a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_serial_console.html#ac6fe8c9d6ff8fce0f3671dba35ceb3a7">begin</a> (<a class="el" href="classustd_1_1_scheduler.html">Scheduler</a> *_pSched, Stream *pSerial, String initialCommand=&quot;&quot;, unsigned long pollRate=60)</td></tr>
+<tr class="separator:ac6fe8c9d6ff8fce0f3671dba35ceb3a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a586ee89c420f3ee0fd8e7556d9dd7bff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_console.html#a586ee89c420f3ee0fd8e7556d9dd7bff">execute</a> (String command)</td></tr>
 <tr class="separator:a586ee89c420f3ee0fd8e7556d9dd7bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a376b939e3721419b7c16a7db1153fe7a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">extend</a> (String command, <a class="el" href="namespaceustd.html#a43414d402e7b537717c6eb1dddd5ae38">T_COMMANDFN</a> handler)</td></tr>
+<tr class="memitem:a376b939e3721419b7c16a7db1153fe7a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_console.html#a376b939e3721419b7c16a7db1153fe7a">extend</a> (String command, <a class="el" href="namespaceustd.html#a43414d402e7b537717c6eb1dddd5ae38">T_COMMANDFN</a> handler)</td></tr>
 <tr class="separator:a376b939e3721419b7c16a7db1153fe7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10f5616d880010af308a29c08a9c46ad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a10f5616d880010af308a29c08a9c46ad">unextend</a> (String command)</td></tr>
+<tr class="memitem:a10f5616d880010af308a29c08a9c46ad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_console.html#a10f5616d880010af308a29c08a9c46ad">unextend</a> (String command)</td></tr>
 <tr class="separator:a10f5616d880010af308a29c08a9c46ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0870092447e2ed3f89707446aed5d7ff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1Console.html#a0870092447e2ed3f89707446aed5d7ff">unextend</a> (int commandHandle)</td></tr>
+<tr class="memitem:a0870092447e2ed3f89707446aed5d7ff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classustd_1_1_console.html#a0870092447e2ed3f89707446aed5d7ff">unextend</a> (int commandHandle)</td></tr>
 <tr class="separator:a0870092447e2ed3f89707446aed5d7ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >muwerk <a class="el" href="classustd_1_1Console.html" title="muwerk Console Class">Console</a> Class </p>
-<p >The console class implements a simple but effective console shell that is the base for <a class="el" href="classustd_1_1SerialConsole.html">ustd::SerialConsole</a> and can also be used for implementing shells over other transport mechanisms. The simple interpreter has the follwing builtin commands:</p>
-<p >help: displays a list of supported commands reboot: restarts the device sub: add or remove message subscriptions shown on console pub: allows to publish a message debug: enable or disable wifi diagnostics (if available) wifi: show wifi status (if available) info: show system status</p>
-<p >If a file system is available (usually when compiling for ESP8266 or ESP32) there are additional builtin commands available:</p>
-<p >ls: display directory contents cat: outputs the specified files rm: removes the specified files jf: read, write or delete values in json files</p>
-<p >The commandline parser can be extended (see example below)</p>
-<h2>Sample of a serial console with extension</h2>
-<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;scheduler.h&quot;</span></div>
-<div class="line"><span class="preprocessor">#include &quot;console.h&quot;</span></div>
-<div class="line"> </div>
-<div class="line"><a class="code hl_class" href="classustd_1_1Scheduler.html">ustd::Scheduler</a> sched( 10, 16, 32 );</div>
-<div class="line"><a class="code hl_class" href="classustd_1_1SerialConsole.html">ustd::SerialConsole</a> con;</div>
-<div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> apploop() {}</div>
-<div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> setup() {</div>
-<div class="line">    <span class="comment">// initialize the serial interface</span></div>
-<div class="line">    Serial.<a class="code hl_function" href="classustd_1_1SerialConsole.html#a978374074f23724f7cc4854c0f6492a0">begin</a>( 115200 );</div>
-<div class="line"> </div>
-<div class="line">    <span class="comment">// extend console</span></div>
-<div class="line">    con.<a class="code hl_function" href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">extend</a>( <span class="stringliteral">&quot;hurz&quot;</span>, []( String cmd, String args ) {</div>
-<div class="line">        printer-&gt;println( <span class="stringliteral">&quot;Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!&quot;</span> );</div>
-<div class="line">        <span class="keywordflow">while</span> ( args.length() ) {</div>
-<div class="line">            String arg = ustd::shift( args );</div>
-<div class="line">            printer-&gt;println( arg + <span class="stringliteral">&quot;   HURZ!&quot;</span> );</div>
-<div class="line">        }</div>
-<div class="line">    } );</div>
-<div class="line"> </div>
-<div class="line">    con.<a class="code hl_function" href="classustd_1_1SerialConsole.html#a978374074f23724f7cc4854c0f6492a0">begin</a>( &amp;sched );</div>
-<div class="line">    <span class="keywordtype">int</span> tID = sched.add( apploop, <span class="stringliteral">&quot;main&quot;</span>, 50000 );</div>
-<div class="line">}</div>
-<div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> loop() {</div>
-<div class="line">    sched.loop();</div>
-<div class="line">}</div>
-<div class="ttc" id="aclassustd_1_1Console_html_a376b939e3721419b7c16a7db1153fe7a"><div class="ttname"><a href="classustd_1_1Console.html#a376b939e3721419b7c16a7db1153fe7a">ustd::Console::extend</a></div><div class="ttdeci">int extend(String command, T_COMMANDFN handler)</div><div class="ttdef"><b>Definition:</b> console.h:136</div></div>
-<div class="ttc" id="aclassustd_1_1Scheduler_html"><div class="ttname"><a href="classustd_1_1Scheduler.html">ustd::Scheduler</a></div><div class="ttdoc">muwerk Scheduler Class</div><div class="ttdef"><b>Definition:</b> scheduler.h:199</div></div>
-<div class="ttc" id="aclassustd_1_1SerialConsole_html"><div class="ttname"><a href="classustd_1_1SerialConsole.html">ustd::SerialConsole</a></div><div class="ttdoc">muwerk Serial Console Class</div><div class="ttdef"><b>Definition:</b> console.h:883</div></div>
-<div class="ttc" id="aclassustd_1_1SerialConsole_html_a978374074f23724f7cc4854c0f6492a0"><div class="ttname"><a href="classustd_1_1SerialConsole.html#a978374074f23724f7cc4854c0f6492a0">ustd::SerialConsole::begin</a></div><div class="ttdeci">void begin(Scheduler *_pSched, String initialCommand=&quot;&quot;, unsigned long pollRate=60)</div><div class="ttdef"><b>Definition:</b> console.h:901</div></div>
-</div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ab16a12a7f94b735aa2c34fa79737bc24" name="ab16a12a7f94b735aa2c34fa79737bc24"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab16a12a7f94b735aa2c34fa79737bc24">&#9670;&#160;</a></span>Console()</h2>
+<div class="textblock"><p >muwerk Serial <a class="el" href="classustd_1_1_console.html" title="muwerk Console Class">Console</a> Class </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ae19d6543e30122f16069bdba3e449ccf" name="ae19d6543e30122f16069bdba3e449ccf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae19d6543e30122f16069bdba3e449ccf">&#9670;&#160;</a></span>SerialConsole()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -159,16 +125,55 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">ustd::Console::Console </td>
+          <td class="memname">ustd::SerialConsole::SerialConsole </td>
           <td>(</td>
-          <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>name</em>, </td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Instantiate a Serial <a class="el" href="classustd_1_1_console.html" title="muwerk Console Class">Console</a></p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac6fe8c9d6ff8fce0f3671dba35ceb3a7" name="ac6fe8c9d6ff8fce0f3671dba35ceb3a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6fe8c9d6ff8fce0f3671dba35ceb3a7">&#9670;&#160;</a></span>begin() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ustd::SerialConsole::begin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classustd_1_1_scheduler.html">Scheduler</a> *&#160;</td>
+          <td class="paramname"><em>_pSched</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>printer</em>&#160;</td>
+          <td class="paramtype">Stream *&#160;</td>
+          <td class="paramname"><em>pSerial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>initialCommand</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramname"><em>pollRate</em> = <code>60</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -182,17 +187,72 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Creates a console </p><dl class="params"><dt>Parameters</dt><dd>
+<p >Starts the console using the specified serial interface</p>
+<p >The specified serial interface must be intiialized and configured (baudrate, etc.) before starting the serial console.</p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Name used for task registration and message origin </td></tr>
-    <tr><td class="paramname">printer</td><td>Pointer to a printer that receives the output</td></tr>
+    <tr><td class="paramname">_pSched</td><td>Pointer to the muwerk scheduler. </td></tr>
+    <tr><td class="paramname">pSerial</td><td>Pointer to the serial interface to use </td></tr>
+    <tr><td class="paramname">initialCommand</td><td>(optional, default none) Initial command to execute. </td></tr>
+    <tr><td class="paramname">pollRate</td><td>(optional, default 60 msec) Pollrate in milliseconds of the serial interface</td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a978374074f23724f7cc4854c0f6492a0" name="a978374074f23724f7cc4854c0f6492a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a978374074f23724f7cc4854c0f6492a0">&#9670;&#160;</a></span>begin() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ustd::SerialConsole::begin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classustd_1_1_scheduler.html">Scheduler</a> *&#160;</td>
+          <td class="paramname"><em>_pSched</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String&#160;</td>
+          <td class="paramname"><em>initialCommand</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramname"><em>pollRate</em> = <code>60</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Starts the console on the default serial interface</p>
+<p >The serial interface <code>Serial</code> must be intiialized and configured (baudrate, etc.) before starting the serial console.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">_pSched</td><td>Pointer to the muwerk scheduler. </td></tr>
+    <tr><td class="paramname">initialCommand</td><td>(optional, default none) Initial command to execute. </td></tr>
+    <tr><td class="paramname">pollRate</td><td>(optional, default 60 msec) Pollrate in milliseconds of the serial interface</td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a586ee89c420f3ee0fd8e7556d9dd7bff" name="a586ee89c420f3ee0fd8e7556d9dd7bff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a586ee89c420f3ee0fd8e7556d9dd7bff">&#9670;&#160;</a></span>execute()</h2>
 
@@ -212,7 +272,7 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">inherited</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -255,7 +315,7 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">inherited</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -291,7 +351,7 @@ args) that is called, if a matching command is entered. </td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">inherited</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -324,7 +384,7 @@ args) that is called, if a matching command is entered. </td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">inherited</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
