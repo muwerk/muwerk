@@ -106,7 +106,8 @@ class Console {
     bool debug = false;
 
   public:
-    Console(String name, Print *printer) : printer(printer), name(name) {
+    Console(String name, Print *printer)
+        : printer(printer), name(name) {
         /*! Creates a console
         @param name Name used for task registration and message origin
         @param printer Pointer to a printer that receives the output
@@ -356,7 +357,7 @@ class Console {
     void cmd_mem() {
         printer->println();
 #ifdef __ESP__
-#ifdef __ESP32__
+#if defined(__ESP32__) || defined(__ESP32_RISC__)
         printer->println("Internal Ram:");
         printer->println("-------------");
         outputf("Size: %u B\r\n", (unsigned int)ESP.getHeapSize());
@@ -381,7 +382,7 @@ class Console {
         outputf("Fragmentation: %u%%\r\n", (unsigned int)ESP.getHeapFragmentation());
         outputf("Largest Free Block: %u B\r\n", (unsigned int)ESP.getMaxFreeBlockSize());
         printer->println();
-#endif  // __ESP32__
+#endif  // __ESP32__ || __ESP32_RISC__
 #else
 #ifdef __ARDUINO__
         printer->println("Memory:");
@@ -401,7 +402,7 @@ class Console {
     void cmd_info() {
         printer->println();
 #ifdef __ESP__
-#ifdef __ESP32__
+#if defined(__ESP32__) || defined(__ESP32_RISC__)
         printer->println("ESP32 Information:");
         printer->println("------------------");
         outputf("Chip Verion: %u\r\n", (unsigned int)ESP.getChipRevision());
@@ -427,7 +428,7 @@ class Console {
         outputf("Flash Chip Speed: %.2f MHz\r\n", (float)ESP.getFlashChipSpeed() / 1000000.0);
         outputf("Last Reset Reason: %s\r\n", ESP.getResetReason().c_str());
         printer->println();
-#endif  // __ESP32__
+#endif  // __ESP32__ || __ESP32_RISC__
 #else
 #ifdef __ARDUINO__
 #if USTD_FEATURE_MEMORY < USTD_FEATURE_MEM_8K
@@ -487,7 +488,7 @@ class Console {
             break;
         case 'n':
 #ifdef __ESP__
-#ifdef __ESP32__
+#if defined(__ESP32__) || defined(__ESP32_RISC__)
             printer->print(WiFi.getHostname());
 #else
             printer->print(WiFi.hostname());
@@ -505,7 +506,7 @@ class Console {
             break;
         case 'p':
 #ifdef __ESP__
-#ifdef __ESP32__
+#if defined(__ESP32__) || defined(__ESP32_RISC__)
             printer->print("ESP32");
 #else
             printer->print("ESP");
@@ -887,7 +888,8 @@ class SerialConsole : public Console {
 #endif
 
   public:
-    SerialConsole() : Console("serial", &Serial) {
+    SerialConsole()
+        : Console("serial", &Serial) {
         /*! Instantiate a Serial Console
          */
 #if MU_SERIAL_BUF_SIZE > 0

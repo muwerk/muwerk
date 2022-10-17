@@ -4,13 +4,14 @@
 
 #include "ustd_platform.h"
 
-#ifdef __ESP32__
+#if defined(__ESP32__) || defined(__ESP32_RISC__)
 namespace fs {
 class Dir {
   public:
     Dir(int _) {
     }
-    Dir(File fd) : fd(fd) {
+    Dir(File fd)
+        : fd(fd) {
     }
 
     File openFile(const char *mode) {
@@ -138,7 +139,7 @@ fs::Dir fsOpenDir(String path) {
     if (!fsBegin()) {
         return (fs::Dir)0;
     }
-#ifdef __ESP32__
+#if defined(__ESP32__) || defined(__ESP32_RISC__)
 #ifdef __USE_SPIFFS_FS__
     fs::File fd = SPIFFS.open(path);
 #else
@@ -152,7 +153,7 @@ fs::Dir fsOpenDir(String path) {
 #else
     return LittleFS.openDir(path.c_str());
 #endif
-#endif  // __ESP32__
+#endif  // __ESP32__ || __ESP32_RISC__
 }
 
 }  // namespace ustd
