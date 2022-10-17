@@ -405,6 +405,11 @@ class Console {
 #if defined(__ESP32__) || defined(__ESP32_RISC__)
         printer->println("ESP32 Information:");
         printer->println("------------------");
+#ifdef __ESP32_RISC__
+        outputf("Silicon type: RISC-V");
+#else
+        outputf("Silicon type: Tensilica");
+#endif
         outputf("Chip Verion: %u\r\n", (unsigned int)ESP.getChipRevision());
         outputf("CPU Frequency: %u MHz\r\n", (unsigned int)ESP.getCpuFreqMHz());
         outputf("SDK Version: %s\r\n", ESP.getSdkVersion());
@@ -506,8 +511,10 @@ class Console {
             break;
         case 'p':
 #ifdef __ESP__
-#if defined(__ESP32__) || defined(__ESP32_RISC__)
-            printer->print("ESP32");
+#if defined(__ESP32__)
+            printer->print("ESP32 (Tensilica)");
+#elif defined(__ESP32_RISC__)
+            printer->print("ESP32 (RISC-V)");
 #else
             printer->print("ESP");
 #endif

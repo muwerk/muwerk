@@ -170,6 +170,7 @@ Related projects:
 
 History
 -------
+* 0.6.4 (2022-10-17) Support for ESP32C3, RISC-V.
 * 0.6.3 (2022-08-26) Support update() function for sensor filter params
 * 0.6.2 (2021-02-xx) (not yet released) Scheduler support for rp2040 Raspberry Pico, fix console.h data type.
 * 0.6.1 (2021-02-12)
