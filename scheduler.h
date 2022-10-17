@@ -236,7 +236,7 @@ class Scheduler {
         resetStats(true);
 #endif
 
-#if defined(__ESP__) && !defined(__ESP32__)
+#if defined(__ESP__) && !defined(__ESP32__) && !defined(__ESP32_RISC__)
         ESP.wdtDisable();
         ESP.wdtEnable(WDTO_8S);
 #endif
@@ -719,7 +719,7 @@ class Scheduler {
         appTime += timeDiff(appTimer, micros());
         systemTimer = micros();
 #endif
-#if defined(__ESP__) && !defined(__ESP32__)
+#if defined(__ESP__) && !defined(__ESP32__) && !defined(__ESP32_RISC__)
         ESP.wdtFeed();
 #endif
     }
