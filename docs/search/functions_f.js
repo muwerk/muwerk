@@ -8,7 +8,7 @@ var searchData=
   ['readjsonvararray_5',['readJsonVarArray',['../classustd_1_1jsonfile.html#a683fabb61184d35c56f0a0c4ffeb65d6',1,'ustd::jsonfile']]],
   ['readlong_6',['readLong',['../classustd_1_1jsonfile.html#a2ecc032924242e85ffe2016a6da6f64c',1,'ustd::jsonfile::readLong(String key, long defaultVal)'],['../classustd_1_1jsonfile.html#acbc5749cd28acd1879035be80c78fea7',1,'ustd::jsonfile::readLong(String key, long minVal, long maxVal, long defaultVal)']]],
   ['readlongarray_7',['readLongArray',['../classustd_1_1jsonfile.html#a7351dc11789aa8ff7eb916ac7ed236a4',1,'ustd::jsonfile']]],
-  ['readstring_8',['readString',['../classustd_1_1jsonfile.html#a0fef42ea23a7559a67728d50e9ef749e',1,'ustd::jsonfile::readString(String key, unsigned int minLength, String defaultVal=&quot;&quot;)'],['../classustd_1_1jsonfile.html#ae09413edf6ead4a73af4202ac3cf06d1',1,'ustd::jsonfile::readString(String key, String defaultVal=&quot;&quot;)']]],
+  ['readstring_8',['readString',['../classustd_1_1jsonfile.html#ae09413edf6ead4a73af4202ac3cf06d1',1,'ustd::jsonfile::readString(String key, String defaultVal=&quot;&quot;)'],['../classustd_1_1jsonfile.html#a0fef42ea23a7559a67728d50e9ef749e',1,'ustd::jsonfile::readString(String key, unsigned int minLength, String defaultVal=&quot;&quot;)']]],
   ['readstringarray_9',['readStringArray',['../classustd_1_1jsonfile.html#a3be5acf1a05f1453f66b2bb61c9560cf',1,'ustd::jsonfile']]],
   ['remove_10',['remove',['../classustd_1_1jsonfile.html#a28ca62be63bf0ac7d24d9e4ea38afd79',1,'ustd::jsonfile::remove()'],['../classustd_1_1Scheduler.html#afa39c8d7f98dbb988ad23a63357f7aed',1,'ustd::Scheduler::remove()']]],
   ['rescale_11',['rescale',['../classustd_1_1numericFunction.html#a4c75b48ff56f517f772e9a4897eda8e6',1,'ustd::numericFunction']]],
