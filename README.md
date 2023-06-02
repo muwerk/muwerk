@@ -24,6 +24,7 @@ platforms from attiny up to ESP32 and Linux. (Linux support for testing with deb
 and valgrind.)
 
 Tasks can simply be created by:
+
 ```c++
 #define __ESP__ 1  // replace with appropriate platform define
 #include "scheduler.h"
@@ -44,11 +45,13 @@ This example creates a task identified by function `void myTask()` with task-nam
 time is around 50us.
 
 The arduino main look simply needs to contain the line:
+
 ```c++
 void loop() {
     sched.loop();
 }
 ```
+
 This calls the muwerk scheduler who dispatches the registered tasks.
 
 Statistics
@@ -170,17 +173,19 @@ Related projects:
 
 History
 -------
+
+* 0.6.5 (2023-06-02) Support for console command extensions with supplied printer instance
 * 0.6.4 (2022-10-17) Support for ESP32C3, RISC-V.
 * 0.6.3 (2022-08-26) Support update() function for sensor filter params
 * 0.6.2 (2021-02-xx) (not yet released) Scheduler support for rp2040 Raspberry Pico, fix console.h data type.
 * 0.6.1 (2021-02-12)
   * New: numericFunction approximator class: piece-wise linear approximation
     of a function defined by a set of points (x1,y1), (x2, y2)...(xn,yn) for
-    calibration etc. 
+    calibration etc.
   * fix: `doctor.h` and `i2cdoctor.h` hat wrong casing for `Arduino_JSON.h` include.
 * 0.6.0 (2021-01-30) **Breaking change** for ustd library include: ustd include-files have now `ustd_` prefix to prevent name-clashes with various platform-sdks. [queue.h clashed with ESP8266-Wifi, platform.h clashed with
 RISC-V SDK, hence new names `ustd_queue.h` and `ustd_platform.h` etc.]
-* 0.5.5 (2021-01-29) Support for all platforms with `Doctor` and `I2CDoctor`. 
+* 0.5.5 (2021-01-29) Support for all platforms with `Doctor` and `I2CDoctor`.
 * CI (2021-01-28 All supported platforms are build-checked automatically with Github actions.
 * 0.5.4 (2021-01-28) Minor fixes:
   * `ustd::Console` and `ustd::SerialConsole` do now honour the USTD_FEATURE_xxx defines.
