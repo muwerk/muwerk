@@ -58,7 +58,7 @@ void task1() {                                // scheduled every 50ms
 }
 
 #if USTD_FEATURE_MEMORY > USTD_FEATURE_MEM_2K
-void command0(String cmd, String args) {
+void command0(String cmd, String args, Print *printer) {
     // extract first argument
     String arg1 = ustd::shift(args);
     arg1.toLowerCase();
@@ -66,28 +66,28 @@ void command0(String cmd, String args) {
     if (arg1 == "on" && blinkerID == -1) {
         // start blinker task
         blinkerID = sched.add(task1, "task1", 50000L);
-        Serial.println("\nLED blinker is switched on");
+        printer->println("\nLED blinker is switched on");
     } else if (arg1 == "off" && blinkerID != -1) {
         // stop blinker task
         if (sched.remove(blinkerID)) {
             blinkerID = -1;
         }
-        Serial.println("\nLED blinker is switched off");
+        printer->println("\nLED blinker is switched off");
     } else if (arg1 == "toggle") {
         // toggle led
         command0(cmd, blinkerID == -1 ? "on" : "off");
     } else if (arg1 == "") {
         // show led status
         if (blinkerID == -1)
-            Serial.println("\nLED blinker is off");
+            printer->println("\nLED blinker is off");
         else
-            Serial.println("\nLED blinker is on");
+            printer->.println("\nLED blinker is on");
 
     } else if (arg1 == "-h") {
         // show help
-        Serial.println("\nusage: led [on | off | toggle]");
+        printer->println("\nusage: led [on | off | toggle]");
     } else {
-        Serial.println("\nInvalid option " + arg1 + " supplied");
+        printer->println("\nInvalid option " + arg1 + " supplied");
     }
 }
 #endif

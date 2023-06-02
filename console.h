@@ -20,9 +20,9 @@ Extension function that implements a new command for a Console.
  */
 
 #if defined(__ESP__) || defined(__UNIXOID__)
-typedef std::function<void(String command, String args)> T_COMMANDFN;
+typedef std::function<void(String command, String args, Print *printer)> T_COMMANDFN;
 #else
-typedef ustd::function<void(String command, String args)> T_COMMANDFN;
+typedef ustd::function<void(String command, String args, Print *printer)> T_COMMANDFN;
 #endif
 
 /*! \brief muwerk Console Class
@@ -67,7 +67,7 @@ void setup() {
     Serial.begin( 115200 );
 
     // extend console
-    con.extend( "hurz", []( String cmd, String args ) {
+    con.extend( "hurz", []( String cmd, String args, Print *printer ) {
         printer->println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
             String arg = ustd::shift( args );
@@ -778,7 +778,7 @@ class Console {
 #if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         for (unsigned int i = 0; i < commands.length(); i++) {
             if (cmd == commands[i].command) {
-                commands[i].fn(cmd, args);
+                commands[i].fn(cmd, args, printer);
                 return true;
             }
         }
@@ -852,7 +852,7 @@ void setup() {
     Serial.begin( 115200 );
 
     // extend console
-    con.extend( "hurz", []( String cmd, String args ) {
+    con.extend( "hurz", []( String cmd, String args, Print *printer ) {
         printer->println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
             String arg = ustd::shift( args );
