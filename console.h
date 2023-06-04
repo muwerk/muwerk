@@ -25,6 +25,75 @@ typedef std::function<void(String command, String args, Print *printer)> T_COMMA
 typedef ustd::function<void(String command, String args, Print *printer)> T_COMMANDFN;
 #endif
 
+/*! \brief muwerk Command extension helper for Console Classes */
+class ExtendableConsole {
+  protected:
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
+    typedef struct {
+        int id;
+        char *command;
+        T_COMMANDFN fn;
+    } T_COMMAND;
+    ustd::array<T_COMMAND> commands;
+    int commandHandle = 0;
+#endif
+
+    virtual ~ExtendableConsole() {
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
+        for (unsigned int i = 0; i < commands.length(); i++) {
+            free(commands[i].command);
+        }
+        commands.erase();
+#endif
+    }
+
+  public:
+#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
+    int extend(String command, T_COMMANDFN handler) {
+        /*! Extend the console with a custom command
+         *
+         * @param command The name of the command
+         * @param handler Callback of type void myCallback(String command, String
+         * args, Print *printer) that is called, if a matching command is entered.
+         * @return commandHandle on success (needed for unextend), or -1
+         * on error.
+         */
+        T_COMMAND cmd = {};
+        cmd.id = ++commandHandle;
+        cmd.fn = handler;
+        cmd.command = (char *)malloc(command.length() + 1);
+        strcpy(cmd.command, command.c_str());
+        return commands.add(cmd) != -1 ? commandHandle : -1;
+    }
+
+    bool unextend(String command) {
+        /*! Removes a custom command from the console
+         * @param command The name of the command to remove.
+         * @return true on success.
+         */
+        for (unsigned int i = 0; i < commands.length(); i++) {
+            if (command == (const char *)commands[i].command) {
+                return commands.erase(i);
+            }
+        }
+        return false;
+    }
+
+    bool unextend(int commandHandle) {
+        /*! Removes a custom command from the console
+         * @param commandHandle The commandHandle of the command to remove.
+         * @return true on success.
+         */
+        for (unsigned int i = 0; i < commands.length(); i++) {
+            if (commands[i].id == commandHandle) {
+                return commands.erase(i);
+            }
+        }
+        return false;
+    }
+#endif
+};
+
 /*! \brief muwerk Console Class
 
 The console class implements a simple but effective console shell that
@@ -85,17 +154,15 @@ void loop() {
 ~~~
 
 */
-class Console {
+class Console : public ExtendableConsole {
+
   protected:
-#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
-    typedef struct {
-        int id;
-        char *command;
-        T_COMMANDFN fn;
-    } T_COMMAND;
-    ustd::array<T_COMMAND> commands;
-    int commandHandle = 0;
-#endif
+    enum AuthState {
+        NAUTH,
+        PASS,
+        AUTH
+    };
+
     Print *printer;
     Scheduler *pSched;
     int tID;
@@ -104,6 +171,13 @@ class Console {
     ustd::array<int> subsub;
     bool suball = false;
     bool debug = false;
+#ifdef USTD_FEATURE_FILESYSTEM
+    ustd::jsonfile config;
+    String username;
+    String password;
+    AuthState authState = NAUTH;
+    String login;
+#endif
 
   public:
     Console(String name, Print *printer)
@@ -115,11 +189,16 @@ class Console {
     }
 
     virtual ~Console() {
-#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
-        for (unsigned int i = 0; i < commands.length(); i++) {
-            free(commands[i].command);
+    }
+
+    void init() {
+#ifdef USTD_FEATURE_FILESYSTEM
+        // read configuration
+        username = config.readString("auth/username");
+        password = config.readString("auth/password");
+        if (username.isEmpty() && password.isEmpty()) {
+            authState = AUTH;
         }
-        commands.erase();
 #endif
     }
 
@@ -132,56 +211,49 @@ class Console {
         return execute();
     }
 
-#if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
-    int extend(String command, T_COMMANDFN handler) {
-        /*! Extend the console with a custom command
-         *
-         * @param command The name of the command
-         * @param handler Callback of type void myCallback(String command, String
-         * args) that is called, if a matching command is entered.
-         * @return commandHandle on success (needed for unextend), or -1
-         * on error.
-         */
-        T_COMMAND cmd = {};
-        cmd.id = ++commandHandle;
-        cmd.fn = handler;
-        cmd.command = (char *)malloc(command.length() + 1);
-        strcpy(cmd.command, command.c_str());
-        return commands.add(cmd) != -1 ? commandHandle : -1;
-    }
-
-    bool unextend(String command) {
-        /*! Removes a custom command from the console
-         * @param command The name of the command to remove.
-         * @return true on success.
-         */
-        for (unsigned int i = 0; i < commands.length(); i++) {
-            if (command == (const char *)commands[i].command) {
-                return commands.erase(i);
-            }
-        }
-        return false;
-    }
-
-    bool unextend(int commandHandle) {
-        /*! Removes a custom command from the console
-         * @param commandHandle The commandHandle of the command to remove.
-         * @return true on success.
-         */
-        for (unsigned int i = 0; i < commands.length(); i++) {
-            if (commands[i].id == commandHandle) {
-                return commands.erase(i);
-            }
-        }
-        return false;
-    }
-#endif
-
   protected:
     virtual void prompt() {
-        printer->print("\rmuwerk> ");
-        printer->print(args);
+#ifdef USTD_FEATURE_FILESYSTEM
+        switch (authState) {
+        case NAUTH:
+            printer->print("\rUsername: ");
+            printer->print(args);
+            break;
+        case PASS:
+            printer->print("\rPassword: ");
+            for (int i = 0; i < args.length(); i++) {
+                printer->print("*");
+            }
+            break;
+        case AUTH:
+#endif
+            printer->print("\rmuwerk> ");
+            printer->print(args);
+#ifdef USTD_FEATURE_FILESYSTEM
+            break;
+        }
+#endif
     }
+
+    String getdate() {
+#ifdef USTD_FEATURE_CLK_READ
+        time_t t = time(nullptr);
+        struct tm *lt = localtime(&t);
+        if (lt) {
+            char szBuffer[64];
+            snprintf(szBuffer, sizeof(szBuffer) - 1, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu",
+                     (int)lt->tm_year + 1900, (int)lt->tm_mon + 1, (int)lt->tm_mday,
+                     (int)lt->tm_hour, (int)lt->tm_min, (int)lt->tm_sec, t);
+            szBuffer[sizeof(szBuffer) - 1] = 0;
+            return szBuffer;
+        }
+        return "<error>";
+#else
+        return "<unknown>";
+#endif
+    }
+
+    virtual String getfrom() = 0;
 
     size_t outputf(const char *format, ...) {
         va_list arg;
@@ -214,6 +286,64 @@ class Console {
             return true;
         }
         return false;
+    }
+
+    bool processInput() {
+#ifdef USTD_FEATURE_FILESYSTEM
+        switch (authState) {
+        default:
+        case NAUTH:
+            login = args;
+            if (!login.isEmpty()) {
+                authState = PASS;
+            }
+            args = "";
+            return true;
+        case PASS:
+            if ((login == username) && (args == password)) {
+                String lastSuccessTime = config.readString("auth/lastSuccessTime");
+                String lastSuccessFrom = config.readString("auth/lastSuccessFrom");
+                String lastFailedTime = config.readString("auth/lastFailedTime");
+                String lastFailedFrom = config.readString("auth/lastFailedFrom");
+                long failedCount = config.readLong("auth/failedCount", 0);
+
+                printer->println();
+                if (!lastFailedTime.isEmpty()) {
+                    printer->printf("Last failed login: %s from %s\r\n", lastFailedTime.c_str(), lastFailedFrom.c_str());
+                }
+                if (failedCount) {
+                    printer->printf("There were %ld failed login attempts since the last successful login.\r\n", failedCount);
+                }
+                if (!lastSuccessTime.isEmpty()) {
+                    printer->printf("Last login: %s from %s\r\n", lastSuccessTime.c_str(), lastSuccessFrom.c_str());
+                }
+
+                // report successful login
+                config.writeString("auth/lastSuccessTime", getdate());
+                config.writeString("auth/lastSuccessFrom", getfrom());
+                // clean failure data
+                config.remove("auth/lastFailedTime");
+                config.remove("auth/lastFailedFrom");
+                config.writeLong("auth/failedCount", 0);
+
+                authState = AUTH;
+            } else {
+                // report failure data
+                config.writeLong("auth/failedCount", config.readLong("auth/failedCount", 0) + 1);
+                config.writeString("auth/lastFailedTime", getdate());
+                config.writeString("auth/lastFailedFrom", getfrom());
+                printer->println();
+                printer->print("Login incorrect\r\n");
+                authState = NAUTH;
+            }
+            args = "";
+            return true;
+        case AUTH:
+            return execute();
+        }
+#else
+        return execute();
+#endif
     }
 
     void commandparser() {
@@ -253,6 +383,8 @@ class Console {
             cmd_cat();
         } else if (cmd == "jf") {
             cmd_jf();
+        } else if (cmd == "logout") {
+            cmd_logout();
 #endif
         } else if (!cmd_custom(cmd)) {
             printer->println("-mush: " + cmd + ": command not found");
@@ -268,7 +400,7 @@ class Console {
         help += ", date";
 #endif
 #ifdef USTD_FEATURE_FILESYSTEM
-        help += ", ls, rm, cat, jf";
+        help += ", ls, rm, cat, jf, logout";
 #endif
 #ifdef __ESP__
         help += ", debug, wifi, reboot";
@@ -461,6 +593,14 @@ class Console {
 #endif  // __ESP__
     }
 
+#ifdef USTD_FEATURE_FILESYSTEM
+    virtual void cmd_logout() {
+        printer->println();
+        printer->println("Bye!");
+        authState = NAUTH;
+    }
+#endif
+
     void cmd_uname(char opt = '\0', bool crlf = true) {
         String arg;
         switch (opt) {
@@ -608,6 +748,22 @@ class Console {
 #endif  // USTD_FEATURE_CLK_READ
 
 #ifdef USTD_FEATURE_FILESYSTEM
+    void motd() {
+        fs::File f = fsOpen("/motd", "r");
+        if (!f) {
+            return;
+        }
+        if (!f.available()) {
+            f.close();
+            return;
+        }
+        while (f.available()) {
+            // Lets read line by line from the file
+            printer->println(f.readStringUntil('\n'));
+        }
+        f.close();
+    }
+
     void cmd_ls() {
         ustd::array<String> paths;
         bool extended = false;
@@ -943,15 +1099,31 @@ class SerialConsole : public Console {
         printer = pSerial;
         tID = pSched->add([this]() { this->loop(); }, name, 60000);  // 60ms
         printer->println();
+        init();
         execute(initialCommand);
+        motd();
         prompt();
     }
 
   protected:
+    virtual String getfrom() {
+        return "Serial";
+    }
+
 #if MU_SERIAL_BUF_SIZE > 0
     virtual void prompt() {
         Console::prompt();
+#ifdef USTD_FEATURE_FILESYSTEM
+        if (authState == PASS) {
+            for (int i = 0; i < strlen(buffer); i++) {
+                printer->print("*");
+            }
+        } else {
+            printer->print(buffer);
+        }
+#else
         printer->print(buffer);
+#endif
     }
 #endif
 
@@ -966,6 +1138,15 @@ class SerialConsole : public Console {
             case 0:   // ignore
             case 10:  // ignore
                 break;
+#ifdef USTD_FEATURE_FILESYSTEM
+            case 4:
+                if (authState == AUTH) {
+                    execute("logout");
+                } else {
+                    authState = NAUTH;
+                }
+                break;
+#endif
             case 8:  // backspace
 #if MU_SERIAL_BUF_SIZE > 0
                 if (pcur > buffer) {
@@ -986,7 +1167,7 @@ class SerialConsole : public Console {
 #if MU_SERIAL_BUF_SIZE > 0
                 flush();
 #endif
-                execute();
+                processInput();
                 changed = true;
                 break;
             case 9:  // tab
@@ -1011,6 +1192,11 @@ class SerialConsole : public Console {
         if (changed) {
             prompt();
         }
+    }
+
+    virtual void cmd_logout() {
+        Console::cmd_logout();
+        motd();
     }
 
 #if MU_SERIAL_BUF_SIZE > 0
