@@ -160,7 +160,9 @@ class Console : public ExtendableConsole {
     enum AuthState {
         NAUTH,
         PASS,
-        AUTH
+        AUTH,
+        PASS1,
+        PASS2
     };
 
     Print *printer;
@@ -177,6 +179,7 @@ class Console : public ExtendableConsole {
     String password;
     AuthState authState = NAUTH;
     String login;
+    String pass1;
 #endif
 
   public:
@@ -221,9 +224,15 @@ class Console : public ExtendableConsole {
             break;
         case PASS:
             printer->print("\rPassword: ");
-            for (int i = 0; i < args.length(); i++) {
-                printer->print("*");
-            }
+            stars(args.length());
+            break;
+        case PASS1:
+            printer->print("\rNew password: ");
+            stars(args.length());
+            break;
+        case PASS2:
+            printer->print("\rRetype new password: ");
+            stars(args.length());
             break;
         case AUTH:
 #endif
@@ -233,6 +242,12 @@ class Console : public ExtendableConsole {
             break;
         }
 #endif
+    }
+
+    void stars(unsigned int count) {
+        for (int i = 0; i < count; i++) {
+            printer->print("*");
+        }
     }
 
     String getdate() {
@@ -340,6 +355,9 @@ class Console : public ExtendableConsole {
             return true;
         case AUTH:
             return execute();
+        case PASS1:
+        case PASS2:
+            return cmd_passwd();
         }
 #else
         return execute();
@@ -375,6 +393,8 @@ class Console : public ExtendableConsole {
         } else if (cmd == "pub") {
             cmd_pub();
 #ifdef USTD_FEATURE_FILESYSTEM
+        } else if (cmd == "man") {
+            cmd_man();
         } else if (cmd == "ls") {
             cmd_ls();
         } else if (cmd == "rm") {
@@ -383,6 +403,8 @@ class Console : public ExtendableConsole {
             cmd_cat();
         } else if (cmd == "jf") {
             cmd_jf();
+        } else if (cmd == "passwd") {
+            cmd_passwd();
         } else if (cmd == "logout") {
             cmd_logout();
 #endif
@@ -400,7 +422,7 @@ class Console : public ExtendableConsole {
         help += ", date";
 #endif
 #ifdef USTD_FEATURE_FILESYSTEM
-        help += ", ls, rm, cat, jf, logout";
+        help += ", man, ls, rm, cat, jf, logout, passwd";
 #endif
 #ifdef __ESP__
         help += ", debug, wifi, reboot";
@@ -599,6 +621,54 @@ class Console : public ExtendableConsole {
         printer->println("Bye!");
         authState = NAUTH;
     }
+
+    bool cmd_passwd() {
+        String arg;
+
+        switch(authState) {
+        case AUTH:
+            arg = pullArg();
+            if (arg == "-h" || arg == "-H") {
+                printer->println("usage: passwd <accountName>");
+                return false;
+            } else if (arg.isEmpty()) {
+                arg = username;
+            }
+            if (arg != username) {
+                printer->printf("passwd: Unknown user name '%s'.\r\n", arg.c_str());
+                return false;
+            }
+            printer->printf("Changing password for user %s.\r\n", arg.c_str());
+            // printer->printf("New password: ");
+            authState = PASS1;
+            return true;
+        case PASS1:
+            if (args.isEmpty()) {
+                printer->println("No password has been supplied.");
+                authState = AUTH;
+                return false;
+            }
+            pass1 = args;
+            args = "";
+            authState = PASS2;
+            return true;
+        case PASS2:
+            if (args != pass1) {
+                printer->println("Sorry, passwords do not match.");
+                args = "";
+                authState = PASS1;
+                return false;
+            }
+            config.writeString("auth/password", args);
+            printer->println("passwd: all authentication tokens updated successfully.");
+            args = "";
+            authState = AUTH;
+            return true;
+        default:
+            return false;
+        }
+        return true;
+    }
 #endif
 
     void cmd_uname(char opt = '\0', bool crlf = true) {
@@ -748,20 +818,41 @@ class Console : public ExtendableConsole {
 #endif  // USTD_FEATURE_CLK_READ
 
 #ifdef USTD_FEATURE_FILESYSTEM
-    void motd() {
-        fs::File f = fsOpen("/motd", "r");
+    bool cat(const char *filename) {
+        fs::File f = fsOpen(filename, "r");
         if (!f) {
-            return;
+            return false;
         }
         if (!f.available()) {
             f.close();
-            return;
+            return false;
         }
         while (f.available()) {
-            // Lets read line by line from the file
             printer->println(f.readStringUntil('\n'));
         }
         f.close();
+        printer->println();
+        return true;
+    }
+
+    void motd() {
+        if (!cat("/motd")) {
+            printer->printf("\r\nWelcome to the machine!\n");
+        }
+    }
+
+    void cmd_man() {
+        String arg = pullArg();
+        if (arg.isEmpty() || arg == "-h" || arg == "-H") {
+            printer->println("\rusage: man COMMAND");
+            printer->println("       Displays help for COMMAND");
+            return;
+        }
+        String file = "/" + arg + ".man";
+        if (!cat(file.c_str())) {
+            cat("/man.man");
+            printer->printf("No manual entry for %s\r\n", arg.c_str());
+        }
     }
 
     void cmd_ls() {
@@ -822,22 +913,9 @@ class Console : public ExtendableConsole {
             return;
         }
 
-        fs::File f = fsOpen(arg, "r");
-        if (!f) {
-#ifndef USE_SERIAL_DBG
+        if (!cat(arg.c_str())) {
             printer->println("error: File " + arg + " can't be opened.");
-#endif
-            return;
         }
-        if (!f.available()) {
-            f.close();
-            return;
-        }
-        while (f.available()) {
-            // Lets read line by line from the file
-            printer->println(f.readStringUntil('\n'));
-        }
-        f.close();
     }
 
     void cmd_jf() {
@@ -1114,12 +1192,15 @@ class SerialConsole : public Console {
     virtual void prompt() {
         Console::prompt();
 #ifdef USTD_FEATURE_FILESYSTEM
-        if (authState == PASS) {
-            for (int i = 0; i < strlen(buffer); i++) {
-                printer->print("*");
-            }
-        } else {
+        switch(authState) {
+        case PASS:
+        case PASS1:
+        case PASS2:
+            stars(strlen(buffer));
+            break;
+        default:
             printer->print(buffer);
+            break;
         }
 #else
         printer->print(buffer);
@@ -1197,6 +1278,7 @@ class SerialConsole : public Console {
     virtual void cmd_logout() {
         Console::cmd_logout();
         motd();
+        prompt();
     }
 
 #if MU_SERIAL_BUF_SIZE > 0
