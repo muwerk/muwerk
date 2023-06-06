@@ -174,9 +174,10 @@ class Console : public ExtendableConsole {
     bool suball = false;
     bool debug = false;
 #ifdef USTD_FEATURE_FILESYSTEM
-    ustd::jsonfile config;
-    String username;
-    String password;
+    static int iManagerTask;
+    static array<Console *> consoles;
+    static ustd::jsonfile config;
+    bool finished = false;
     AuthState authState = NAUTH;
     String login;
     String pass1;
@@ -194,15 +195,25 @@ class Console : public ExtendableConsole {
     virtual ~Console() {
     }
 
-    void init() {
+    virtual void init(Scheduler *pSched) {
 #ifdef USTD_FEATURE_FILESYSTEM
         // read configuration
-        username = config.readString("auth/username");
-        password = config.readString("auth/password");
+        String username = config.readString("auth/username");
+        String password = config.readString("auth/password");
         if (username.isEmpty() && password.isEmpty()) {
             authState = AUTH;
         }
+        // setup console management task if not already setup (static scope)
+        if (iManagerTask == -1) {
+            iManagerTask = pSched->add([]() { Console::manager(); }, "conman", 1000000);
+        }
+        // add console to list
+        Console *pCon = this;
+        Console::consoles.add(pCon);
 #endif
+    }
+
+    virtual void end() {
     }
 
     bool execute(String command) {
@@ -244,64 +255,14 @@ class Console : public ExtendableConsole {
 #endif
     }
 
-    void stars(unsigned int count) {
-        for (int i = 0; i < count; i++) {
-            printer->print("*");
-        }
+#ifdef USTD_FEATURE_FILESYSTEM
+    virtual String getFrom() = 0;
+    virtual String getUser() {
+        return (authState == AUTH) ? "root" : "-";
     }
-
-    String getdate() {
-#ifdef USTD_FEATURE_CLK_READ
-        time_t t = time(nullptr);
-        struct tm *lt = localtime(&t);
-        if (lt) {
-            char szBuffer[64];
-            snprintf(szBuffer, sizeof(szBuffer) - 1, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu",
-                     (int)lt->tm_year + 1900, (int)lt->tm_mon + 1, (int)lt->tm_mday,
-                     (int)lt->tm_hour, (int)lt->tm_min, (int)lt->tm_sec, t);
-            szBuffer[sizeof(szBuffer) - 1] = 0;
-            return szBuffer;
-        }
-        return "<error>";
-#else
-        return "<unknown>";
+    virtual String getRemoteAddress() = 0;
+    virtual String getRemotePort() = 0;
 #endif
-    }
-
-    virtual String getfrom() = 0;
-
-    size_t outputf(const char *format, ...) {
-        va_list arg;
-        va_start(arg, format);
-        char temp[64];
-        char *buffer = temp;
-        size_t len = vsnprintf(temp, sizeof(temp), format, arg);
-        va_end(arg);
-        if (len > sizeof(temp) - 1) {
-            buffer = new char[len + 1];
-            if (!buffer) {
-                return 0;
-            }
-            va_start(arg, format);
-            vsnprintf(buffer, len + 1, format, arg);
-            va_end(arg);
-        }
-        len = printer->write((const uint8_t *)buffer, len);
-        if (buffer != temp) {
-            delete[] buffer;
-        }
-        return len;
-    }
-
-    bool execute() {
-        args.trim();
-        if (args.length()) {
-            commandparser();
-            args = "";
-            return true;
-        }
-        return false;
-    }
 
     bool processInput() {
 #ifdef USTD_FEATURE_FILESYSTEM
@@ -315,7 +276,7 @@ class Console : public ExtendableConsole {
             args = "";
             return true;
         case PASS:
-            if ((login == username) && (args == password)) {
+            if ((login == config.readString("auth/username")) && (args == config.readString("auth/password"))) {
                 String lastSuccessTime = config.readString("auth/lastSuccessTime");
                 String lastSuccessFrom = config.readString("auth/lastSuccessFrom");
                 String lastFailedTime = config.readString("auth/lastFailedTime");
@@ -334,8 +295,8 @@ class Console : public ExtendableConsole {
                 }
 
                 // report successful login
-                config.writeString("auth/lastSuccessTime", getdate());
-                config.writeString("auth/lastSuccessFrom", getfrom());
+                config.writeString("auth/lastSuccessTime", getDate());
+                config.writeString("auth/lastSuccessFrom", getFrom());
                 // clean failure data
                 config.remove("auth/lastFailedTime");
                 config.remove("auth/lastFailedFrom");
@@ -345,8 +306,8 @@ class Console : public ExtendableConsole {
             } else {
                 // report failure data
                 config.writeLong("auth/failedCount", config.readLong("auth/failedCount", 0) + 1);
-                config.writeString("auth/lastFailedTime", getdate());
-                config.writeString("auth/lastFailedFrom", getfrom());
+                config.writeString("auth/lastFailedTime", getDate());
+                config.writeString("auth/lastFailedFrom", getFrom());
                 printer->println();
                 printer->print("Login incorrect\r\n");
                 authState = NAUTH;
@@ -362,6 +323,16 @@ class Console : public ExtendableConsole {
 #else
         return execute();
 #endif
+    }
+
+    bool execute() {
+        args.trim();
+        if (args.length()) {
+            commandparser();
+            args = "";
+            return true;
+        }
+        return false;
     }
 
     void commandparser() {
@@ -405,6 +376,8 @@ class Console : public ExtendableConsole {
             cmd_jf();
         } else if (cmd == "passwd") {
             cmd_passwd();
+        } else if (cmd == "users") {
+            cmd_users();
         } else if (cmd == "logout") {
             cmd_logout();
 #endif
@@ -422,7 +395,7 @@ class Console : public ExtendableConsole {
         help += ", date";
 #endif
 #ifdef USTD_FEATURE_FILESYSTEM
-        help += ", man, ls, rm, cat, jf, logout, passwd";
+        help += ", man, ls, rm, cat, jf, logout, users, passwd";
 #endif
 #ifdef __ESP__
         help += ", debug, wifi, reboot";
@@ -625,21 +598,20 @@ class Console : public ExtendableConsole {
     bool cmd_passwd() {
         String arg;
 
-        switch(authState) {
+        switch (authState) {
         case AUTH:
             arg = pullArg();
             if (arg == "-h" || arg == "-H") {
                 printer->println("usage: passwd <accountName>");
                 return false;
             } else if (arg.isEmpty()) {
-                arg = username;
+                arg = config.readString("auth/username");
             }
-            if (arg != username) {
+            if (arg != config.readString("auth/username")) {
                 printer->printf("passwd: Unknown user name '%s'.\r\n", arg.c_str());
                 return false;
             }
             printer->printf("Changing password for user %s.\r\n", arg.c_str());
-            // printer->printf("New password: ");
             authState = PASS1;
             return true;
         case PASS1:
@@ -668,6 +640,19 @@ class Console : public ExtendableConsole {
             return false;
         }
         return true;
+    }
+
+    void cmd_users() {
+        printer->printf("ID   User      Address               Port\n");
+        printer->printf("-------------------------------------------\n");
+        for (unsigned int i = 0; i < consoles.length(); i++) {
+            Console *pCon = Console::consoles[i];
+            if (pCon->finished) {
+                printer->printf("%-3d  Connection is terminated\n", i);
+            } else {
+                printer->printf("%-3d  %-8.8s  %-20.20s  %s\n", i, pCon->getUser(), pCon->getRemoteAddress().c_str(), pCon->getRemotePort());
+            }
+        }
     }
 #endif
 
@@ -818,29 +803,6 @@ class Console : public ExtendableConsole {
 #endif  // USTD_FEATURE_CLK_READ
 
 #ifdef USTD_FEATURE_FILESYSTEM
-    bool cat(const char *filename) {
-        fs::File f = fsOpen(filename, "r");
-        if (!f) {
-            return false;
-        }
-        if (!f.available()) {
-            f.close();
-            return false;
-        }
-        while (f.available()) {
-            printer->println(f.readStringUntil('\n'));
-        }
-        f.close();
-        printer->println();
-        return true;
-    }
-
-    void motd() {
-        if (!cat("/motd")) {
-            printer->printf("\r\nWelcome to the machine!\n");
-        }
-    }
-
     void cmd_man() {
         String arg = pullArg();
         if (arg.isEmpty() || arg == "-h" || arg == "-H") {
@@ -907,14 +869,34 @@ class Console : public ExtendableConsole {
     }
 
     void cmd_cat() {
-        String arg = pullArg();
-        if (arg == "-h" || arg == "-H") {
-            printer->println("usage: cat <filename>");
-            return;
-        }
+        bool lineNumbers = false;
+        unsigned int startLine = 1;
+        unsigned int endLine = (unsigned int)-1;
+        ustd::array<String> filenames;
 
-        if (!cat(arg.c_str())) {
-            printer->println("error: File " + arg + " can't be opened.");
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (arg == "-h" || arg == "-H") {
+                printer->println("usage: cat [-l] [-s <start>] [-e <end>] <filename>");
+                return;
+            } else if (arg == "-l") {
+                lineNumbers = true;
+            } else if (arg == "-s") {
+                arg = pullArg();
+                sscanf(arg.c_str(), "%ud", &startLine);
+                if (startLine < 1) {
+                    startLine = 1;
+                }
+            } else if (arg == "-e") {
+                arg = pullArg();
+                sscanf(arg.c_str(), "%ud", &endLine);
+            } else if (!arg.isEmpty()) {
+                filenames.add(arg);
+            }
+        }
+        for (unsigned int i = 0; i < filenames.length(); i++) {
+            if (!cat(filenames[i].c_str(), lineNumbers, startLine, endLine)) {
+                printer->println("error: File " + filenames[i] + " can't be opened.");
+            }
         }
     }
 
@@ -1020,6 +1002,77 @@ class Console : public ExtendableConsole {
         return false;
     }
 
+#ifdef USTD_FEATURE_FILESYSTEM
+    static void manager() {
+        // cleanup finished dynamic consoles
+        for (unsigned int i = 0; i < consoles.length(); i++) {
+            Console *pCon = Console::consoles[i];
+            if (pCon->finished) {
+                DBGF("\rCleaning up console %i\r\n", i);
+                pCon->end();
+                delete pCon;
+                consoles.erase(i);
+                --i;
+                continue;
+            }
+        }
+    }
+
+    bool cat(const char *filename, bool lineNumbers = false, unsigned int startLine = 1, unsigned int endLine = (unsigned int)-1) {
+        fs::File f = fsOpen(filename, "r");
+        if (!f) {
+            return false;
+        }
+        if (!f.available()) {
+            f.close();
+            return true;
+        }
+        unsigned int lineNumber = 0;
+        String line;
+        while (f.available()) {
+            ++lineNumber;
+            line = f.readStringUntil('\n');
+            if (lineNumber >= startLine && lineNumber <= endLine) {
+                if (lineNumbers) {
+                    printer->printf("%05d: ", lineNumber);
+                }
+                printer->println(line);
+            }
+        }
+        f.close();
+        printer->println();
+        return true;
+    }
+
+    void motd() {
+        if (!cat("/motd")) {
+            printer->println("\r\nWelcome to the machine!");
+        }
+    }
+#else
+    void motd() {
+        printer->println("\r\nWelcome to the machine!");
+    }
+#endif
+
+    String getDate() {
+#ifdef USTD_FEATURE_CLK_READ
+        time_t t = time(nullptr);
+        struct tm *lt = localtime(&t);
+        if (lt) {
+            char szBuffer[64];
+            snprintf(szBuffer, sizeof(szBuffer) - 1, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu",
+                     (int)lt->tm_year + 1900, (int)lt->tm_mon + 1, (int)lt->tm_mday,
+                     (int)lt->tm_hour, (int)lt->tm_min, (int)lt->tm_sec, t);
+            szBuffer[sizeof(szBuffer) - 1] = 0;
+            return szBuffer;
+        }
+        return "<error>";
+#else
+        return "<unknown>";
+#endif
+    }
+
     bool addsub(String topic) {
         if (suball) {
             return false;
@@ -1061,7 +1114,43 @@ class Console : public ExtendableConsole {
     String pullArg(String defValue = "") {
         return ustd::shift(args, ' ', defValue);
     }
+
+    size_t outputf(const char *format, ...) {
+        va_list arg;
+        va_start(arg, format);
+        char temp[64];
+        char *buffer = temp;
+        size_t len = vsnprintf(temp, sizeof(temp), format, arg);
+        va_end(arg);
+        if (len > sizeof(temp) - 1) {
+            buffer = new char[len + 1];
+            if (!buffer) {
+                return 0;
+            }
+            va_start(arg, format);
+            vsnprintf(buffer, len + 1, format, arg);
+            va_end(arg);
+        }
+        len = printer->write((const uint8_t *)buffer, len);
+        if (buffer != temp) {
+            delete[] buffer;
+        }
+        return len;
+    }
+
+    void stars(unsigned int count) {
+        for (unsigned int i = 0; i < count; i++) {
+            printer->print("*");
+        }
+    }
 };
+
+#ifdef USTD_FEATURE_FILESYSTEM
+// static members initialisation
+ustd::jsonfile Console::config;
+int Console::iManagerTask = -1;
+array<Console *> Console::consoles;
+#endif
 
 /*! \brief muwerk Serial Console Class
 
@@ -1177,22 +1266,33 @@ class SerialConsole : public Console {
         printer = pSerial;
         tID = pSched->add([this]() { this->loop(); }, name, 60000);  // 60ms
         printer->println();
-        init();
+        init(_pSched);
         execute(initialCommand);
         motd();
         prompt();
     }
 
   protected:
-    virtual String getfrom() {
-        return "Serial";
+
+#ifdef USTD_FEATURE_FILESYSTEM
+    virtual String getFrom() {
+        return getRemotePort();
     }
+
+    virtual String getRemoteAddress() {
+        return "-";
+    }
+
+    virtual String getRemotePort() {
+        return "Serial";
+    };
+#endif
 
 #if MU_SERIAL_BUF_SIZE > 0
     virtual void prompt() {
         Console::prompt();
 #ifdef USTD_FEATURE_FILESYSTEM
-        switch(authState) {
+        switch (authState) {
         case PASS:
         case PASS1:
         case PASS2:
@@ -1275,11 +1375,13 @@ class SerialConsole : public Console {
         }
     }
 
+#ifdef USTD_FEATURE_FILESYSTEM
     virtual void cmd_logout() {
         Console::cmd_logout();
         motd();
         prompt();
     }
+#endif
 
 #if MU_SERIAL_BUF_SIZE > 0
     void flush() {
