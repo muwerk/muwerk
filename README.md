@@ -174,6 +174,9 @@ Related projects:
 History
 -------
 
+* 0.7.0 (2023-06-XX)
+  * Improvements to ustd::split for better parsing capabilities
+  * New function ustd:join
 * 0.6.5 (2023-06-02) Support for console command extensions with supplied printer instance
 * 0.6.4 (2022-10-17) Support for ESP32C3, RISC-V.
 * 0.6.3 (2022-08-26) Support update() function for sensor filter params

@@ -41,6 +41,17 @@ used by:
 //! \brief The muwerk namespace
 namespace ustd {
 
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+String trim(const String &str) {
+    size_t first = str.find_first_not_of(' ');
+    if (String::npos == first)
+        return "";
+
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}
+#endif
+
 unsigned long timeDiff(unsigned long first, unsigned long second) {
     /*! Calculate time difference between two time values
      *
@@ -59,15 +70,25 @@ unsigned long timeDiff(unsigned long first, unsigned long second) {
     return (unsigned long)-1 - first + second + 1;
 }
 
-void split(String &src, char delimiter, array<String> &result) {
-    /*! Split a String into an array of segamnts using a specified delimiter.
+void split(String &src, char delimiter, array<String> &result, bool emptyWhenEmpty = false, bool trim = false) {
+    /*! Split a String into an array of segments using a specified delimiter.
     @param src Source String.
     @param delimiter Delimiter for splitting the string.
-    @param result Array if strings holding the result of the operation.
+    @param result Array of strings holding the result of the operation.
+    @param emptyWhenEmpty (optional) If true, the resulting array will be empty if the imput string is empty)
+    @param trim (optional) If true, the string and the resulting segments will be trimmed
     */
-    int ind;
     String source = src;
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+    if (trim) source = ustd::trim(source);
+    if (emptyWhenEmpty && source.empty()) return;
+#else
+    if (trim) source.trim();
+    if (emptyWhenEmpty && source.length() == 0) return;
+#endif
+
     String sb;
+    int ind;
     while (true) {
 #if defined(__UNIXOID__) || defined(__RP_PICO__)
         ind = (int)source.find(delimiter);
@@ -80,15 +101,56 @@ void split(String &src, char delimiter, array<String> &result) {
         } else {
 #if defined(__UNIXOID__) || defined(__RP_PICO__)
             sb = source.substr(0, ind);
+            if (trim) sb = ustd::trim(sb);
             result.add(sb);
             source = source.substr(ind + 1);
 #else
             sb = source.substring(0, ind);
+            if (trim) sb.trim();
             result.add(sb);
             source = source.substring(ind + 1);
 #endif
         }
     }
+}
+
+String join(array<String> &result, char delimiter) {
+    /*! Joins an array of segments into a string using a specified delimiter.
+    @param result Array of strings holding the segments to join
+    @param delimiter Delimiter for joining the string segments.
+    @return The resulting string
+    */
+    String ret = "";
+    int length = result.length();
+    int prelast = length - 1;
+    for (int i = 0; i < length; i++) {
+        ret += i < prelast ? (result[i] + delimiter) : result[i];
+    }
+    return ret;
+}
+
+String join(array<String> &result, const char *delimiter) {
+    /*! Joins an array of segments into a string using a specified delimiter.
+    @param result Array of strings holding the segments to join
+    @param delimiter Delimiter for joining the string segments.
+    @return The resulting string
+    */
+    String ret = "";
+    int length = result.length();
+    int prelast = length - 1;
+    for (int i = 0; i < length; i++) {
+        ret += i < prelast ? (result[i] + delimiter) : result[i];
+    }
+    return ret;
+}
+
+String join(array<String> &result, String delimiter) {
+    /*! Joins an array of segments into a string using a specified delimiter.
+    @param result Array of strings holding the segments to join
+    @param delimiter Delimiter for joining the string segments.
+    @return The resulting string
+    */
+    return join(result, delimiter.c_str());
 }
 
 String shift(String &src, char delimiter = ' ', String defValue = "") {
@@ -115,8 +177,7 @@ String shift(String &src, char delimiter = ' ', String defValue = "") {
     } else {
 #if defined(__UNIXOID__) || defined(__RP_PICO__)
         ret = src.substr(0, ind);
-        src = src.substr(ind + 1);
-        // src.trim();
+        src = ustd::trim(src.substr(ind + 1));
 #else
         ret = src.substring(0, ind);
         src = src.substring(ind + 1);
