@@ -11,7 +11,7 @@ class Dir {
     Dir(int _) {
     }
     Dir(File fd)
-        : fd(fd) {
+        : fd(fd), ff(fd), valid(fd != 0) {
     }
 
     File openFile(const char *mode) {
@@ -29,6 +29,9 @@ class Dir {
     }
     time_t fileCreationTime() {
         return (size_t)0;
+    }
+    bool isValid() {
+        return valid;
     }
     bool isFile() {
         return ff.isDirectory() ? false : true;
@@ -49,6 +52,7 @@ class Dir {
   protected:
     File fd;
     File ff;
+    bool valid;
 };
 }  // namespace fs
 #endif
@@ -94,10 +98,22 @@ void fsEnd() {
     }
 }
 
+bool fsExists(const char* path) {
+    /*! Checks if a path exists
+    @param path Absolute pathname to check for existence
+    @return true on success
+    */
+#ifdef __USE_SPIFFS_FS__
+    return fsBegin() && SPIFFS.exists(path);
+#else
+    return fsBegin() && LittleFS.exists(path);
+#endif
+}
+
 bool fsDelete(String filename) {
     /*! This function deletes the spcified file from the filesystem.
     @param filename Absolute filename of the file to be deleted
-    @return true on sucess
+    @return true on success
     */
 #ifdef __USE_SPIFFS_FS__
     bool ret = fsBegin() && SPIFFS.remove(filename);
@@ -131,6 +147,30 @@ fs::File fsOpen(String filename, String mode) {
     return f;
 }
 
+bool fsMkDir(String path) {
+    /*! This function creates a directory given its absolute path.
+    @param path Absolute path to create
+    @return true on success
+    */
+#ifdef __USE_SPIFFS_FS__
+    return false;
+#else
+    return LittleFS.mkdir(path);
+#endif
+}
+
+bool fsRmDir(String path) {
+    /*! This function removes a directory given its absolute path.
+    @param path Absolute path to remove
+    @return true on success
+    */
+#ifdef __USE_SPIFFS_FS__
+    return false;
+#else
+    return LittleFS.rmdir(path);
+#endif
+}
+
 fs::Dir fsOpenDir(String path) {
     /*! This function opens a directory given its absolute path.
     @param path Absolute path to open
@@ -154,6 +194,28 @@ fs::Dir fsOpenDir(String path) {
     return LittleFS.openDir(path.c_str());
 #endif
 #endif  // __ESP32__ || __ESP32_RISC__
+}
+
+size_t fsTotalBytes() {
+    /*! This function returns the total number of bytes of the filesystem
+    @return Total number of bytes of the filesystem
+    */
+#ifdef __USE_SPIFFS_FS__
+    return fsBegin() ? SPIFFS.totalBytes() : 0;
+#else
+    return fsBegin() ? LittleFS.totalBytes() : 0;
+#endif
+}
+
+size_t fsUsedBytes() {
+    /*! This function returns the number of used bytes of the filesystem
+    @return Number of used bytes of the filesystem
+    */
+#ifdef __USE_SPIFFS_FS__
+    return fsBegin() ? SPIFFS.usedBytes() : 0;
+#else
+    return fsBegin() ? LittleFS.usedBytes() : 0;
+#endif
 }
 
 }  // namespace ustd

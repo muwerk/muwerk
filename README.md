@@ -175,6 +175,9 @@ History
 -------
 
 * 0.7.0 (2023-06-XX)
+  * Improvements to file system abstraction: new functions fsExists, fsMkDir, fsRmDir, fsTotalBytes, fsUsedBytes
+  * Improvements to directory class: methods can now also be called on directory itself before calling "next" in order to check for existence
+  * Improvements to directory class: new method isValid
   * Improvements to ustd::split for better parsing capabilities
   * New function ustd:join
 * 0.6.5 (2023-06-02) Support for console command extensions with supplied printer instance
