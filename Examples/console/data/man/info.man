@@ -1,0 +1,12 @@
+NAME
+    info - show system status
+
+SYNOPSIS
+    info
+
+DESCRIPTION
+    Shows information reguarding the system. Depending on the device type,
+    this information may vary.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

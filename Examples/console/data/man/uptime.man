@@ -1,0 +1,12 @@
+NAME
+    uptime - Tell how long the system has been running.
+
+SYNOPSIS
+    uptime
+
+DESCRIPTION
+    uptime gives a one line display of the following information.  The current time,
+    how long the system has been running and how many users are currently logged on.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

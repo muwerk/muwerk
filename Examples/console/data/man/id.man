@@ -1,0 +1,14 @@
+NAME
+    id - print real and effective user and group IDs
+
+SYNOPSIS
+    id [USER]...
+
+DESCRIPTION
+    Print user and group information for each specified USER, or (when USER omitted) for the current user.
+
+SEE ALSO
+    passwd, userdel, id, who.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

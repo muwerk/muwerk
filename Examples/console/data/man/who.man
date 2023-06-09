@@ -1,0 +1,14 @@
+NAME
+    who - show who is logged on
+
+SYNOPSIS
+    who
+
+DESCRIPTION
+    Print information about users who are currently logged in.
+
+SEE ALSO
+    passwd, useradd, id, who.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

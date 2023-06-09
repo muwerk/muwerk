@@ -1,0 +1,29 @@
+NAME
+    date - print or set the system date and time
+
+SYNOPSIS
+    date [-f FORMAT]
+    date [[YYYY-MM-DD] hh:mm:ss]
+
+DESCRIPTION
+    Display the current time in the given FORMAT, or set the system date. When disaplying the date,
+    the following formats can be specified:
+
+    -f 0
+        Complete: results in something like: 2023-06-07 16:58:16 - epoch 1686149896
+
+    -f 1
+        Timestamp: results in something like: 2023-06-07 16:58:16
+
+    -f 2
+        Date: results in something like: 2023-06-07
+
+    -f 3
+        Time: results in something like: 16:58:16
+
+EXAMPLES
+    date
+        Displays the current date or time
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

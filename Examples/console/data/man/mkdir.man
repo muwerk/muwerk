@@ -1,0 +1,20 @@
+NAME
+    mkdir - make directories
+
+SYNOPSIS
+    mkdir [OPTION]... DIRECTORY...
+
+DESCRIPTION
+    Create the DIRECTORY(ies), if they do not already exist.
+
+    -p, --parents
+        no error if existing, make parent directories as needed
+
+    -v, --verbose
+        print a message for each created directory
+
+    -h, --help
+        display this help and exit
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

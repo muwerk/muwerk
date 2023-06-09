@@ -1,0 +1,30 @@
+NAME
+    cat – concatenate and print files
+
+SYNOPSIS
+    cat [-l] [-s <start>] [-e <end>] FILE ...
+
+DESCRIPTION
+    The cat utility reads files sequentially, writing them to the standard output.
+    The file operands are processed in command-line order.
+
+    The options are as follows:
+
+    -l
+        Show line numbers in output
+
+    -s <start>
+        Display file(s) only starting from the specified line number
+
+    -e <end>
+        Display file(s) only up to the specified line number
+
+EXAMPLES
+    cat /etc/motd
+        Displays the file "/etc/motd"
+
+    cat -l -s 2 /etc/motd
+        Displays the file "/etc/motd" starting at line number 2 and displaying line numbers
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

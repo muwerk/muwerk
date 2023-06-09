@@ -1,0 +1,18 @@
+NAME
+    logout - log out the currently logged in user
+
+SYNOPSIS
+    logout
+
+DESCRIPTION
+    Ends the session of the currently logged in user.
+
+FILES
+    /etc/passwd.json
+        User account information.
+
+SEE ALSO
+    passwd, userdel, id, who.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

@@ -1,0 +1,11 @@
+NAME
+    sub - add or remove message subscriptions shown on console
+
+SYNOPSIS
+
+DESCRIPTION
+
+EXAMPLES
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

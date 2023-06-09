@@ -1,0 +1,22 @@
+NAME
+    passwd - update user's authentication tokens
+
+SYNOPSIS
+    passwd [username]
+
+DESCRIPTION
+    The passwd utility is used to update user's authentication token(s). If no username
+    is apecified, the command refers to the currently logged in user.
+
+CAVEATS
+    Only users with root permission (gid 0) are allowed to change passwords of other users.
+
+FILES
+    /etc/passwd.json
+        User account information.
+
+SEE ALSO
+    passwd, userdel, id, who.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

@@ -1,0 +1,11 @@
+NAME
+    jf set - write values in json files
+
+SYNOPSIS
+
+DESCRIPTION
+
+EXAMPLES
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

@@ -1,0 +1,39 @@
+NAME
+    uname - print system information
+
+SYNOPSIS
+    uname [OPTION]...
+
+DESCRIPTION
+    Print certain system information.  With no OPTION, same as -s.
+
+    -a
+        print all information, in the following order, except omit -p and -i if unknown:
+
+    -s
+        print the kernel name
+
+    -n
+        print the network node hostname
+
+    -r
+        print the kernel release
+
+    -v
+        print the kernel version
+
+    -m
+        print the machine hardware name
+
+    -p
+        print the processor type (non-portable)
+
+    -o
+        print the operating system
+
+    -h
+        display this help and exit
+
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

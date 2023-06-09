@@ -1,0 +1,40 @@
+NAME
+    useradd - create a new user or update default new user information
+
+SYNOPSIS
+    useradd [options] LOGIN
+
+
+DESCRIPTION
+    The useradd command creates a new user account using the values specified on the command line
+    plus the default values from the system.
+
+OPTIONS
+    The options which apply to the useradd command are:
+
+    -g
+        The group number of the user's initial login group.
+
+        If not specified, the user will be assigned to the group 100(users) by default.
+
+    -u
+        The numerical value of the user's ID. This value must be unique, unless the -o option
+        is used. The value must be non-negative. The default is to use the smallest ID value
+        greater than or equal to UID_MIN (1000) and greater than every other user.
+
+CAVEATS
+    Usernames may contain only lower and upper case letters, digits, underscores, or dash.
+    Dashes are not allowed at the beginning of the username. Fully numeric usernames are also
+    disallowed.
+
+    Usernames may only be up to 16 characters long.
+
+FILES
+    /etc/passwd.json
+        User account information.
+
+SEE ALSO
+    passwd, userdel, id, who.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

@@ -20,9 +20,9 @@ Extension function that implements a new command for a Console.
  */
 
 #if defined(__ESP__) || defined(__UNIXOID__)
-typedef std::function<void(String command, String args, Print *printer)> T_COMMANDFN;
+typedef std::function<void(String command, String args, Print *printer, Console *pCon)> T_COMMANDFN;
 #else
-typedef ustd::function<void(String command, String args, Print *printer)> T_COMMANDFN;
+typedef ustd::function<void(String command, String args, Print *printer, Console *pCon)> T_COMMANDFN;
 #endif
 
 /*! \brief muwerk Command extension helper for Console Classes */
@@ -53,8 +53,8 @@ class ExtendableConsole {
         /*! Extend the console with a custom command
          *
          * @param command The name of the command
-         * @param handler Callback of type void myCallback(String command, String
-         * args, Print *printer) that is called, if a matching command is entered.
+         * @param handler Callback of type void myCallback(String command, String args, Print *printer Console *pCon)
+         * that is called, if a matching command is entered.
          * @return commandHandle on success (needed for unextend), or -1
          * on error.
          */
@@ -102,10 +102,12 @@ shells over other transport mechanisms.
 The simple interpreter has the follwing builtin commands:
 
 * help: displays a list of supported commands
-* reboot: restarts the device
+* reboot: restarts the device (only on esp)
+* uname: prints system information
+* uptime: tells how long the system has been running.
+* mem:
 * sub: add or remove message subscriptions shown on console
 * pub: allows to publish a message
-* debug: enable or disable wifi diagnostics (if available)
 * wifi: show wifi status (if available)
 * info: show system status
 
@@ -116,6 +118,17 @@ there are additional builtin commands available:
 * cat: outputs the specified files
 * rm: removes the specified files
 * jf: read, write or delete values in json files
+* man: displays man pages for the supported commands
+
+If the filesystem contains a valid `auth.json` file, the console supports
+user authorization and the following additional buildin commands:
+
+* passwd: update user's authentication tokens
+* useradd: create a new user or update default new user information
+* userdel: delete a user account and related files
+* id: print real and effective user and group IDs
+* who: show who is logged on
+* logout: log out the currently logged in user
 
 The commandline parser can be extended (see example below)
 
@@ -136,7 +149,7 @@ void setup() {
     Serial.begin( 115200 );
 
     // extend console
-    con.extend( "hurz", []( String cmd, String args, Print *printer ) {
+    con.extend( "hurz", []( String cmd, String args, Print *printer, Console *pCon ) {
         printer->println( "Der Wolf... Das Lamm.... Auf der grünen Wiese....  HURZ!" );
         while ( args.length() ) {
             String arg = ustd::shift( args );
@@ -174,13 +187,19 @@ class Console : public ExtendableConsole {
     bool suball = false;
     bool debug = false;
 #ifdef USTD_FEATURE_FILESYSTEM
+    static bool auth;
     static int iManagerTask;
     static array<Console *> consoles;
     static ustd::jsonfile config;
     bool finished = false;
     AuthState authState = NAUTH;
-    String login;
-    String pass1;
+    uint16_t uid = 65535;
+    uint16_t gid = 65535;
+    String userid;
+    String param1;
+    String param2;
+    String home = "/";
+    String cwd = "/";
 #endif
 
   public:
@@ -195,12 +214,14 @@ class Console : public ExtendableConsole {
     virtual ~Console() {
     }
 
-    virtual void init(Scheduler *pSched) {
+    virtual void init() {
 #ifdef USTD_FEATURE_FILESYSTEM
-        // read configuration
-        String username = config.readString("auth/username");
-        String password = config.readString("auth/password");
-        if (username.isEmpty() && password.isEmpty()) {
+        // check if there are declared users
+        auth = config.exists("passwd/users/root");
+        if (!auth) {
+            uid = 0;
+            gid = 0;
+            userid = "root";
             authState = AUTH;
         }
         // setup console management task if not already setup (static scope)
@@ -246,20 +267,42 @@ class Console : public ExtendableConsole {
             stars(args.length());
             break;
         case AUTH:
-#endif
-            printer->print("\rmuwerk> ");
-            printer->print(args);
-#ifdef USTD_FEATURE_FILESYSTEM
+            outputf("\r%s@%s:%s%c %s", userid.c_str(), hostname().c_str(), getPromptPath().c_str(), (uid == 0 ? '#' : '$'), args.c_str());
             break;
         }
+#else
+        printer->print("\rroot@");
+        printer->print(hostname());
+        printer->print("~# ");
+        printer->print(args);
 #endif
     }
 
 #ifdef USTD_FEATURE_FILESYSTEM
-    virtual String getFrom() = 0;
-    virtual String getUser() {
-        return (authState == AUTH) ? "root" : "-";
+    String getPromptPath() {
+        if (cwd == home) {
+            return "~";
+        } else if (cwd == "/") {
+            return "/";
+        } else {
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+            return cwd.substr(0, cwd.length() - 1);
+#else
+            return cwd.substring(0, cwd.length() - 1);
+#endif
+        }
     }
+
+    uint16_t getUid() {
+        return uid;
+    }
+    uint16_t getGid() {
+        return gid;
+    }
+    virtual String getUser() {
+        return (authState == AUTH) ? userid : "-";
+    }
+    virtual String getFrom() = 0;
     virtual String getRemoteAddress() = 0;
     virtual String getRemotePort() = 0;
 #endif
@@ -269,49 +312,25 @@ class Console : public ExtendableConsole {
         switch (authState) {
         default:
         case NAUTH:
-            login = args;
-            if (!login.isEmpty()) {
+            param1 = args;
+            if (!param1.isEmpty()) {
                 authState = PASS;
             }
             args = "";
             return true;
         case PASS:
-            if ((login == config.readString("auth/username")) && (args == config.readString("auth/password"))) {
-                String lastSuccessTime = config.readString("auth/lastSuccessTime");
-                String lastSuccessFrom = config.readString("auth/lastSuccessFrom");
-                String lastFailedTime = config.readString("auth/lastFailedTime");
-                String lastFailedFrom = config.readString("auth/lastFailedFrom");
-                long failedCount = config.readLong("auth/failedCount", 0);
-
-                printer->println();
-                if (!lastFailedTime.isEmpty()) {
-                    printer->printf("Last failed login: %s from %s\r\n", lastFailedTime.c_str(), lastFailedFrom.c_str());
-                }
-                if (failedCount) {
-                    printer->printf("There were %ld failed login attempts since the last successful login.\r\n", failedCount);
-                }
-                if (!lastSuccessTime.isEmpty()) {
-                    printer->printf("Last login: %s from %s\r\n", lastSuccessTime.c_str(), lastSuccessFrom.c_str());
-                }
-
-                // report successful login
-                config.writeString("auth/lastSuccessTime", getDate());
-                config.writeString("auth/lastSuccessFrom", getFrom());
-                // clean failure data
-                config.remove("auth/lastFailedTime");
-                config.remove("auth/lastFailedFrom");
-                config.writeLong("auth/failedCount", 0);
-
-                authState = AUTH;
+            if ((config.exists("passwd/users/" + param1)) && checkLogin(param1, args)) {
+                login(param1.c_str());
             } else {
                 // report failure data
-                config.writeLong("auth/failedCount", config.readLong("auth/failedCount", 0) + 1);
-                config.writeString("auth/lastFailedTime", getDate());
-                config.writeString("auth/lastFailedFrom", getFrom());
+                config.writeLong("passwd/failedCount", config.readLong("passwd/failedCount", 0) + 1);
+                config.writeString("passwd/lastFailedTime", getDate());
+                config.writeString("passwd/lastFailedFrom", getFrom());
                 printer->println();
                 printer->print("Login incorrect\r\n");
-                authState = NAUTH;
+                logout();
             }
+            param1 = "";
             args = "";
             return true;
         case AUTH:
@@ -368,17 +387,31 @@ class Console : public ExtendableConsole {
             cmd_man();
         } else if (cmd == "ls") {
             cmd_ls();
+        } else if (cmd == "cd") {
+            cmd_cd();
         } else if (cmd == "rm") {
             cmd_rm();
+        } else if (cmd == "df") {
+            cmd_df();
         } else if (cmd == "cat") {
             cmd_cat();
+        } else if (cmd == "mkdir") {
+            cmd_mkdir();
+        } else if (cmd == "rmdir") {
+            cmd_rmdir();
         } else if (cmd == "jf") {
             cmd_jf();
-        } else if (cmd == "passwd") {
+        } else if (auth && cmd == "passwd") {
             cmd_passwd();
-        } else if (cmd == "users") {
-            cmd_users();
-        } else if (cmd == "logout") {
+        } else if (auth && cmd == "useradd") {
+            cmd_useradd();
+        } else if (auth && cmd == "userdel") {
+            cmd_userdel();
+        } else if (auth && cmd == "id") {
+            cmd_id();
+        } else if (auth && cmd == "who") {
+            cmd_who();
+        } else if (auth && cmd == "logout") {
             cmd_logout();
 #endif
         } else if (!cmd_custom(cmd)) {
@@ -395,10 +428,11 @@ class Console : public ExtendableConsole {
         help += ", date";
 #endif
 #ifdef USTD_FEATURE_FILESYSTEM
-        help += ", man, ls, rm, cat, jf, logout, users, passwd";
+        help += ", man, ls, rm, cat, jf";
+        if (auth) { help += ", passwd, useradd, userdel, id, who, logout"; }
 #endif
 #ifdef __ESP__
-        help += ", debug, wifi, reboot";
+        help += ", wifi, reboot";
 #endif
 #if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         for (unsigned int i = 0; i < commands.length(); i++) {
@@ -411,9 +445,7 @@ class Console : public ExtendableConsole {
 
     void cmd_sub() {
         String arg = pullArg();
-        if (arg == "-h" || arg == "-H") {
-            printer->println("usage: sub [all | none]");
-            printer->println("usage: sub topic [topic [..]]");
+        if (help(arg, "usage: sub [all | none]\r\nusage: sub topic [topic [..]]")) {
             return;
         } else if (arg == "none") {
             clearsub();
@@ -441,8 +473,7 @@ class Console : public ExtendableConsole {
 
     void cmd_pub() {
         String arg = pullArg();
-        if (arg == "-h" || arg == "-H" || arg == "") {
-            printer->println("usage: pub <topic> <message>");
+        if (help(arg, "usage: pub <topic> <message>")) {
             return;
         }
         pSched->publish(arg, args, name);
@@ -461,6 +492,7 @@ class Console : public ExtendableConsole {
         printer->println();
     }
 #endif
+
     void cmd_uptime() {
         unsigned long uptime = pSched->getUptime();
         unsigned long days = uptime / 86400;
@@ -468,7 +500,12 @@ class Console : public ExtendableConsole {
         unsigned long minutes = (uptime % 3600) / 60;
         unsigned long seconds = uptime % 60;
 
+#ifdef USTD_FEATURE_CLK_READ
+        printer->print(getDate(3));
+        printer->print(" up ");
+#else
         printer->print("up ");
+#endif
         if (days) {
             printer->print(days);
             if (days > 1) {
@@ -590,9 +627,11 @@ class Console : public ExtendableConsole {
 
 #ifdef USTD_FEATURE_FILESYSTEM
     virtual void cmd_logout() {
-        printer->println();
-        printer->println("Bye!");
-        authState = NAUTH;
+        if (auth) {
+            printer->println();
+            printer->println("Bye!");
+            authState = NAUTH;
+        }
     }
 
     bool cmd_passwd() {
@@ -601,38 +640,46 @@ class Console : public ExtendableConsole {
         switch (authState) {
         case AUTH:
             arg = pullArg();
-            if (arg == "-h" || arg == "-H") {
-                printer->println("usage: passwd <accountName>");
+            if (help(arg, "usage: passwd <accountName>")) {
                 return false;
             } else if (arg.isEmpty()) {
-                arg = config.readString("auth/username");
-            }
-            if (arg != config.readString("auth/username")) {
-                printer->printf("passwd: Unknown user name '%s'.\r\n", arg.c_str());
+                arg = userid;
+            } else if ((arg != userid) && (gid != 0)) {
+                printer->println("passwd: Only root can specify a user name.");
                 return false;
             }
-            printer->printf("Changing password for user %s.\r\n", arg.c_str());
+
+            if (!config.exists("passwd/users/" + arg)) {
+                outputf("passwd: Unknown user name '%s'.\r\n", arg.c_str());
+                return false;
+            }
+            outputf("Changing password for user %s.\r\n", arg.c_str());
+            param1 = arg;
+            args = "";
             authState = PASS1;
             return true;
         case PASS1:
             if (args.isEmpty()) {
                 printer->println("No password has been supplied.");
                 authState = AUTH;
+                resetparams();
                 return false;
             }
-            pass1 = args;
+            param2 = args;
             args = "";
             authState = PASS2;
             return true;
         case PASS2:
-            if (args != pass1) {
+            if (args != param2) {
                 printer->println("Sorry, passwords do not match.");
+                resetparams();
                 args = "";
                 authState = PASS1;
                 return false;
             }
-            config.writeString("auth/password", args);
+            savePassword(param1, args);
             printer->println("passwd: all authentication tokens updated successfully.");
+            resetparams();
             args = "";
             authState = AUTH;
             return true;
@@ -642,15 +689,109 @@ class Console : public ExtendableConsole {
         return true;
     }
 
-    void cmd_users() {
-        printer->printf("ID   User      Address               Port\n");
-        printer->printf("-------------------------------------------\n");
+    void cmd_useradd() {
+        String nuserid;
+        uint16_t nuid = 1000;
+        uint16_t ngid = 100;
+        bool autoid = true;
+
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (help(arg, "usage: useradd [-g GID] [-u UID] LOGIN")) {
+                return;
+            } else if (arg == "-g") {
+                arg = pullArg();
+                gid = parseId(arg, 65535);
+                if (gid == 65535) {
+                    printer->println("\rInvalid gid specified.");
+                    return;
+                }
+            } else if (arg == "-u") {
+                arg = pullArg();
+                uid = parseId(arg, 65535);
+                if (uid == 65535) {
+                    printer->println("\rInvalid uid specified.");
+                    return;
+                }
+                autoid = false;
+            } else {
+                if (!validLogin(arg)) {
+                    outputf("useradd: invalid user name '%s'.\r\n", arg.c_str());
+                    return;
+                }
+                nuserid = arg;
+            }
+        }
+        if (nuserid.isEmpty()) {
+            printer->println("usage: useradd [-g GID] [-u UID] LOGIN");
+            return;
+        } else if (gid != 0) {
+            printer->println("useradd: Permission denied.");
+            return;
+        }
+        if (autoid) {
+            JSONVar users;
+            config.readJsonVar("passwd/users", users);
+            nuid = 0;
+            for (int i = 0; i < users.keys().length(); i++) {
+                long luid = config.readLong("passwd/users/" + String((const char *)users.keys()[i]) + "/uid", 0);
+                if (luid > nuid) {
+                    nuid = luid;
+                }
+            }
+            if (++nuid < 1000) {
+                nuid = 1000;
+            }
+        }
+        config.writeLong("passwd/users/" + nuserid + "/uid", nuid);
+        config.writeLong("passwd/users/" + nuserid + "/gid", ngid);
+        config.writeString("passwd/users/" + nuserid + "/password", "");
+    }
+
+    void cmd_userdel() {
+        String arg = pullArg();
+        if (help(arg, "usage: userdel LOGIN", true)) {
+            return;
+        }
+        if (gid != 0) {
+            printer->println("userdel: Permission denied.");
+            return;
+        }
+        if (arg == "root") {
+            printer->println("userdel: user 'root' cannot be deleted\r\n");
+        } else if (arg == userid) {
+            outputf("userdel: user '%s' is currently used\r\n", arg.c_str());
+        } else if (!config.exists("passwd/users/" + arg)) {
+            outputf("userdel: user '%s' does not exist\r\n", arg.c_str());
+        } else {
+            config.remove("passwd/users/" + arg);
+        }
+    }
+
+    void cmd_id() {
+        if (args.isEmpty()) {
+            outputf("uid=%d(%s) gid=%d(%s)\r\n", (int)uid, userid.c_str(), (int)gid, groupname(gid));
+            return;
+        }
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (config.exists("passwd/users/" + arg)) {
+                uint16_t iduid = config.readLong("passwd/users/" + arg + "/uid", 65535);
+                uint16_t idgid = config.readLong("passwd/users/" + arg + "/gid", 65535);
+                outputf("uid=%d(%s) gid=%d(%s)\r\n", (int)iduid, arg.c_str(), (int)idgid, groupname(idgid));
+            } else {
+                outputf("id: %s: no such user\r\n", arg.c_str());
+            }
+        }
+    }
+
+    void cmd_who() {
+        outputf("ID   User      Address               Port\n");
+        outputf("-------------------------------------------\n");
         for (unsigned int i = 0; i < consoles.length(); i++) {
             Console *pCon = Console::consoles[i];
             if (pCon->finished) {
-                printer->printf("%-3d  Connection is terminated\n", i);
+                outputf("%-3d  Connection is terminated\n", i);
             } else {
-                printer->printf("%-3d  %-8.8s  %-20.20s  %s\n", i, pCon->getUser(), pCon->getRemoteAddress().c_str(), pCon->getRemotePort());
+                outputf("%-3d  %-8.8s  %-20.20s  %s\n", i, pCon->getUser().c_str(), pCon->getRemoteAddress().c_str(), pCon->getRemotePort());
             }
         }
     }
@@ -687,15 +828,7 @@ class Console : public ExtendableConsole {
             cmd_uname('v', false);
             break;
         case 'n':
-#ifdef __ESP__
-#if defined(__ESP32__) || defined(__ESP32_RISC__)
-            printer->print(WiFi.getHostname());
-#else
-            printer->print(WiFi.hostname());
-#endif
-#else
-            printer->print("localhost");
-#endif
+            printer->print(hostname());
             break;
         case 'r':
 #ifdef __ESP__
@@ -705,21 +838,7 @@ class Console : public ExtendableConsole {
 #endif
             break;
         case 'p':
-#ifdef __ESP__
-#if defined(__ESP32__)
-            printer->print("ESP32 (Tensilica)");
-#elif defined(__ESP32_RISC__)
-            printer->print("ESP32 (RISC-V)");
-#else
-            printer->print("ESP");
-#endif
-#else
-#ifdef __ARDUINO__
-            printer->print("Arduino");
-#else
-            printer->print("Unknown");
-#endif
-#endif
+            printer->print(architecture());
             break;
         case 'v':
             cmd_uname('p', false);
@@ -733,9 +852,12 @@ class Console : public ExtendableConsole {
 #endif
 #endif
             break;
+        case 'o':
+            printer->print("muwerk");
+            break;
         case 'h':
         default:
-            printer->println("usage: uname [-amnprsv]");
+            printer->println("usage: uname [-amnoprsv]");
             return;
         }
         if (crlf) {
@@ -746,25 +868,31 @@ class Console : public ExtendableConsole {
 #ifdef USTD_FEATURE_CLK_READ
     void cmd_date() {
         String arg = pullArg();
-        arg.toLowerCase();
-        if (arg == "-h") {
+
 #ifdef USTD_FEATURE_CLK_SET
-            printer->println("usage: date [[YYYY-MM-DD] hh:mm:ss]");
+        if (help(arg, "usage: date [-f FORMAT]\r\nusage: date [[YYYY-MM-DD] hh:mm:ss]")) {
 #else
-            printer->println("usage: date");
+        if (help(arg, "usage: date [-f FORMAT]")) {
 #endif
             return;
         }
+
+        uint16_t mode = 0;
         time_t t = time(nullptr);
         struct tm *lt = localtime(&t);
         if (!lt) {
             printer->println("error: current time cannot be determined");
             return;
         }
+
+        if (arg == "-f") {
+            arg = pullArg();
+            mode = parseId(arg, 0);
+            arg = pullArg();
+        }
+
         if (arg == "") {
-            outputf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu\r\n", (int)lt->tm_year + 1900,
-                    (int)lt->tm_mon + 1, (int)lt->tm_mday, (int)lt->tm_hour, (int)lt->tm_min,
-                    (int)lt->tm_sec, t);
+            printer->println(getDate(lt, t, mode));
         } else {
 #ifdef USTD_FEATURE_CLK_SET
             if (args.length()) {
@@ -796,7 +924,7 @@ class Console : public ExtendableConsole {
             // invoke myself to display resulting date
             args = "";
             printer->print("Date set to: ");
-            cmd_date();
+            printer->print(getDate(0));
 #endif  // __ESP__
         }
     }
@@ -804,79 +932,73 @@ class Console : public ExtendableConsole {
 
 #ifdef USTD_FEATURE_FILESYSTEM
     void cmd_man() {
-        String arg = pullArg();
-        if (arg.isEmpty() || arg == "-h" || arg == "-H") {
-            printer->println("\rusage: man COMMAND");
-            printer->println("       Displays help for COMMAND");
+        if (help(args, "usage: man COMMAND\r\n       Displays help for COMMAND")) {
             return;
         }
-        String file = "/" + arg + ".man";
-        if (!cat(file.c_str())) {
-            cat("/man.man");
-            printer->printf("No manual entry for %s\r\n", arg.c_str());
+        args.replace(' ', '_');
+        String file = "/man/" + args + ".man";
+        if (!cat(file.c_str(), false)) {
+            cat("/man/man.man", false);
+            outputf("man: No manual entry for %s\r\n", args.c_str());
         }
+    }
+
+    void cmd_cd() {
+        String arg = pullArg();
+        if (help(arg, "usage: cd [dir]")) {
+            return;
+        }
+        cd(arg.c_str());
     }
 
     void cmd_ls() {
         ustd::array<String> paths;
         bool extended = false;
+        bool all = false;
 
         for (String arg = pullArg(); arg.length(); arg = pullArg()) {
-            if (arg == "-h" || arg == "-H") {
-                printer->println("\rusage: ls [-l] <path> [<path> [...]]");
+            if (help(arg, "usage: ls [-l] <path> [<path> [...]]")) {
                 return;
-            } else if (arg == "-l" || arg == "-L" || arg == "-la") {
+            } else if (arg == "-l" || arg == "-L") {
                 extended = true;
+            } else if (arg == "-a") {
+                all = true;
+            } else if (arg == "-la" || arg == "-al") {
+                all = extended = true;
             } else {
                 paths.add(arg);
             }
         }
 
         if (paths.length() == 0) {
-            String root = "/";
-            paths.add(root);
+            paths.add(cwd);
         }
 
-        for (unsigned int i = 0; i < paths.length(); i++) {
-            fs::Dir dir = fsOpenDir(paths[i]);
-            while (dir.next()) {
-                if (extended) {
-                    outputf("%crw-rw-rw-  root  root  %10u  ", (dir.isDirectory() ? 'd' : '-'),
-                            dir.fileSize());
-                    time_t tt = dir.fileTime();
-                    struct tm *lt = localtime(&tt);
-                    if (lt) {
-                        outputf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i  ", lt->tm_year + 1900,
-                                lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
-                    }
-                }
-                printer->println(dir.fileName());
-            }
-        }
+        ls(paths, extended, all);
     }
 
     void cmd_rm() {
-        String arg = pullArg();
-        if (arg == "-h" || arg == "-H") {
-            printer->println("usage: rm <filename>");
-            return;
+        ustd::array<String> paths;
+
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (help(arg, "usage: rm [FILE]...", true)) {
+                return;
+            } else {
+                paths.add(arg);
+            }
         }
-        if (!fsDelete(arg)) {
-#ifndef USE_SERIAL_DBG
-            printer->println("error: File " + arg + " can't be deleted.");
-#endif
-        }
+
+        rm(paths);
     }
 
     void cmd_cat() {
+        ustd::array<String> paths;
         bool lineNumbers = false;
         unsigned int startLine = 1;
         unsigned int endLine = (unsigned int)-1;
-        ustd::array<String> filenames;
 
         for (String arg = pullArg(); arg.length(); arg = pullArg()) {
-            if (arg == "-h" || arg == "-H") {
-                printer->println("usage: cat [-l] [-s <start>] [-e <end>] <filename>");
+            if (help(arg, "usage: cat [-l] [-s <start>] [-e <end>] <filename>", true)) {
                 return;
             } else if (arg == "-l") {
                 lineNumbers = true;
@@ -890,21 +1012,93 @@ class Console : public ExtendableConsole {
                 arg = pullArg();
                 sscanf(arg.c_str(), "%ud", &endLine);
             } else if (!arg.isEmpty()) {
+                paths.add(arg);
+            }
+        }
+
+        cat(paths, true, lineNumbers, startLine, endLine);
+    }
+
+    void cmd_mkdir() {
+        ustd::array<String> paths;
+        bool parents = false;
+        bool verbose = false;
+
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (help(arg, "usage: mkdir [-p] DIRECTORY...", true)) {
+                return;
+            } else if (arg == "-p" || arg == "--parents") {
+                parents = true;
+            } else if (arg == "-v" || arg == "--verbose") {
+                verbose = true;
+            } else if (arg == "-vp" || arg == "-pv") {
+                parents = verbose = true;
+            } else if (!arg.isEmpty()) {
+                paths.add(arg);
+            }
+        }
+
+        mkdir(paths, parents, verbose);
+    }
+
+    void cmd_rmdir() {
+        ustd::array<String> paths;
+        bool verbose = false;
+
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (help(arg, "usage: rmdir DIRECTORY...", true)) {
+                return;
+            } else if (arg == "-v" || arg == "--verbose") {
+                verbose = true;
+            } else if (!arg.isEmpty()) {
+                paths.add(arg);
+            }
+        }
+
+        rmdir(paths, verbose);
+    }
+
+    void cmd_df() {
+        bool showFsType = false;
+        bool showHuman = false;
+        ustd::array<String> filenames;
+
+        for (String arg = pullArg(); arg.length(); arg = pullArg()) {
+            if (help(arg, "usage: df [-T] [-h] [FILE]...", false, true)) {
+                return;
+            } else if (arg == "-T" || arg == "--print-type") {
+                showFsType = true;
+            } else if (arg == "-h" || arg == "--human-readable") {
+                showHuman = true;
+            } else if (!arg.isEmpty()) {
                 filenames.add(arg);
             }
         }
-        for (unsigned int i = 0; i < filenames.length(); i++) {
-            if (!cat(filenames[i].c_str(), lineNumbers, startLine, endLine)) {
-                printer->println("error: File " + filenames[i] + " can't be opened.");
-            }
+
+        // print header
+        printer->print("Filesystem      ");
+        if (showFsType) {
+            printer->print("Type       ");
         }
+        if (showHuman) {
+            printer->print("    Size     Used    Avail ");
+        } else {
+            printer->print(" 1K-blocks       Used  Available ");
+        }
+        printer->println("Use% Mounted on");
+
+        // internal filesystem
+        String internalType = FSNAME;
+        internalType.toLowerCase();
+        dfLine("internal", internalType.c_str(), fsTotalBytes(), fsUsedBytes(), "/", showFsType, showHuman);
+        // future todo: add sdcard(s) if available
     }
 
     void cmd_jf() {
         String arg = pullArg();
         arg.toLowerCase();
 
-        if (arg == "-h" || arg == "") {
+        if (arg == "-h" || arg == "--help" || arg == "") {
             cmd_jf_help();
         } else if (arg == "get") {
             cmd_jf_get();
@@ -913,7 +1107,7 @@ class Console : public ExtendableConsole {
         } else if (arg == "del") {
             cmd_jf_del();
         } else {
-            printer->println("error: bad command " + arg + "specified.");
+            outputf("jf: '%s' is not a jf command. See 'jf --help'.\r\n", arg.c_str());
             cmd_jf_help();
         }
     }
@@ -932,7 +1126,7 @@ class Console : public ExtendableConsole {
             return;
         }
 
-        ustd::jsonfile jf;
+        ustd::jsonfile jf(true, false, cwd);
         JSONVar value;
 
         if (!jf.readJsonVar(arg, value)) {
@@ -960,7 +1154,7 @@ class Console : public ExtendableConsole {
             return;
         }
 
-        ustd::jsonfile jf;
+        ustd::jsonfile jf(true, false, cwd);
         JSONVar value = JSON.parse(args);
         if (JSON.typeof(value) == "undefined") {
             printer->println("error: Cannot parse value " + args);
@@ -981,7 +1175,7 @@ class Console : public ExtendableConsole {
             return;
         }
 
-        ustd::jsonfile jf;
+        ustd::jsonfile jf(true, false, cwd);
         if (!jf.remove(arg)) {
 #ifndef USE_SERIAL_DBG
             printer->println("error: Failed to delete value " + arg);
@@ -994,12 +1188,42 @@ class Console : public ExtendableConsole {
 #if USTD_FEATURE_MEMORY >= USTD_FEATURE_MEM_8K
         for (unsigned int i = 0; i < commands.length(); i++) {
             if (cmd == commands[i].command) {
-                commands[i].fn(cmd, args, printer);
+                commands[i].fn(cmd, args, printer, this);
                 return true;
             }
         }
 #endif
         return false;
+    }
+
+    String hostname() {
+#ifdef __ESP__
+#if defined(__ESP32__) || defined(__ESP32_RISC__)
+        return WiFi.getHostname();
+#else
+        return WiFi.hostname();
+#endif
+#else
+        return "localhost";
+#endif
+    }
+
+    String architecture() {
+#ifdef __ESP__
+#if defined(__ESP32__)
+        return "ESP32 (Tensilica)";
+#elif defined(__ESP32_RISC__)
+        return "ESP32 (RISC-V)";
+#else
+    return "ESP";
+#endif
+#else
+#ifdef __ARDUINO__
+        return "Arduino";
+#else
+        return "Unknown";
+#endif
+#endif
     }
 
 #ifdef USTD_FEATURE_FILESYSTEM
@@ -1018,9 +1242,296 @@ class Console : public ExtendableConsole {
         }
     }
 
-    bool cat(const char *filename, bool lineNumbers = false, unsigned int startLine = 1, unsigned int endLine = (unsigned int)-1) {
-        fs::File f = fsOpen(filename, "r");
+    void resetparams() {
+        param1 = param2 = "";
+    }
+
+    bool validLogin(String login) {
+        // Usernames may contain only lower and upper case letters, digits, underscores, or dash.
+        // Dashes are not allowed at the beginning of the username. Fully numeric usernames are also
+        // disallowed.
+        if (login.isEmpty() || login.length() > 16) {
+            return false;
+        }
+        bool hasnums = false;
+        bool haschar = false;
+        bool hasdash = false;
+        for (const char *pPtr = login.c_str(); *pPtr; pPtr++) {
+            if (*pPtr >= '0' && *pPtr <= '9') {
+                hasnums = true;
+            } else if ((*pPtr >= 'A' && *pPtr <= 'Z') || (*pPtr >= 'a' && *pPtr <= 'z')) {
+                haschar = true;
+            } else if ((*pPtr == '-') || (*pPtr == '_')) {
+                hasdash = true;
+            } else {
+                return false;
+            }
+        }
+        return haschar && (login.c_str()[0] != '-') && (login.c_str()[0] != '_');
+    }
+
+    bool checkLogin(String login, String password) {
+        String rawPassword = config.readString("passwd/users/" + login + "/password");
+        if (rawPassword.isEmpty()) {
+            // check for no password
+            return password.isEmpty();
+        }
+        if (rawPassword.length() < 3 || rawPassword.c_str()[0] != '$' || rawPassword.c_str()[2] != '$') {
+            // password stored without any encryption
+            return password == rawPassword;
+        }
+        switch (rawPassword.c_str()[1]) {
+        case '0':
+            // password stored without any encryption
+            return password == (rawPassword.c_str() + 3);
+        // case '1':
+        //     // sha1 hash
+        //     // TODO: provide sha1 implementation
+        //     return false;
+        // case '2':
+        //     // sha256 hash
+        //     // TODO: provide sha256 implementation
+        //     return false;
+        default:
+            // unknown encryption
+            return false;
+        }
+    }
+
+    void savePassword(String login, String password) {
+        config.writeString("passwd/users/" + login + "/password", "$0$" + password);
+    }
+
+    const char *groupname(uint16_t _gid) {
+        switch (_gid) {
+        case 0:
+            return "root";
+        case 100:
+            return "users";
+        case 65535:
+            return "nobody";
+        default:
+            return "other";
+        }
+    }
+
+    uint16_t parseId(String arg, uint16_t defaultVal) {
+        arg.trim();
+        if (arg.length() == 0) {
+            return defaultVal;
+        }
+        for (const char *pPtr = arg.c_str(); *pPtr; pPtr++) {
+            if (*pPtr < '0' || *pPtr > '9') {
+                return defaultVal;
+            }
+        }
+        long result = atol(arg.c_str());
+        return ((result < 0) || (result > 65535)) ? defaultVal : result;
+    }
+
+    void dfLine(const char *fs, const char *fsType, unsigned long totalBytes, unsigned long usedBytes, const char *mountPoint, bool showFsType, bool showHuman) {
+        unsigned long freeBytes = totalBytes - usedBytes;
+        unsigned long used = (usedBytes * 100) / totalBytes;
+
+        outputf("%-15.15s ", fs);
+        if (showFsType) {
+            outputf("%-10.10s ", fsType);
+        }
+        if (showHuman) {
+            outputf("%8s %8s %8s ", getHuman(totalBytes), getHuman(usedBytes), getHuman(freeBytes));
+        } else {
+            outputf("%10lu %10lu %10lu ", totalBytes / 1024, usedBytes / 1024, freeBytes / 1024);
+        }
+        outputf(" %2lu%% %s\r\n", used, mountPoint);
+    }
+
+    String getHuman(double value) {
+        const char *szUnits = " KMGTPZ";
+        char szBuffer[64];
+
+        while (value > 1024) {
+            value = value / 1024;
+            szUnits++;
+        }
+        snprintf(szBuffer, sizeof(szBuffer) - 1, "%.1lf%c", value, *szUnits);
+        szBuffer[sizeof(szBuffer) - 1] = 0;
+        return szBuffer;
+    }
+
+    String normalize(String path) {
+        if (path == "/") return "/";
+
+        // remove trailing slash
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+        path = path.startsWith("/") ? path.substr(1) : cwd.substr(1) + path;
+#else
+        path = path.startsWith("/") ? path.substring(1) : cwd.substring(1) + path;
+#endif
+        // split in parts
+        array<String> parts;
+        ustd::split(path, '/', parts);
+        // normaliez
+        for (int i = 0; i < parts.length(); i++) {
+            if (parts[i] == ".") {
+                // remove reference on self
+                parts.erase(i);
+                --i;
+            } else if (parts[i] == "..") {
+                // remove self AND parent (if not root)
+                parts.erase(i);
+                --i;
+                if (i >= 0) {
+                    parts.erase(i);
+                    --i;
+                }
+            }
+        }
+
+        // add trailing slash and rejoin parts
+        return "/" + ustd::join(parts, '/');
+    }
+
+    bool isAbsolute(const char *path) {
+        return *path == '/';
+    }
+
+    bool isDir(String path) {
+        if (path == "/") {
+            return true;
+        } else if (path.startsWith("/")) {
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+            String test = path.endsWith("/") ? path.substr(0, path.length() - 1) : path;
+#else
+            String test = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+#endif
+            char *pPos = strrchr(test.c_str(), '/') + 1;
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+            String parent = test.substr(0, pPos - test.c_str());
+#else
+            String parent = test.substring(0, pPos - test.c_str());
+#endif
+            String candidate = String(pPos);
+            fs::Dir dir = fsOpenDir(parent);
+            while (dir.next()) {
+                if (dir.fileName() == candidate) {
+                    return dir.isDirectory();
+                }
+            };
+            return false;
+        } else {
+            return isDir(cwd + path);
+        }
+    }
+
+    void login(String loginid) {
+        String lastSuccessTime = config.readString("passwd/lastSuccessTime");
+        String lastSuccessFrom = config.readString("passwd/lastSuccessFrom");
+        String lastFailedTime = config.readString("passwd/lastFailedTime");
+        String lastFailedFrom = config.readString("passwd/lastFailedFrom");
+        long failedCount = config.readLong("passwd/failedCount", 0);
+
+        printer->println();
+        if (!lastFailedTime.isEmpty()) {
+            outputf("Last failed login: %s from %s\r\n", lastFailedTime.c_str(), lastFailedFrom.c_str());
+        }
+        if (failedCount) {
+            outputf("There were %ld failed login attempts since the last successful login.\r\n", failedCount);
+        }
+        if (!lastSuccessTime.isEmpty()) {
+            outputf("Last login: %s from %s\r\n", lastSuccessTime.c_str(), lastSuccessFrom.c_str());
+        }
+
+        // update last successful login
+        config.writeString("passwd/lastSuccessTime", getDate());
+        config.writeString("passwd/lastSuccessFrom", getFrom());
+        // clean failed login data
+        config.remove("passwd/lastFailedTime");
+        config.remove("passwd/lastFailedFrom");
+        config.writeLong("passwd/failedCount", 0);
+
+        uid = config.readLong("passwd/users/" + loginid + "/uid", 65535);
+        gid = config.readLong("passwd/users/" + loginid + "/gid", 65535);
+        userid = loginid;
+        authState = AUTH;
+    }
+
+    void logout() {
+        uid = 65535;
+        gid = 65535;
+        userid = "";
+        authState = NAUTH;
+    }
+
+    void cd(const char *pathname) {
+        if (*pathname == 0) {
+            cwd = home;
+            return;
+        }
+        String candidate = normalize(pathname);
+        if (!isDir(candidate)) {
+            outputf("cd: %s: No such file or directory\r\n", pathname);
+            return;
+        }
+        cwd = candidate.endsWith("/") ? candidate : candidate + "/";
+    }
+
+    void ls(ustd::array<String> &paths, bool extended = false, bool all = false) {
+        for (int i = 0; i < paths.length(); i++) {
+            ls(paths[i].c_str(), extended, all);
+        }
+    }
+
+    void ls(const char *path, bool extended = false, bool all = false) {
+        fs::Dir dir = fsOpenDir(normalize(path));
+        if (!dir.isValid()) {
+            outputf("ls: cannot access '%s': No such file or directory\r\n", path);
+        } else if (dir.isDirectory()) {
+            while (dir.next()) {
+                ls_line(dir, extended, all);
+            }
+        } else if (dir.isFile()) {
+            ls_line(dir, extended, all);
+        }
+    }
+
+    void ls_line(fs::Dir &dir, bool extended, bool all) {
+        if (dir.fileName().c_str()[0] != '.' || all) {
+            if (extended) {
+                outputf("%crw-rw-rw-  root  root  %10u  ", (dir.isDirectory() ? 'd' : '-'), dir.fileSize());
+                time_t tt = dir.fileTime();
+                struct tm *lt = localtime(&tt);
+                if (lt) {
+                    outputf("%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i  ",
+                            lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday,
+                            lt->tm_hour, lt->tm_min, lt->tm_sec);
+                }
+            }
+            printer->println(dir.fileName());
+        }
+    }
+
+    void rm(ustd::array<String> &paths) {
+        for (int i = 0; i < paths.length(); i++) {
+            rm(paths[i].c_str());
+        }
+    }
+
+    void rm(const char *path) {
+        if (!fsDelete(normalize(path))) {
+            outputf("rm: cannot remove '%s': No such file or directory\r\n", path);
+        }
+    }
+
+    void cat(ustd::array<String> &paths, bool showError = true, bool lineNumbers = false, unsigned int startLine = 1, unsigned int endLine = (unsigned int)-1) {
+        for (int i = 0; i < paths.length(); i++) {
+            cat(paths[i].c_str(), showError, lineNumbers, startLine, endLine);
+        }
+    }
+
+    bool cat(const char *filename, bool showError = true, bool lineNumbers = false, unsigned int startLine = 1, unsigned int endLine = (unsigned int)-1) {
+        fs::File f = fsOpen(normalize(filename), "r");
         if (!f) {
+            if (showError) outputf("cat: %s: No such file or directory\r\n", filename);
             return false;
         }
         if (!f.available()) {
@@ -1034,7 +1545,7 @@ class Console : public ExtendableConsole {
             line = f.readStringUntil('\n');
             if (lineNumber >= startLine && lineNumber <= endLine) {
                 if (lineNumbers) {
-                    printer->printf("%05d: ", lineNumber);
+                    outputf("%05d: ", lineNumber);
                 }
                 printer->println(line);
             }
@@ -1044,8 +1555,66 @@ class Console : public ExtendableConsole {
         return true;
     }
 
+    void mkdir(ustd::array<String> &paths, bool parents = false, bool verbose = false) {
+        for (int i = 0; i < paths.length(); i++) {
+            mkdir(paths[i].c_str(), parents, verbose);
+        }
+    }
+
+    void mkdir(const char *path, bool parents = false, bool verbose = false) {
+        if (!_mkdir(normalize(path).c_str(), parents, verbose)) {
+            outputf("mkdir: cannot create directory ‘%s’: No such file or directory\r\n", path);
+        }
+    }
+
+    bool _mkdir(const char *path, bool parents, bool verbose) {
+        if (fsMkDir(path)) {
+            if (verbose) {
+                outputf("mkdir: created directory '%s'\r\n", path);
+            }
+            return true;
+        }
+        if (!parents) return false;
+        // try to create parent directory
+        const char *pPos = strrchr(path, '/');
+        if (!pPos || pPos == path) {
+            // strange - we are on root or path was not absolute - should never happen
+            return false;
+        }
+        String candidate = path;
+        // try to create parent directory
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+        if (_mkdir(candidate.substr(0, pPos - path).c_str(), true, verbose)) {
+#else
+        if (_mkdir(candidate.substring(0, pPos - path).c_str(), true, verbose)) {
+#endif
+            return _mkdir(path, false, verbose);
+        }
+        return false;
+    }
+
+    void rmdir(ustd::array<String> &paths, bool verbose = false) {
+        for (int i = 0; i < paths.length(); i++) {
+            rmdir(paths[i].c_str(), verbose);
+        }
+    }
+
+    void rmdir(const char *path, bool verbose = false) {
+        if (verbose) outputf("rmdir: removing directory, '%s'\r\n", path);
+        if (!fsRmDir(normalize(path))) {
+            fs::Dir dir = fsOpenDir(normalize(path));
+            if (dir.isValid()) {
+                if (dir.next()) {
+                    outputf("rmdir: failed to remove '%s': Directory not empty\r\n", path);
+                    return;
+                }
+            }
+            outputf("rmdir: failed to remove '%s': No such file or directory\r\n", path);
+        }
+    }
+
     void motd() {
-        if (!cat("/motd")) {
+        if (!cat("/etc/motd", false)) {
             printer->println("\r\nWelcome to the machine!");
         }
     }
@@ -1055,22 +1624,47 @@ class Console : public ExtendableConsole {
     }
 #endif
 
-    String getDate() {
+    String getDate(uint8_t format = 1) {
 #ifdef USTD_FEATURE_CLK_READ
         time_t t = time(nullptr);
-        struct tm *lt = localtime(&t);
+        return getDate(localtime(&t), t, format);
+#else
+        return "<unknown>";
+#endif
+    }
+
+    String getDate(struct tm *lt, time_t t, uint8_t format) {
         if (lt) {
             char szBuffer[64];
-            snprintf(szBuffer, sizeof(szBuffer) - 1, "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu",
-                     (int)lt->tm_year + 1900, (int)lt->tm_mon + 1, (int)lt->tm_mday,
-                     (int)lt->tm_hour, (int)lt->tm_min, (int)lt->tm_sec, t);
+            switch (format) {
+            default:
+            case 0:
+                snprintf(szBuffer, sizeof(szBuffer) - 1,
+                         "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i - epoch %lu",
+                         (int)lt->tm_year + 1900, (int)lt->tm_mon + 1, (int)lt->tm_mday,
+                         (int)lt->tm_hour, (int)lt->tm_min, (int)lt->tm_sec, t);
+                break;
+            case 1:
+                snprintf(szBuffer, sizeof(szBuffer) - 1,
+                         "%4.4i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i",
+                         (int)lt->tm_year + 1900, (int)lt->tm_mon + 1, (int)lt->tm_mday,
+                         (int)lt->tm_hour, (int)lt->tm_min, (int)lt->tm_sec);
+                break;
+            case 2:
+                snprintf(szBuffer, sizeof(szBuffer) - 1,
+                         "%4.4i-%2.2i-%2.2i",
+                         (int)lt->tm_year + 1900, (int)lt->tm_mon + 1, (int)lt->tm_mday);
+                break;
+            case 3:
+                snprintf(szBuffer, sizeof(szBuffer) - 1,
+                         "%2.2i:%2.2i:%2.2i",
+                         (int)lt->tm_hour, (int)lt->tm_min, (int)lt->tm_sec);
+                break;
+            }
             szBuffer[sizeof(szBuffer) - 1] = 0;
             return szBuffer;
         }
         return "<error>";
-#else
-        return "<unknown>";
-#endif
     }
 
     bool addsub(String topic) {
@@ -1138,6 +1732,18 @@ class Console : public ExtendableConsole {
         return len;
     }
 
+    bool help(String &arg, const char *szHelp, bool noparams = false, bool noshort = false) {
+#if defined(__UNIXOID__) || defined(__RP_PICO__)
+        if ((arg == "--help") || (arg == "-h" && !noshort) || (noparams == true && arg.empty())) {
+#else
+        if ((arg == "--help") || (arg == "-h" && !noshort) || (noparams == true && arg.isEmpty())) {
+#endif
+            printer->println(szHelp);
+            return true;
+        }
+        return false;
+    }
+
     void stars(unsigned int count) {
         for (unsigned int i = 0; i < count; i++) {
             printer->print("*");
@@ -1147,7 +1753,8 @@ class Console : public ExtendableConsole {
 
 #ifdef USTD_FEATURE_FILESYSTEM
 // static members initialisation
-ustd::jsonfile Console::config;
+bool Console::auth = false;
+ustd::jsonfile Console::config(true, false, "/etc/");
 int Console::iManagerTask = -1;
 array<Console *> Console::consoles;
 #endif
@@ -1264,16 +1871,15 @@ class SerialConsole : public Console {
         }
         pSched = _pSched;
         printer = pSerial;
-        tID = pSched->add([this]() { this->loop(); }, name, 60000);  // 60ms
+        tID = pSched->add([this]() { this->loop(); }, name, pollRate);
         printer->println();
-        init(_pSched);
+        init();
         execute(initialCommand);
         motd();
         prompt();
     }
 
   protected:
-
 #ifdef USTD_FEATURE_FILESYSTEM
     virtual String getFrom() {
         return getRemotePort();

@@ -1,0 +1,12 @@
+NAME
+    mem - Shows memory information
+
+SYNOPSIS
+    mem
+
+DESCRIPTION
+    Shows information reguarding the system memory. Depending on the device type,
+    this information may vary.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

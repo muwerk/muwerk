@@ -1,0 +1,27 @@
+NAME
+    df - report file system disk space usage
+
+SYNOPSIS
+    df [OPTION]... [FILE]...
+
+DESCRIPTION
+    df displays the amount of disk space available on the file system
+    containing each file name argument. If no file name is given, the space
+    available on all currently mounted file systems is shown.
+    Disk space is shown in 1K blocks by default.
+
+
+OPTIONS
+    Show information about the file system on which each FILE resides, or all
+    file systems by default.
+
+    -h, --human-readable
+        print sizes in powers of 1024 (e.g., 1023M)
+
+    -T, --print-type
+        print file system type
+
+    --help display this help and exit
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll

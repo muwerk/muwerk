@@ -1,0 +1,19 @@
+NAME
+    userdel - delete a user account and related files
+
+SYNOPSIS
+    userdel LOGIN
+
+DESCRIPTION
+    The userdel command modifies the system account files, deleting all entries
+    that refer to the user name LOGIN. The named user must exist.
+
+FILES
+    /etc/passwd.json
+        User account information.
+
+SEE ALSO
+    passwd, useradd, id, who.
+
+AUTHOR
+    Written by Dominik Schlösser and Leo Moll
